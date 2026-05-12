@@ -9,6 +9,7 @@ enum NavigGroup: string implements HasLabel
     case MasterData = 'master_data';
     case Operation = 'operations';
     case Accounting = 'accounting';
+    case Inventory = 'inventory';
 
     public function getLabel(): ?string
     {
@@ -16,6 +17,7 @@ enum NavigGroup: string implements HasLabel
             self::MasterData => 'Master Data',
             self::Operation => 'Operations',
             self::Accounting => 'Accounting',
+            self::Inventory => 'Inventory',
         };
     }
 }

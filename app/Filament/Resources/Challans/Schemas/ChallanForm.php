@@ -5,10 +5,8 @@ namespace App\Filament\Resources\Challans\Schemas;
 use App\Domains\Master\Models\Driver;
 use App\Domains\Master\Models\Item;
 use App\Domains\Master\Models\Vehicle;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -36,6 +34,18 @@ class ChallanForm
                             ->native(false)
                             ->disabled(fn($record) => $record?->status === 'Invoiced'),
                     ])->columns(2),
+                Section::make('Payment Details')->schema([
+                    Select::make('payment_mode')
+                        ->options([
+                            'Cash' => 'Cash',
+                            'A/C' => 'A/C',
+                            'Credit Card' => 'Credit Card',
+                            'Bank Transfer' => 'Bank Transfer',
+                            'Mobile Payment' => 'Mobile Payment',
+                            'Cheque' => 'Cheque',
+                            'Other' => 'Other'
+                        ])->default('A/C')->native(false),
+                ]),
 
                 Section::make('Assignments')
                     ->schema([
@@ -54,7 +64,10 @@ class ChallanForm
                             ->label('Vehicle')
                             ->options(function (Get $get) {
                                 $partyId = $get('party_id');
-                                if (!$partyId) return [];
+                                if (! $partyId) {
+                                    return [];
+                                }
+
                                 return Vehicle::where('party_id', $partyId)->pluck('vehicle_number', 'id');
                             })
                             ->searchable()
@@ -73,8 +86,11 @@ class ChallanForm
                             ->label('Driver')
                             ->options(function (Get $get) {
                                 $partyId = $get('party_id');
-                                if (!$partyId) return [];
-                                return Driver::where('party_id', $partyId)->pluck('name', 'id');
+                                if (! $partyId) {
+                                    return [];
+                                }
+
+                                return Driver::where('party_id', $partyId)->pluck('full_name', 'id');
                             })
                             ->searchable()
                             ->required(),
@@ -87,11 +103,31 @@ class ChallanForm
                             ->required(),
 
                         TextInput::make('quantity_cft')
-                            ->label('Quantity (CFT)')
+                            ->label('Quantity')
                             ->numeric()
                             ->required()
-                            ->prefix('CFT'),
+                            ->prefix(function (Get $get) {
+                                $itemId = $get('item_id');
+
+                                if (! $itemId) {
+                                    return null;
+                                }
+
+                                return Item::find($itemId)?->unit;
+                            })->helperText(function (Get $get) {
+                                $itemId = $get('item_id');
+
+                                if (! $itemId) {
+                                    return null;
+                                }
+
+                                $item = Item::find($itemId);
+
+                                return "Price per {$item->unit}: ₹{$item->price_per_unit} | Total: ₹" . ($item->price_per_unit * ($get('quantity_cft') ?? 0));
+                            }),
                     ])->columns(2),
+
+
             ]);
     }
 }

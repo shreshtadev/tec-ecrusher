@@ -22,7 +22,7 @@
         .slip-container {
             position: absolute;
             width: 100mm;
-            height: 105mm;
+            height: 95mm;
             /* Fixed height to take up nearly half the vertical space */
             top: 5mm;
             box-sizing: border-box;

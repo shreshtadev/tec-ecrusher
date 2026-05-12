@@ -5,7 +5,7 @@ namespace App\Domains\Master\Models;
 use App\Domains\Common\Models\BModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Item extends BModel
+class Warehouse extends BModel
 {
     public function stockLevels(): HasMany
     {

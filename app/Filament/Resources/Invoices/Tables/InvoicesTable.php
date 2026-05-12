@@ -52,11 +52,6 @@ class InvoicesTable
             ])
             ->recordActions([
                 EditAction::make(),
-                Action::make('finalize')
-                    ->icon('heroicon-o-check-circle')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->action(fn(Invoice $record) => ChallanFinalized::dispatch($record)),
                 Action::make('print')
                     ->label('Print Invoice')
                     ->icon('heroicon-o-printer')

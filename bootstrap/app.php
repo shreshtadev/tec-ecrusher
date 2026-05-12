@@ -17,4 +17,5 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })->withEvents(discover: [
         base_path('app/Domains/Accounting/Listeners'),
+        base_path('app/Domains/Operations/Listeners'),
     ])->create();

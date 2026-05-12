@@ -21,6 +21,7 @@ class SyncInvoiceToLedger
                 'total_amount' => $challan->quantity_cft * $challan->item->price_per_unit,
                 'driver_bata' => 0,
                 'status' => 'Finalized',
+                'payment_mode' => $challan->payment_mode,
             ]);
 
             // 2. Mark Challan as Invoiced

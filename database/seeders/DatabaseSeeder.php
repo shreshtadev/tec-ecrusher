@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Domains\Operations\Models\Challan;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,7 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         // $this->call([
-        //     TestDataSeeder::class,
+        //     InventorySeeder::class,
         // ]);
     }
 }

@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Filament\Resources\StockAdjustments\Schemas;
+
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Schema;
+
+class StockAdjustmentForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Select::make('item_id')
+                    ->relationship('item', 'material_name')
+                    ->searchable()
+                    ->required(),
+                Select::make('warehouse_id')
+                    ->relationship('warehouse', 'name')
+                    ->searchable()
+                    ->required(),
+                Select::make('adjustment_type')
+                    ->options([
+                        'Damage' => 'Damage',
+                        'Loss' => 'Loss',
+                        'Correction' => 'Correction',
+                        'Audit' => 'Audit',
+                        'Other' => 'Other',
+                    ])
+                    ->required(),
+                TextInput::make('quantity_change')
+                    ->numeric()
+                    ->required()
+                    ->label('Quantity Change (can be negative)'),
+                Textarea::make('reason')
+                    ->required()
+                    ->rows(3),
+                TextInput::make('reference_number')
+                    ->label('Reference Number')
+                    ->maxLength(255),
+            ]);
+    }
+}
