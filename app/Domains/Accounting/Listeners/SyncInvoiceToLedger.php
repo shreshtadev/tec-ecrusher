@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Listeners\Domains\Accounting\Listeners;
+namespace App\Domains\Accounting\Listeners;
 
-use App\Domains\Operations\Models\Invoice;
 use App\Domains\Accounting\Models\LedgerEntry;
 use App\Domains\Operations\Events\ChallanFinalized;
+use App\Domains\Operations\Models\Invoice;
 use Illuminate\Support\Facades\DB;
 
 class SyncInvoiceToLedger
@@ -20,8 +20,7 @@ class SyncInvoiceToLedger
                 'party_id' => $challan->party_id,
                 'total_amount' => $challan->quantity_cft * $challan->item->price_per_unit,
                 'driver_bata' => 0,
-                'status' => 'Finalized',
-                'payment_mode' => $challan->payment_mode,
+                'payment_mode' => $challan->payment_mode ?? 'Credit',
             ]);
 
             // 2. Mark Challan as Invoiced
