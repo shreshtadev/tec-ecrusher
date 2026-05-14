@@ -7,7 +7,7 @@ use App\Domains\Master\Models\Party;
 use App\Filament\Resources\Parties\Pages\CreateParty;
 use App\Filament\Resources\Parties\Pages\EditParty;
 use App\Filament\Resources\Parties\Pages\ListParties;
-use App\Filament\Resources\Parties\PartyResource\RelationManagers\LedgerEntriesRelationManager;
+use App\Filament\Resources\Parties\PartyResource\RelationManagers\LedgerRelationManager;
 use App\Filament\Resources\Parties\PartyResource\RelationManagers\VehiclesRelationManager;
 use App\Filament\Resources\Parties\Schemas\PartyForm;
 use App\Filament\Resources\Parties\Tables\PartiesTable;
@@ -42,7 +42,7 @@ class PartyResource extends Resource
     {
         return [
             VehiclesRelationManager::class,
-            LedgerEntriesRelationManager::class,
+            LedgerRelationManager::class,
         ];
     }
 

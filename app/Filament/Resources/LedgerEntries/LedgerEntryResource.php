@@ -23,6 +23,7 @@ class LedgerEntryResource extends Resource
     protected static ?string $model = LedgerEntry::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::Accounting;
 
     public static function form(Schema $schema): Schema
@@ -46,8 +47,8 @@ class LedgerEntryResource extends Resource
     {
         return [
             'index' => ListLedgerEntries::route('/'),
-            'create' => CreateLedgerEntry::route('/create'),
-            'edit' => EditLedgerEntry::route('/{record}/edit'),
+            // 'create' => CreateLedgerEntry::route('/create'),
+            // 'edit' => EditLedgerEntry::route('/{record}/edit'),
         ];
     }
 

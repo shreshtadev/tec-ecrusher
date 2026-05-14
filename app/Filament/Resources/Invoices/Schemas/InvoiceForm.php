@@ -15,13 +15,15 @@ class InvoiceForm
             ->components([
                 TextInput::make('invoice_number')
                     ->required(),
-                Select::make('party.full_name')
+                Select::make('party_id')
                     ->required()
-                    ->options(fn() => Party::pluck('full_name', 'id')->toArray()),
+                    ->options(fn () => Party::pluck('full_name', 'id')->toArray()),
                 TextInput::make('total_amount')
+                    ->prefix('₹')
                     ->required()
                     ->numeric(),
                 TextInput::make('driver_bata')
+                    ->prefix('₹')
                     ->required()
                     ->numeric()
                     ->default(0),

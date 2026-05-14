@@ -14,10 +14,8 @@ class DriversTable
     {
         return $table
             ->columns([
-                TextColumn::make('party.id')
-                    ->searchable(),
-                TextColumn::make('full_name')
-                    ->searchable(),
+                TextColumn::make('party.full_name'),
+                TextColumn::make('full_name'),
                 TextColumn::make('phone_number')
                     ->searchable(),
                 TextColumn::make('created_at')

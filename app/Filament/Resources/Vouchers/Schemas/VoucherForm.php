@@ -5,8 +5,8 @@ namespace App\Filament\Resources\Vouchers\Schemas;
 use App\Domains\Operations\Models\Invoice;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -20,7 +20,7 @@ class VoucherForm
                 Section::make('Voucher Details')
                     ->schema([
                         TextInput::make('voucher_no')
-                            ->default(fn() => 'VCH-' . date('Ymd-His'))
+                            ->default(fn () => 'VCH-'.date('Ymd-His'))
                             ->readonly()
                             ->required(),
                         DatePicker::make('voucher_date')
@@ -45,8 +45,7 @@ class VoucherForm
                         Select::make('reference_invoice_id')
                             ->label('Against Invoice (Optional)')
                             ->options(
-                                fn(Get $get) =>
-                                Invoice::where('party_id', $get('party_id'))
+                                fn (Get $get) => Invoice::where('party_id', $get('party_id'))
                                     ->pluck('invoice_number', 'id')
                             )
                             ->searchable()
@@ -58,8 +57,15 @@ class VoucherForm
                             ->required(),
 
                         Select::make('payment_mode')
-                            ->options(['Cash' => 'Cash', 'Bank' => 'Bank Transfer', 'Cheque' => 'Cheque'])
-                            ->default('Cash'),
+                            ->options([
+                                'Cash' => 'Cash',
+                                'A/C' => 'A/C',
+                                'Credit Card' => 'Credit Card',
+                                'Bank Transfer' => 'Bank Transfer',
+                                'UPI' => 'UPI',
+                                'Cheque' => 'Cheque',
+                                'Other' => 'Other',
+                            ])->default('A/C')->native(false),
                     ])->columns(2),
 
                 Textarea::make('remarks')->columnSpanFull(),

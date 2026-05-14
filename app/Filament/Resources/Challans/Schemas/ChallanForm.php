@@ -21,7 +21,7 @@ class ChallanForm
                 Section::make('Challan Details')
                     ->schema([
                         TextInput::make('challan_number')
-                            ->default(fn() => 'CHL-' . strtoupper(uniqid())) // Or your custom logic
+                            ->default(fn () => 'CHL-'.strtoupper(uniqid())) // Or your custom logic
                             ->readonly()
                             ->required(),
 
@@ -32,7 +32,7 @@ class ChallanForm
                             ])
                             ->default('Pending')
                             ->native(false)
-                            ->disabled(fn($record) => $record?->status === 'Invoiced'),
+                            ->disabled(fn ($record) => $record?->status === 'Invoiced'),
                     ])->columns(2),
                 Section::make('Payment Details')->schema([
                     Select::make('payment_mode')
@@ -43,7 +43,7 @@ class ChallanForm
                             'Bank Transfer' => 'Bank Transfer',
                             'Mobile Payment' => 'Mobile Payment',
                             'Cheque' => 'Cheque',
-                            'Other' => 'Other'
+                            'Other' => 'Other',
                         ])->default('A/C')->native(false),
                 ]),
 
@@ -56,7 +56,7 @@ class ChallanForm
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->afterStateUpdated(fn(Set $set) => $set('vehicle_id', null))
+                            ->afterStateUpdated(fn (Set $set) => $set('vehicle_id', null))
                             ->required(),
 
                         // 2. Vehicle Select (Filtered by Party)
@@ -79,6 +79,7 @@ class ChallanForm
                                     $set('quantity_cft', $vehicle->capacity_cft);
                                 }
                             })
+                            ->relationship('vehicle', 'vehicle_number')
                             ->required(),
 
                         // 3. Driver Select (Filtered by Party)
@@ -92,6 +93,7 @@ class ChallanForm
 
                                 return Driver::where('party_id', $partyId)->pluck('full_name', 'id');
                             })
+                            ->relationship('driver', 'full_name')
                             ->searchable()
                             ->required(),
 
@@ -123,10 +125,9 @@ class ChallanForm
 
                                 $item = Item::find($itemId);
 
-                                return "Price per {$item->unit}: ₹{$item->price_per_unit} | Total: ₹" . ($item->price_per_unit * ($get('quantity_cft') ?? 0));
+                                return "Price per {$item->unit}: ₹{$item->price_per_unit} | Total: ₹".($item->price_per_unit * ($get('quantity_cft') ?? 0));
                             }),
                     ])->columns(2),
-
 
             ]);
     }

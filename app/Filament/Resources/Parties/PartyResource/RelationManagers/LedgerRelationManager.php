@@ -2,12 +2,13 @@
 
 namespace App\Filament\Resources\Parties\PartyResource\RelationManagers;
 
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class LedgerEntriesRelationManager extends RelationManager
+class LedgerRelationManager extends RelationManager
 {
     protected static string $relationship = 'ledgerEntries';
 
@@ -52,14 +53,14 @@ class LedgerEntriesRelationManager extends RelationManager
             ->filters([
                 Tables\Filters\Filter::make('entry_date')
                     ->form([
-                        \Filament\Forms\Components\DatePicker::make('from'),
-                        \Filament\Forms\Components\DatePicker::make('until'),
+                        DatePicker::make('from'),
+                        DatePicker::make('until'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when($data['from'], fn($q) => $q->whereDate('entry_date', '>=', $data['from']))
-                            ->when($data['until'], fn($q) => $q->whereDate('entry_date', '<=', $data['until']));
-                    })
+                            ->when($data['from'], fn ($q) => $q->whereDate('entry_date', '>=', $data['from']))
+                            ->when($data['until'], fn ($q) => $q->whereDate('entry_date', '<=', $data['until']));
+                    }),
             ])
             ->headerActions([
                 // You can add a "Print PDF" action here later

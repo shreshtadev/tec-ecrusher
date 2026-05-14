@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\LedgerEntries\Schemas;
 
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -14,14 +15,13 @@ class LedgerEntryForm
             ->components([
                 DatePicker::make('entry_date')
                     ->required(),
-                TextInput::make('party_id')
+                Select::make('party_id')
                     ->required()
-                    ->numeric(),
+                    ->relationship('party', 'full_name'),
                 TextInput::make('recordable_type')
                     ->required(),
                 TextInput::make('recordable_id')
-                    ->required()
-                    ->numeric(),
+                    ->required()->numeric(),
                 TextInput::make('description')
                     ->required(),
                 TextInput::make('debit')

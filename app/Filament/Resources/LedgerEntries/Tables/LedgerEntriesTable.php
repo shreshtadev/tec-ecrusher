@@ -20,13 +20,7 @@ class LedgerEntriesTable
                 TextColumn::make('entry_date')
                     ->date()
                     ->sortable(),
-                TextColumn::make('party_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('recordable_type')
-                    ->searchable(),
-                TextColumn::make('recordable_id')
-                    ->numeric()
+                TextColumn::make('party.full_name')
                     ->sortable(),
                 TextColumn::make('description')
                     ->searchable(),
@@ -56,7 +50,7 @@ class LedgerEntriesTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                EditAction::make(),
+                // EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

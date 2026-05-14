@@ -16,8 +16,9 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Party::class)->constrained()->onDelete('cascade');
             $table->string('vehicle_number')->unique();
-            $table->decimal('capacity_cft', 8, 2); // Capacity in Cubic Feet (CFT)
-            $table->string('vehicle_type')->nullable(); // e.g., Tipper, Truck
+            $table->decimal('capacity_cft', 8, 2);
+            $table->string('unit', 5)->default('CFT');
+            $table->string('vehicle_type')->nullable();
             $table->timestamps();
         });
     }

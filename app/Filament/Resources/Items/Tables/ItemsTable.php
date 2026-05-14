@@ -17,10 +17,8 @@ class ItemsTable
                 TextColumn::make('material_name')
                     ->searchable(),
                 TextColumn::make('price_per_unit')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('unit')
-                    ->searchable(),
+                    ->money('INR')->alignment('left'),
+                TextColumn::make('unit'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

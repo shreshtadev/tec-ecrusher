@@ -15,18 +15,17 @@ class VehiclesTable
         return $table
             ->columns([
                 TextColumn::make('party.full_name')
-                    ->label('Party Name')
-                    ->searchable(),
+                    ->label('Party Name'),
                 TextColumn::make('vehicle_number')
                     ->label('Vehicle Number')
                     ->searchable(),
                 TextColumn::make('capacity_cft')
-                    ->label('Capacity (CFT)')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Capacity')
+                    ->numeric(),
+                TextColumn::make('unit')
+                    ->label('Unit'),
                 TextColumn::make('vehicle_type')
-                    ->label('Vehicle Type')
-                    ->searchable(),
+                    ->label('Vehicle Type'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

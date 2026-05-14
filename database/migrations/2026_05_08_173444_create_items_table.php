@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('material_name'); // e.g., 20mm, 40mm, M-Sand
             $table->decimal('price_per_unit', 10, 2);
-            $table->string('unit')->default('CFT'); // Default unit is CFT
+            $table->string('unit', 5)->default('CFT'); // Default unit is CFT
             $table->timestamps();
         });
     }
