@@ -15,10 +15,10 @@ return new class extends Migration
         Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Party::class)->constrained()->onDelete('cascade');
-            $table->string('vehicle_number')->unique();
+            $table->string('vehicle_number', 50)->unique();
             $table->decimal('capacity_cft', 8, 2);
             $table->string('unit', 5)->default('CFT');
-            $table->string('vehicle_type')->nullable();
+            $table->string('vehicle_type', 50)->nullable();
             $table->timestamps();
         });
     }

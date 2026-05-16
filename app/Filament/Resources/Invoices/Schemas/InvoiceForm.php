@@ -17,7 +17,7 @@ class InvoiceForm
                     ->required(),
                 Select::make('party_id')
                     ->required()
-                    ->options(fn () => Party::pluck('full_name', 'id')->toArray()),
+                    ->options(fn() => Party::pluck('full_name', 'id')->toArray()),
                 TextInput::make('total_amount')
                     ->prefix('₹')
                     ->required()
@@ -32,6 +32,7 @@ class InvoiceForm
                     ->default('Credit')
                     ->options([
                         'Credit' => 'Credit',
+                        "A/C" => 'A/C',
                         'Cash' => 'Cash',
                         'UPI' => 'UPI',
                         'Cheque' => 'Cheque',

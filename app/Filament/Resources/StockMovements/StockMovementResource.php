@@ -4,6 +4,8 @@ namespace App\Filament\Resources\StockMovements;
 
 use App\Domains\Common\Enums\NavigGroup;
 use App\Domains\Operations\Models\StockMovement;
+use App\Filament\Resources\StockMovements\Pages\CreateStockMovements;
+use App\Filament\Resources\StockMovements\Pages\EditStockMovements;
 use App\Filament\Resources\StockMovements\Pages\ListStockMovements;
 use App\Filament\Resources\StockMovements\Schemas\StockMovementForm;
 use App\Filament\Resources\StockMovements\Tables\StockMovementsTable;
@@ -26,6 +28,11 @@ class StockMovementResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::Inventory;
 
+    public static function form(Schema $schema): Schema
+    {
+        return StockMovementForm::configure($schema);
+    }
+
     public static function table(Table $table): Table
     {
         return StockMovementsTable::configure($table);
@@ -35,6 +42,8 @@ class StockMovementResource extends Resource
     {
         return [
             'index' => ListStockMovements::route('/'),
+            'create' => CreateStockMovements::route('/create'),
+            'edit' => EditStockMovements::route('/{record}/edit'),
         ];
     }
 }

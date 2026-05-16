@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\StockMovements\Tables;
 
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -56,6 +57,8 @@ class StockMovementsTable
                         'ADJUSTMENT' => 'Adjustment',
                     ]),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('created_at', 'desc')->recordActions([
+                EditAction::make(),
+            ]);
     }
 }

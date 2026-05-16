@@ -9,7 +9,7 @@ use Illuminate\Queue\SerializesModels;
 
 class ChallanFinalized
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.

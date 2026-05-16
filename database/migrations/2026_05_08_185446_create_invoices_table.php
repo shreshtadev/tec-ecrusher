@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->string('invoice_number')->unique();
+            $table->string('invoice_number', 50)->unique();
             $table->foreignId('party_id')->constrained();
             $table->decimal('total_amount', 12, 2);
             $table->decimal('driver_bata', 10, 2)->default(0);
-            $table->string('payment_mode')->default('Credit');
+            $table->string('payment_mode', 20)->default('Credit');
             $table->softDeletes();
             $table->timestamps();
         });

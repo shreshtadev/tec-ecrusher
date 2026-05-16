@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\StockAdjustments\Tables;
 
-use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -17,6 +17,8 @@ class StockAdjustmentsTable
                     ->label('Item')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('item.unit')
+                    ->label('Unit'),
                 TextColumn::make('warehouse.name')
                     ->label('Warehouse')
                     ->searchable()
@@ -34,7 +36,8 @@ class StockAdjustmentsTable
                     ->tooltip(fn($record) => $record->reason),
                 TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('adjustment_type')
@@ -47,7 +50,7 @@ class StockAdjustmentsTable
                     ]),
             ])
             ->recordActions([
-                ViewAction::make(),
+                EditAction::make(),
             ]);
     }
 }

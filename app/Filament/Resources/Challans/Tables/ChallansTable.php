@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Challans\Tables;
 
-use App\Domains\Operations\Events\ChallanFinalized as EventsChallanFinalized;
+use App\Domains\Operations\Events\ChallanFinalized;
 use App\Domains\Operations\Models\Challan;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -32,12 +32,10 @@ class ChallansTable
                 TextColumn::make('vehicle.vehicle_number')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('driver.full_name')
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('item.material_name')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('item.unit'),
                 TextColumn::make('quantity_cft')
                     ->label('Qty')
                     ->numeric()
@@ -68,10 +66,10 @@ class ChallansTable
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (Challan $record) => $record->status === 'Pending')
+                    ->visible(fn(Challan $record) => $record->status === 'Pending')
                     ->action(function (Challan $record) {
                         // Dispatch the event
-                        EventsChallanFinalized::dispatch($record);
+                        ChallanFinalized::dispatch($record);
 
                         Notification::make()
                             ->title('Challan Finalized')
@@ -82,7 +80,7 @@ class ChallansTable
                     ->label('Print Challan')
                     ->icon('heroicon-o-printer')
                     ->color('gray')
-                    ->url(fn (Challan $record) => route('print.challan', $record))
+                    ->url(fn(Challan $record) => route('print.challan', $record))
                     ->openUrlInNewTab(),
             ])
             ->toolbarActions([
@@ -97,8 +95,8 @@ class ChallansTable
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn () => true) // You can add logic to show/hide this action based on selection
-                    ->action(fn (Collection $records) => $records->each(fn ($r) => EventsChallanFinalized::dispatch($r)))
+                    ->visible(fn() => true) // You can add logic to show/hide this action based on selection
+                    ->action(fn(Collection $records) => $records->each(fn($r) => ChallanFinalized::dispatch($r)))
                     ->requiresConfirmation()
                     ->color('success')
                     ->icon('heroicon-o-document-duplicate'),

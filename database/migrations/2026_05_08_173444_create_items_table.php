@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
-            $table->string('material_name'); // e.g., 20mm, 40mm, M-Sand
+            $table->string('material_name', 100); // e.g., 20mm, 40mm, M-Sand
             $table->decimal('price_per_unit', 10, 2);
             $table->string('unit', 5)->default('CFT'); // Default unit is CFT
             $table->timestamps();

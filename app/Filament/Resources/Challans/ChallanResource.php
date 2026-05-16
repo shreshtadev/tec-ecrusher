@@ -22,6 +22,8 @@ class ChallanResource extends Resource
 {
     protected static ?string $model = Challan::class;
 
+    protected static ?string $navigationLabel = 'Trip Sheets';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::Operation;

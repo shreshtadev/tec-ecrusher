@@ -2,7 +2,7 @@
 
 namespace App\Domains\Master\Models;
 
-use App\Domains\Accounting\Models\LedgerEntry;
+use App\Domains\Accounting\Models\Expense;
 use App\Domains\Common\Models\BModel;
 use App\Domains\Operations\Models\Challan;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -26,9 +26,9 @@ class Party extends BModel
         return $this->hasMany(Challan::class);
     }
 
-    // Links to Accounting
-    public function ledgerEntries(): HasMany
+
+    public function expenses(): HasMany
     {
-        return $this->hasMany(LedgerEntry::class);
+        return $this->hasMany(Expense::class);
     }
 }

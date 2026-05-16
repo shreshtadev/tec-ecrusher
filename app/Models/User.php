@@ -14,13 +14,14 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Override;
+use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
 
     /**
      * Get the attributes that should be cast.
@@ -50,6 +51,6 @@ class User extends Authenticatable implements FilamentUser
     #[Override]
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->email == config('auth.panel_user') && $this->hasVerifiedEmail();
+        return $this->hasVerifiedEmail();
     }
 }

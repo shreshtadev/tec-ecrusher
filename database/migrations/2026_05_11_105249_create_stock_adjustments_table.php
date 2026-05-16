@@ -21,6 +21,7 @@ return new class extends Migration
             $table->enum('adjustment_type', ['Damage', 'Loss', 'Correction', 'Audit', 'Other'])->default('Other');
             $table->text('reason');
             $table->string('reference_number')->nullable();
+            $table->nullableMorphs('adjustable');
             $table->softDeletes();
             $table->timestamps();
         });

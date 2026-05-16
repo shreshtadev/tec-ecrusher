@@ -21,7 +21,7 @@ class ChallanForm
                 Section::make('Challan Details')
                     ->schema([
                         TextInput::make('challan_number')
-                            ->default(fn () => 'CHL-'.strtoupper(uniqid())) // Or your custom logic
+                            ->default(fn() => 'CHL-' . strtoupper(uniqid())) // Or your custom logic
                             ->readonly()
                             ->required(),
 
@@ -31,8 +31,7 @@ class ChallanForm
                                 'Invoiced' => 'Invoiced',
                             ])
                             ->default('Pending')
-                            ->native(false)
-                            ->disabled(fn ($record) => $record?->status === 'Invoiced'),
+                            ->native(false),
                     ])->columns(2),
                 Section::make('Payment Details')->schema([
                     Select::make('payment_mode')
@@ -56,7 +55,7 @@ class ChallanForm
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->afterStateUpdated(fn (Set $set) => $set('vehicle_id', null))
+                            ->afterStateUpdated(fn(Set $set) => $set('vehicle_id', null))
                             ->required(),
 
                         // 2. Vehicle Select (Filtered by Party)
@@ -125,10 +124,10 @@ class ChallanForm
 
                                 $item = Item::find($itemId);
 
-                                return "Price per {$item->unit}: ₹{$item->price_per_unit} | Total: ₹".($item->price_per_unit * ($get('quantity_cft') ?? 0));
+                                return "Price per {$item->unit}: ₹{$item->price_per_unit} | Total: ₹" . ($item->price_per_unit * ($get('quantity_cft') ?? 0));
                             }),
                     ])->columns(2),
 
-            ]);
+            ])->disabled(fn($record) => $record?->status === 'Invoiced');
     }
 }

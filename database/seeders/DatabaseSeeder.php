@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Domains\Operations\Models\Challan;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,7 +14,10 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         // $this->call([
-        //     InventorySeeder::class,
+        //     TestDataSeeder::class,
         // ]);
+
+        // $superAdmin = User::firstWhere('email', env('USER_ADMIN_ACCESS'));
+        // $superAdmin->assignRole('super_admin');
     }
 }

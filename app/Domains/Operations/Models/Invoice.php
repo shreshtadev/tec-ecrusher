@@ -28,12 +28,6 @@ class Invoice extends SModel
         return $this->belongsTo(Party::class);
     }
 
-    // Polymorphic link to Accounting (for tracking the financial impact)
-    public function ledgerEntries()
-    {
-        return $this->morphMany(LedgerEntry::class, 'recordable');
-    }
-
     // Link to Stock Movements
     public function stockMovements(): HasMany
     {

@@ -2,7 +2,8 @@
 
 namespace App\Domains\Accounting\Models;
 
-use App\Domains\Accounting\Events\VoucherSaved;
+use App\Domains\Accounting\Events\PaymentMade;
+use App\Domains\Accounting\Events\PaymentCollected;
 use App\Domains\Common\Models\SModel;
 use App\Domains\Master\Models\Party;
 use App\Domains\Operations\Models\Invoice;
@@ -24,6 +25,11 @@ class Voucher extends SModel
     #[Override]
     protected static function booted()
     {
-        static::saved(fn($voucher) => VoucherSaved::dispatch($voucher));
+        static::saved(function ($voucher) {
+            if ($voucher->voucher_type === 'Receipt') {
+                return PaymentCollected::dispatch($voucher);
+            }
+            return PaymentMade::dispatch($voucher);
+        });
     }
 }

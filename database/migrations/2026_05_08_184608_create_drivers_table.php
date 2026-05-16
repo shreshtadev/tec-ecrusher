@@ -15,8 +15,8 @@ return new class extends Migration
         Schema::create('drivers', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Party::class)->constrained()->onDelete('cascade');
-            $table->string('full_name');
-            $table->string('phone_number')->nullable();
+            $table->string('full_name', 120);
+            $table->string('phone_number', 20)->nullable();
             $table->timestamps();
         });
     }

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Warehouses;
 
 use App\Domains\Common\Enums\NavigGroup;
 use App\Domains\Master\Models\Warehouse;
+use App\Domains\Operations\Services\StockService;
 use App\Filament\Resources\Warehouses\Pages\CreateWarehouse;
 use App\Filament\Resources\Warehouses\Pages\EditWarehouse;
 use App\Filament\Resources\Warehouses\Pages\ListWarehouses;
@@ -20,16 +21,17 @@ class WarehouseResource extends Resource
 {
     protected static ?string $model = Warehouse::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $navigationLabel = 'Warehouses';
 
     protected static ?string $modelLabel = 'Warehouse';
+
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::Inventory;
 
     public static function form(Schema $schema): Schema
     {
-        return WarehouseForm::configure($schema);
+        return WarehouseForm::configure($schema, app(StockService::class));
     }
 
     public static function table(Table $table): Table

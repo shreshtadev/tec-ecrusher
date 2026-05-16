@@ -4,6 +4,7 @@ namespace App\Domains\Master\Models;
 
 use App\Domains\Common\Models\BModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class StockAdjustment extends BModel
 {
@@ -24,5 +25,10 @@ class StockAdjustment extends BModel
     public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
+    }
+
+    public function adjustment(): MorphTo
+    {
+        return $this->morphTo();
     }
 }

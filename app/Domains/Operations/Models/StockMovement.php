@@ -7,6 +7,7 @@ use App\Domains\Master\Models\Item;
 use App\Domains\Master\Models\StockAdjustment;
 use App\Domains\Master\Models\Warehouse;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class StockMovement extends SModel
 {
@@ -40,10 +41,5 @@ class StockMovement extends SModel
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
-    }
-
-    public function adjustment(): BelongsTo
-    {
-        return $this->belongsTo(StockAdjustment::class);
     }
 }

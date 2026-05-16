@@ -4,10 +4,10 @@ namespace App\Filament\Resources\StockAdjustments;
 
 use App\Domains\Common\Enums\NavigGroup;
 use App\Domains\Master\Models\StockAdjustment;
+use App\Domains\Operations\Services\StockService;
 use App\Filament\Resources\StockAdjustments\Pages\CreateStockAdjustment;
 use App\Filament\Resources\StockAdjustments\Pages\EditStockAdjustment;
 use App\Filament\Resources\StockAdjustments\Pages\ListStockAdjustments;
-use App\Filament\Resources\StockAdjustments\Pages\ViewStockAdjustment;
 use App\Filament\Resources\StockAdjustments\Schemas\StockAdjustmentForm;
 use App\Filament\Resources\StockAdjustments\Tables\StockAdjustmentsTable;
 use BackedEnum;
@@ -21,7 +21,7 @@ class StockAdjustmentResource extends Resource
 {
     protected static ?string $model = StockAdjustment::class;
 
-    protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $navigationLabel = 'Stock Adjustments';
 
@@ -31,7 +31,7 @@ class StockAdjustmentResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return StockAdjustmentForm::configure($schema);
+        return StockAdjustmentForm::configure($schema, app(StockService::class));
     }
 
     public static function table(Table $table): Table

@@ -15,12 +15,12 @@ return new class extends Migration
     {
         Schema::create('vouchers', function (Blueprint $table) {
             $table->id();
-            $table->string('voucher_no')->unique();
+            $table->string('voucher_no', 50)->unique();
             $table->date('voucher_date');
             $table->foreignIdFor(Party::class)->constrained('parties');
             $table->enum('voucher_type', ['Payment', 'Receipt']);
             $table->decimal('amount', 12, 2);
-            $table->string('payment_mode')->default('Cash');
+            $table->string('payment_mode', 20)->default('Cash');
             $table->text('remarks')->nullable();
             $table->foreignIdFor(Invoice::class, 'reference_invoice_id')->nullable()->constrained('invoices');
             $table->softDeletes();

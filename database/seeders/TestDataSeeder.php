@@ -2,261 +2,221 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Faker\Factory as Faker;
-
-use App\Domains\Operations\Models\Invoice;
-use App\Domains\Accounting\Models\Voucher;
+use App\Domains\Accounting\Models\Expense;
 use App\Domains\Accounting\Models\LedgerEntry;
+use App\Domains\Accounting\Models\Voucher;
 use App\Domains\Master\Models\Driver;
 use App\Domains\Master\Models\Item;
 use App\Domains\Master\Models\Party;
+use App\Domains\Master\Models\StockAdjustment;
+use App\Domains\Master\Models\StockLevel;
 use App\Domains\Master\Models\Vehicle;
+use App\Domains\Master\Models\Warehouse;
 use App\Domains\Operations\Models\Challan;
+use App\Domains\Operations\Models\Invoice;
+use App\Domains\Operations\Models\ProductionEntry;
+use App\Domains\Operations\Models\StockMovement;
+use App\Domains\Operations\Models\StockReservation;
+use Illuminate\Database\Seeder;
 
 class TestDataSeeder extends Seeder
 {
+    /**
+     * Seed the application's database.
+     */
     public function run(): void
     {
-        DB::transaction(function () {
+        $customerParty = Party::create([
+            'full_name' => 'Kumar Construction',
+            'address_line_1' => '12 Industrial Layout',
+            'address_line_2' => 'Near Lakeside Junction',
+            'city' => 'Bengaluru',
+            'state' => 'KA',
+            'postal_code' => '560076',
+            'contact_number' => '9448123456',
+            'party_type' => 'Customer',
+        ]);
 
-            $faker = Faker::create('en_IN');
+        $supplierParty = Party::create([
+            'full_name' => 'Sri Transport Services',
+            'address_line_1' => '45 Logistics Road',
+            'address_line_2' => 'HOSUR Main Road',
+            'city' => 'Bengaluru',
+            'state' => 'KA',
+            'postal_code' => '560100',
+            'contact_number' => '9845012345',
+            'party_type' => 'Supplier',
+        ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | ITEMS
-            |--------------------------------------------------------------------------
-            */
+        $warehouseA = Warehouse::create([
+            'name' => 'Main Stock Yard',
+            'code' => 'MAIN',
+            'is_active' => true,
+        ]);
 
-            $materials = [
-                ['material_name' => '20mm Jelly', 'price_per_unit' => 45],
-                ['material_name' => '40mm Jelly', 'price_per_unit' => 55],
-                ['material_name' => 'M-Sand', 'price_per_unit' => 38],
-                ['material_name' => 'P-Sand', 'price_per_unit' => 42],
-                ['material_name' => 'Dust', 'price_per_unit' => 25],
-                ['material_name' => '6mm Jelly', 'price_per_unit' => 48],
-            ];
+        $warehouseB = Warehouse::create([
+            'name' => 'Secondary Yard',
+            'code' => 'SECOND',
+            'is_active' => true,
+        ]);
 
-            $items = collect();
+        $item20mm = Item::create([
+            'material_name' => '20mm Gravel',
+            'price_per_unit' => 1250.00,
+            'unit' => 'CFT',
+        ]);
 
-            foreach ($materials as $material) {
-                $items->push(
-                    Item::factory()->create([
-                        'material_name' => $material['material_name'],
-                        'price_per_unit' => $material['price_per_unit'],
-                        'unit' => 'CFT',
-                    ])
-                );
-            }
+        $item40mm = Item::create([
+            'material_name' => '40mm Gravel',
+            'price_per_unit' => 1425.00,
+            'unit' => 'CFT',
+        ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | PARTIES
-            |--------------------------------------------------------------------------
-            */
+        $itemMSand = Item::create([
+            'material_name' => 'M-Sand',
+            'price_per_unit' => 950.00,
+            'unit' => 'CFT',
+        ]);
 
-            $customers = Party::factory()->count(20)
-                ->create([
-                    'party_type' => 'Customer',
-                ]);
+        StockLevel::create([
+            'item_id' => $item20mm->id,
+            'warehouse_id' => $warehouseA->id,
+            'available_qty' => 120.00,
+            'reserved_qty' => 10.00,
+            'valuation_method' => 'FIFO',
+        ]);
 
-            $suppliers = Party::factory()->count(8)
-                ->create([
-                    'party_type' => 'Supplier',
-                ]);
+        StockLevel::create([
+            'item_id' => $item40mm->id,
+            'warehouse_id' => $warehouseA->id,
+            'available_qty' => 90.00,
+            'reserved_qty' => 5.00,
+            'valuation_method' => 'FIFO',
+        ]);
 
-            $allParties = $customers->merge($suppliers);
+        StockLevel::create([
+            'item_id' => $itemMSand->id,
+            'warehouse_id' => $warehouseB->id,
+            'available_qty' => 65.00,
+            'reserved_qty' => 8.00,
+            'valuation_method' => 'FIFO',
+        ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | VEHICLES + DRIVERS
-            |--------------------------------------------------------------------------
-            */
+        $vehicle = Vehicle::create([
+            'party_id' => $supplierParty->id,
+            'vehicle_number' => 'KA01AB1234',
+            'capacity_cft' => 18.50,
+            'unit' => 'CFT',
+            'vehicle_type' => 'Tata 2518',
+        ]);
 
-            $vehicles = collect();
-            $drivers = collect();
+        $driver = Driver::create([
+            'party_id' => $supplierParty->id,
+            'full_name' => 'Ramesh Kumar',
+            'phone_number' => '9900876543',
+        ]);
 
-            foreach ($suppliers->all() as $supplier) {
+        $challan = Challan::create([
+            'challan_number' => 'CH-2026-001',
+            'party_id' => $customerParty->id,
+            'vehicle_id' => $vehicle->id,
+            'driver_id' => $driver->id,
+            'item_id' => $item20mm->id,
+            'invoice_id' => null,
+            'quantity_cft' => 22.75,
+            'payment_mode' => 'A/C',
+            'status' => 'Pending',
+        ]);
 
-                $supplierVehicles = Vehicle::factory()->count(rand(2, 5))
-                    ->create([
-                        'party_id' => $supplier->id,
-                    ]);
+        $productionEntry = ProductionEntry::create([
+            'production_entry_date' => now()->subDays(2)->toDateString(),
+            'item_id' => $itemMSand->id,
+            'warehouse_id' => $warehouseB->id,
+            'quantity' => 45.00,
+            'batch_no' => 'BATCH-001',
+        ]);
 
-                foreach ($supplierVehicles as $vehicle) {
+        $stockAdjustment = StockAdjustment::create([
+            'item_id' => $item20mm->id,
+            'warehouse_id' => $warehouseA->id,
+            'quantity_change' => -1.50,
+            'adjustment_type' => 'Damage',
+            'reason' => 'Damaged material during loading',
+            'reference_number' => 'ADJ-2026-001',
+        ]);
 
-                    $vehicles->push($vehicle);
+        StockMovement::create([
+            'item_id' => $item20mm->id,
+            'warehouse_id' => $warehouseA->id,
+            'challan_id' => $challan->id,
+            'invoice_id' => null,
+            'adjustment_id' => null,
+            'movement_type' => 'OUT',
+            'quantity' => 22.75,
+            'unit_cost' => $item20mm->price_per_unit,
+            'notes' => 'Shipment booked against challan ' . $challan->challan_number,
+        ]);
 
-                    $driver = Driver::factory()->create([
-                        'party_id' => $supplier->id,
-                    ]);
+        StockReservation::create([
+            'challan_id' => $challan->id,
+            'warehouse_id' => $warehouseA->id,
+            'item_id' => $item20mm->id,
+            'quantity_reserved' => 22.75,
+            'status' => 'finalized',
+        ]);
 
-                    $drivers->push($driver);
-                }
-            }
+        $invoice = Invoice::create([
+            'invoice_number' => 'INV-2026-001',
+            'party_id' => $customerParty->id,
+            'total_amount' => 22.75 * $item20mm->price_per_unit + 450.00,
+            'driver_bata' => 450.00,
+            'payment_mode' => 'Credit',
+        ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | CHALLANS
-            |--------------------------------------------------------------------------
-            */
+        $challan->update([
+            'invoice_id' => $invoice->id,
+            'status' => 'Invoiced',
+        ]);
 
-            $challans = collect();
+        $voucher = Voucher::create([
+            'voucher_no' => 'RC-2026-001',
+            'voucher_date' => now()->toDateString(),
+            'party_id' => $customerParty->id,
+            'voucher_type' => 'Receipt',
+            'amount' => $invoice->total_amount,
+            'payment_mode' => 'Bank Transfer',
+            'remarks' => 'Full payment received for invoice ' . $invoice->invoice_number,
+            'reference_invoice_id' => $invoice->id,
+        ]);
 
-            for ($i = 1; $i <= 150; $i++) {
+        LedgerEntry::create([
+            'entry_date' => now()->toDateString(),
+            'party_id' => $customerParty->id,
+            'recordable_id' => $invoice->id,
+            'recordable_type' => Invoice::class,
+            'description' => 'Invoice generated for challan ' . $challan->challan_number,
+            'debit' => $invoice->total_amount,
+            'credit' => 0,
+            'balance' => $invoice->total_amount,
+        ]);
 
-                $vehicle = $vehicles->random();
+        LedgerEntry::create([
+            'entry_date' => now()->toDateString(),
+            'party_id' => $customerParty->id,
+            'recordable_id' => $voucher->id,
+            'recordable_type' => Voucher::class,
+            'description' => 'Payment received against invoice ' . $invoice->invoice_number,
+            'debit' => 0,
+            'credit' => $voucher->amount,
+            'balance' => 0,
+        ]);
 
-                $driver = $drivers->random();
-
-                $item = $items->random();
-
-                $customer = $customers->random();
-
-                $quantity = rand(80, 450);
-
-                $challan = Challan::factory()->create([
-                    'challan_number' => 'CH-' . str_pad($i, 5, '0', STR_PAD_LEFT),
-                    'party_id' => $customer->id,
-                    'vehicle_id' => $vehicle->id,
-                    'driver_id' => $driver->id,
-                    'item_id' => $item->id,
-                    'quantity_cft' => $quantity,
-                    'status' => 'Pending',
-                    'created_at' => $faker->dateTimeBetween('-3 months', 'now'),
-                ]);
-
-                $challans->push($challan);
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | INVOICES
-            |--------------------------------------------------------------------------
-            */
-
-            $invoiceCounter = 1;
-
-            foreach ($customers->all() as $customer) {
-
-                $customerChallans = Challan::where('party_id', $customer->id)
-                    ->inRandomOrder()
-                    ->get();
-
-                if ($customerChallans->count() === 0) {
-                    continue;
-                }
-
-                $chunks = $customerChallans->chunk(rand(3, 8));
-
-                foreach ($chunks as $chunk) {
-
-                    $totalAmount = 0;
-
-                    foreach ($chunk as $challan) {
-
-                        $item = $items->firstWhere('id', $challan->item_id);
-
-                        $totalAmount += (
-                            $challan->quantity_cft *
-                            $item->price_per_unit
-                        );
-                    }
-
-                    $invoice = Invoice::factory()->create([
-                        'invoice_number' => 'INV-' . str_pad($invoiceCounter++, 5, '0', STR_PAD_LEFT),
-                        'party_id' => $customer->id,
-                        'total_amount' => $totalAmount,
-                        'driver_bata' => rand(500, 3000),
-                        'payment_mode' => $faker->randomElement([
-                            'Cash',
-                            'UPI',
-                            'Bank Transfer',
-                            'Credit'
-                        ]),
-                        'created_at' => $faker->dateTimeBetween('-3 months', 'now'),
-                    ]);
-
-                    foreach ($chunk as $challan) {
-
-                        $challan->update([
-                            'invoice_id' => $invoice->id,
-                            'status' => 'Invoiced',
-                        ]);
-                    }
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | LEDGER ENTRY - INVOICE
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $previousBalance = LedgerEntry::where(
-                        'party_id',
-                        $customer->id
-                    )->latest('id')->value('balance') ?? 0;
-
-                    $newBalance = $previousBalance + $invoice->total_amount;
-
-                    LedgerEntry::factory()->create([
-                        'entry_date' => $invoice->created_at,
-                        'party_id' => $customer->id,
-
-                        'recordable_type' => Invoice::class,
-                        'recordable_id' => $invoice->id,
-
-                        'description' => 'Invoice ' . $invoice->invoice_number,
-                        'debit' => $invoice->total_amount,
-                        'credit' => 0,
-                        'balance' => $newBalance,
-                    ]);
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | PAYMENT VOUCHERS
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (rand(0, 1)) {
-
-                        $paidAmount = rand(
-                            (int)($invoice->total_amount * 0.4),
-                            (int)$invoice->total_amount
-                        );
-
-                        $voucher = Voucher::factory()->create([
-                            'voucher_no' => 'RCPT-' . str_pad($invoice->id, 5, '0', STR_PAD_LEFT),
-                            'voucher_date' => now()->subDays(rand(0, 30)),
-                            'party_id' => $customer->id,
-                            'voucher_type' => 'Receipt',
-                            'amount' => $paidAmount,
-                            'payment_mode' => $faker->randomElement([
-                                'Cash',
-                                'UPI',
-                                'Bank Transfer',
-                            ]),
-                            'remarks' => 'Payment received',
-                            'reference_invoice_id' => $invoice->id,
-                        ]);
-
-                        $updatedBalance = $newBalance - $paidAmount;
-
-                        LedgerEntry::factory()->create([
-                            'entry_date' => $voucher->voucher_date,
-                            'party_id' => $customer->id,
-
-                            'recordable_type' => Voucher::class,
-                            'recordable_id' => $voucher->id,
-
-                            'description' => 'Receipt against ' . $invoice->invoice_number,
-                            'debit' => 0,
-                            'credit' => $paidAmount,
-                            'balance' => $updatedBalance,
-                        ]);
-                    }
-                }
-            }
-        });
+        Expense::create([
+            'expenditure_date' => now()->subDay()->toDateString(),
+            'category' => 'Diesel',
+            'amount' => 3120.00,
+            'reference_no' => 'EXP-2026-001',
+            'notes' => 'Diesel expense for delivery run',
+        ]);
     }
 }
