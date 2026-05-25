@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignIdFor(Vehicle::class)->constrained('vehicles');
             $table->foreignIdFor(Driver::class)->constrained('drivers');
             $table->foreignIdFor(Item::class)->constrained('items');
-            $table->foreignIdFor(Invoice::class)
+            $table->foreignId('invoice_id')
                 ->nullable()
                 ->constrained('invoices')
                 ->nullOnDelete();

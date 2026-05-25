@@ -189,28 +189,6 @@ class TestDataSeeder extends Seeder
             'reference_invoice_id' => $invoice->id,
         ]);
 
-        LedgerEntry::create([
-            'entry_date' => now()->toDateString(),
-            'party_id' => $customerParty->id,
-            'recordable_id' => $invoice->id,
-            'recordable_type' => Invoice::class,
-            'description' => 'Invoice generated for challan ' . $challan->challan_number,
-            'debit' => $invoice->total_amount,
-            'credit' => 0,
-            'balance' => $invoice->total_amount,
-        ]);
-
-        LedgerEntry::create([
-            'entry_date' => now()->toDateString(),
-            'party_id' => $customerParty->id,
-            'recordable_id' => $voucher->id,
-            'recordable_type' => Voucher::class,
-            'description' => 'Payment received against invoice ' . $invoice->invoice_number,
-            'debit' => 0,
-            'credit' => $voucher->amount,
-            'balance' => 0,
-        ]);
-
         Expense::create([
             'expenditure_date' => now()->subDay()->toDateString(),
             'category' => 'Diesel',
