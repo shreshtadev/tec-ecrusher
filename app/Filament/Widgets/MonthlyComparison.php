@@ -14,25 +14,23 @@ class MonthlyComparison extends ChartWidget
     protected function getData(): array
     {
         $months = collect(range(1, 12))->map(fn($month) => Carbon::create(null, $month, 1)->format('M'));
-
-        // Query Sales per month (Invoices)
-        $sales = Invoice::selectRaw('strftime("%m", created_at) as month, SUM(total_amount) as total')
+        $sales = Invoice::selectRaw('MONTH(created_at) as month, SUM(total_amount) as total')
             ->whereYear('created_at', date('Y'))
             ->groupBy('month')
             ->pluck('total', 'month')
             ->all();
 
-        // Query Collections per month (Receipt Vouchers)
-        $collections = Voucher::selectRaw('strftime("%m", voucher_date) as month, SUM(amount) as total')
-            ->where('type', 'Receipt')
-            ->whereYear('date', date('Y'))
+        // Query Collections - Changed strftime to MONTH and fixed column names
+        $collections = Voucher::selectRaw('MONTH(voucher_date) as month, SUM(amount) as total')
+            ->where('voucher_type', 'Receipt')
+            ->whereYear('voucher_date', date('Y'))
             ->groupBy('month')
             ->pluck('total', 'month')
             ->all();
 
-        // Map the data to ensure all 12 months are represented even if 0
-        $salesData = collect(range(1, 12))->map(fn($m) => $sales[str_pad($m, 2, '0', STR_PAD_LEFT)] ?? 0);
-        $collectionData = collect(range(1, 12))->map(fn($m) => $collections[str_pad($m, 2, '0', STR_PAD_LEFT)] ?? 0);
+        // Map data (The key needs to be the integer month if using MONTH())
+        $salesData = collect(range(1, 12))->map(fn($m) => $sales[$m] ?? 0);
+        $collectionData = collect(range(1, 12))->map(fn($m) => $collections[$m] ?? 0);
 
         return [
             'datasets' => [

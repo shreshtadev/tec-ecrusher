@@ -4,7 +4,7 @@ use App\Domains\Shared\Controllers\PrintController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
-Route::redirect("/login", "/admin/login")->name('admin.login');
+Route::redirect('/login', '/admin/login', 301)->name('admin.login');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::redirect("/dashboard", "/admin")->name('admin.dashboard');
 

@@ -89,6 +89,17 @@
         </div>
     </div>
 
+    <footer
+        class="mt-auto w-full lg:max-w-4xl max-w-83.75 text-sm text-[#1b1b18]/70 dark:text-[#EDEDEC]/60 border-t border-[#19140015] dark:border-[#3E3E3A] pt-4">
+        <p class="text-center">
+            © {{ now()->format('Y') }} <a href="https://techsathya.in"
+                class="text-blue-600 dark:text-blue-400 hover:underline">techsathya.in</a>. All rights reserved. Powered
+            by <a href="https://shreshtasmg.in"
+                class="text-blue-600 dark:text-blue-400 hover:underline">shreshtasmg.in</a>.
+        </p>
+
+    </footer>
+
     @if (Route::has('login'))
         <div class="h-14.5 hidden lg:block"></div>
     @endif

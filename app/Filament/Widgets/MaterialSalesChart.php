@@ -14,7 +14,6 @@ class MaterialSalesChart extends ChartWidget
 
     protected function getData(): array
     {
-        // Get sales grouped by Item ID for the current month
         $data = DB::table('invoices')
             ->join('challans', 'invoices.id', '=', 'challans.invoice_id')
             ->join('items', 'challans.item_id', '=', 'items.id')
@@ -24,18 +23,20 @@ class MaterialSalesChart extends ChartWidget
             ->groupBy('items.material_name')
             ->get();
 
+        // If no data, return a placeholder to prevent chart crashes
+        if ($data->isEmpty()) {
+            return [
+                'datasets' => [['label' => 'No Data', 'data' => [0], 'backgroundColor' => ['#cbd5e1']]],
+                'labels' => ['No sales this month'],
+            ];
+        }
+
         return [
             'datasets' => [
                 [
                     'label' => 'Revenue',
                     'data' => $data->pluck('total_revenue')->toArray(),
-                    'backgroundColor' => [
-                        '#36A2EB', // Blue
-                        '#FF6384', // Red
-                        '#FFCE56', // Yellow
-                        '#4BC0C0', // Teal
-                        '#9966FF', // Purple
-                    ],
+                    'backgroundColor' => ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF'],
                 ],
             ],
             'labels' => $data->pluck('material_name')->toArray(),

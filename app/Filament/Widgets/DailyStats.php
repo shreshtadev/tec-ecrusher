@@ -32,8 +32,8 @@ class DailyStats extends StatsOverviewWidget
 
             Stat::make(
                 'Today\'s Sales',
-                '₹'.number_format(
-                    Invoice::whereDate('created_at', $today)->sum('total_amount'),
+                '₹' . number_format(
+                    (float) Invoice::whereDate('created_at', $today)->sum('total_amount'),
                     2
                 )
             )
@@ -43,9 +43,9 @@ class DailyStats extends StatsOverviewWidget
 
             Stat::make(
                 'Today\'s Collections',
-                '₹'.number_format(
-                    Voucher::where('voucher_type', 'Receipt')
-                        ->whereDate('date', $today)
+                '₹' . number_format(
+                    (float) Voucher::where('voucher_type', 'Receipt')
+                        ->whereDate('voucher_date', $today)
                         ->sum('amount'),
                     2
                 )
@@ -62,7 +62,7 @@ class DailyStats extends StatsOverviewWidget
 
             Stat::make(
                 'Total Sales',
-                '₹'.number_format(
+                '₹' . number_format(
                     Invoice::sum('total_amount'),
                     2
                 )
@@ -73,7 +73,7 @@ class DailyStats extends StatsOverviewWidget
 
             Stat::make(
                 'Total Collections',
-                '₹'.number_format(
+                '₹' . number_format(
                     Voucher::where('voucher_type', 'Receipt')->sum('amount'),
                     2
                 )
