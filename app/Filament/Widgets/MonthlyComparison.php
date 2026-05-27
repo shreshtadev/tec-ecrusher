@@ -15,7 +15,7 @@ class MonthlyComparison extends ChartWidget
     {
         $months = collect(range(1, 12))->map(fn($month) => Carbon::create(null, $month, 1)->format('M'));
         $sales = Invoice::selectRaw('MONTH(created_at) as month, SUM(total_amount) as total')
-            ->whereYear('created_at', date('Y'))
+            ->whereYear('created_at', '=', date('Y'), true)
             ->groupBy('month')
             ->pluck('total', 'month')
             ->all();
@@ -23,7 +23,7 @@ class MonthlyComparison extends ChartWidget
         // Query Collections - Changed strftime to MONTH and fixed column names
         $collections = Voucher::selectRaw('MONTH(voucher_date) as month, SUM(amount) as total')
             ->where('voucher_type', 'Receipt')
-            ->whereYear('voucher_date', date('Y'))
+            ->whereYear('voucher_date', '=', date('Y'), true)
             ->groupBy('month')
             ->pluck('total', 'month')
             ->all();

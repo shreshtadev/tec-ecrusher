@@ -16,6 +16,7 @@ class InvoiceForm
                 TextInput::make('invoice_number')
                     ->required(),
                 Select::make('party_id')
+                    ->label('Party')
                     ->required()
                     ->options(fn() => Party::pluck('full_name', 'id')->toArray()),
                 TextInput::make('total_amount')
