@@ -6,20 +6,31 @@ use App\Domains\Common\Models\BModel;
 use App\Domains\Master\Models\Item;
 use App\Domains\Master\Models\Warehouse;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class StockReservation extends BModel
 {
     protected $fillable = [
-        'challan_id',
+        'source_id',
+        'source_type',
         'warehouse_id',
         'item_id',
-        'quantity_reserved',
+        'quantity',
         'status',
+        'reserved_at',
+        'finalized_at',
+        'cancelled_at',
+        'remarks',
     ];
 
-    public function challan(): BelongsTo
+    protected function casts(): array
     {
-        return $this->belongsTo(Challan::class);
+        return [
+            'quantity' => 'decimal:2',
+            'reserved_at' => 'datetime',
+            'finalized_at' => 'datetime',
+            'cancelled_at' => 'datetime',
+        ];
     }
 
     public function warehouse(): BelongsTo
@@ -30,5 +41,10 @@ class StockReservation extends BModel
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function source(): MorphTo
+    {
+        return $this->morphTo();
     }
 }

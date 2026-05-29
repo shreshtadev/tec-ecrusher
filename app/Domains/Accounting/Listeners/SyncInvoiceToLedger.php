@@ -2,7 +2,6 @@
 
 namespace App\Domains\Accounting\Listeners;
 
-use App\Domains\Accounting\Models\LedgerEntry;
 use App\Domains\Operations\Events\ChallanFinalized;
 use App\Domains\Operations\Models\Invoice;
 use App\Domains\Operations\Services\StockService;
@@ -31,8 +30,6 @@ class SyncInvoiceToLedger
                 'invoice_id' => $invoice->id,
                 'status' => 'Invoiced',
             ]);
-
-            $invoice->load('challans.stockReservation.warehouse', 'challans.stockReservation.item');
             $this->stockService->finalize($invoice);
         });
     }

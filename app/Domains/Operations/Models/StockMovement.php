@@ -4,24 +4,31 @@ namespace App\Domains\Operations\Models;
 
 use App\Domains\Common\Models\SModel;
 use App\Domains\Master\Models\Item;
-use App\Domains\Master\Models\StockAdjustment;
 use App\Domains\Master\Models\Warehouse;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class StockMovement extends SModel
 {
     protected $fillable = [
         'item_id',
         'warehouse_id',
-        'challan_id',
-        'invoice_id',
-        'adjustment_id',
+        'source_id',
+        'source_type',
         'movement_type',
         'quantity',
         'unit_cost',
-        'notes',
+        'movement_date',
+        'remarks',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'quantity' => 'decimal:2',
+            'unit_cost' => 'decimal:2',
+            'movement_date' => 'datetime',
+        ];
+    }
 
     public function item(): BelongsTo
     {
@@ -31,15 +38,5 @@ class StockMovement extends SModel
     public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
-    }
-
-    public function challan(): BelongsTo
-    {
-        return $this->belongsTo(Challan::class);
-    }
-
-    public function invoice(): BelongsTo
-    {
-        return $this->belongsTo(Invoice::class);
     }
 }

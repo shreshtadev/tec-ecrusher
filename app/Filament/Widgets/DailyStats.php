@@ -23,7 +23,6 @@ class DailyStats extends StatsOverviewWidget
         $today = Carbon::today();
 
         return [
-
             // TODAY SECTION
             Stat::make('Today\'s Trips', Challan::whereDate('created_at', $today)->count())
                 ->description('Active Challans')
@@ -32,7 +31,7 @@ class DailyStats extends StatsOverviewWidget
 
             Stat::make(
                 'Today\'s Sales',
-                '₹' . number_format(
+                '₹'.number_format(
                     (float) Invoice::whereDate('created_at', $today)->sum('total_amount'),
                     2
                 )
@@ -43,7 +42,7 @@ class DailyStats extends StatsOverviewWidget
 
             Stat::make(
                 'Today\'s Collections',
-                '₹' . number_format(
+                '₹'.number_format(
                     (float) Voucher::where('voucher_type', 'Receipt')
                         ->whereDate('voucher_date', $today)
                         ->sum('amount'),
@@ -62,7 +61,7 @@ class DailyStats extends StatsOverviewWidget
 
             Stat::make(
                 'Total Sales',
-                '₹' . number_format(
+                '₹'.number_format(
                     Invoice::sum('total_amount'),
                     2
                 )
@@ -73,7 +72,7 @@ class DailyStats extends StatsOverviewWidget
 
             Stat::make(
                 'Total Collections',
-                '₹' . number_format(
+                '₹'.number_format(
                     Voucher::where('voucher_type', 'Receipt')->sum('amount'),
                     2
                 )

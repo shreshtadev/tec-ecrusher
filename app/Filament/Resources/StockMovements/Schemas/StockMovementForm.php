@@ -10,13 +10,12 @@ use Filament\Schemas\Schema;
 
 class StockMovementForm
 {
-
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextEntry::make('stock_movement_notice')
-                    ->state(fn(callable $get) => 'Stock movements are read-only audit records.'),
+                    ->state(fn (callable $get) => 'Stock movements are read-only audit records.'),
                 TextEntry::make('stock_movement_summary')
                     ->state(function (callable $get) {
                         $itemId = $get('item_id');
@@ -35,11 +34,12 @@ class StockMovementForm
                         }
 
                         $service = app(StockService::class);
-                        $available = $service->getAvailableStock($item, $warehouse);
                         $valuation = $service->getStockValuation($item, $warehouse);
-                        $formattedValue = number_format($valuation['inventory_value'], 2);
+                        $available = $service->getAvailableStock($item, $warehouse);
 
-                        return "Available Qty: {$available}<br>Inventory value ({$valuation['method']}): {$formattedValue}<br>Movement Type: {$movementType}";
+                        $onHandQty = $valuation['quantity'] ?? 0;
+
+                        return "Available Qty: {$available}<br>On-hand Qty: {$onHandQty}<br>Movement Type: {$movementType}";
                     })
                     ->html(),
             ]);

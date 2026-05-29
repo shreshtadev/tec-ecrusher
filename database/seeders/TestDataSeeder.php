@@ -3,12 +3,10 @@
 namespace Database\Seeders;
 
 use App\Domains\Accounting\Models\Expense;
-use App\Domains\Accounting\Models\LedgerEntry;
 use App\Domains\Accounting\Models\Voucher;
 use App\Domains\Master\Models\Driver;
 use App\Domains\Master\Models\Item;
 use App\Domains\Master\Models\Party;
-use App\Domains\Master\Models\StockAdjustment;
 use App\Domains\Master\Models\StockLevel;
 use App\Domains\Master\Models\Vehicle;
 use App\Domains\Master\Models\Warehouse;
@@ -83,7 +81,7 @@ class TestDataSeeder extends Seeder
             'warehouse_id' => $warehouseA->id,
             'available_qty' => 120.00,
             'reserved_qty' => 10.00,
-            'valuation_method' => 'FIFO',
+
         ]);
 
         StockLevel::create([
@@ -91,7 +89,6 @@ class TestDataSeeder extends Seeder
             'warehouse_id' => $warehouseA->id,
             'available_qty' => 90.00,
             'reserved_qty' => 5.00,
-            'valuation_method' => 'FIFO',
         ]);
 
         StockLevel::create([
@@ -99,7 +96,6 @@ class TestDataSeeder extends Seeder
             'warehouse_id' => $warehouseB->id,
             'available_qty' => 65.00,
             'reserved_qty' => 8.00,
-            'valuation_method' => 'FIFO',
         ]);
 
         $vehicle = Vehicle::create([
@@ -136,15 +132,6 @@ class TestDataSeeder extends Seeder
             'batch_no' => 'BATCH-001',
         ]);
 
-        $stockAdjustment = StockAdjustment::create([
-            'item_id' => $item20mm->id,
-            'warehouse_id' => $warehouseA->id,
-            'quantity_change' => -1.50,
-            'adjustment_type' => 'Damage',
-            'reason' => 'Damaged material during loading',
-            'reference_number' => 'ADJ-2026-001',
-        ]);
-
         StockMovement::create([
             'item_id' => $item20mm->id,
             'warehouse_id' => $warehouseA->id,
@@ -154,7 +141,7 @@ class TestDataSeeder extends Seeder
             'movement_type' => 'OUT',
             'quantity' => 22.75,
             'unit_cost' => $item20mm->price_per_unit,
-            'notes' => 'Shipment booked against challan ' . $challan->challan_number,
+            'notes' => 'Shipment booked against challan '.$challan->challan_number,
         ]);
 
         StockReservation::create([
@@ -185,7 +172,7 @@ class TestDataSeeder extends Seeder
             'voucher_type' => 'Receipt',
             'amount' => $invoice->total_amount,
             'payment_mode' => 'Bank Transfer',
-            'remarks' => 'Full payment received for invoice ' . $invoice->invoice_number,
+            'remarks' => 'Full payment received for invoice '.$invoice->invoice_number,
             'reference_invoice_id' => $invoice->id,
         ]);
 

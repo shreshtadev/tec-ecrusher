@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\StockMovements\Tables;
 
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -13,7 +12,7 @@ class StockMovementsTable
     {
         return $table
             ->columns([
-                TextColumn::make('created_at')
+                TextColumn::make('movement_date')
                     ->label('Date')
                     ->dateTime()
                     ->sortable(),
@@ -28,11 +27,9 @@ class StockMovementsTable
                 TextColumn::make('movement_type')
                     ->label('Type')
                     ->badge()
-                    ->color(fn($state) => match ($state) {
+                    ->color(fn ($state) => match ($state) {
                         'IN' => 'success',
                         'OUT' => 'danger',
-                        'RESERVE' => 'warning',
-                        'UNRESERVE' => 'info',
                         'ADJUSTMENT' => 'secondary',
                         default => 'gray',
                     }),
@@ -43,22 +40,19 @@ class StockMovementsTable
                 TextColumn::make('unit_cost')
                     ->label('Unit Cost')
                     ->numeric(),
-                TextColumn::make('notes')
+                TextColumn::make('remarks')
                     ->limit(50)
-                    ->tooltip(fn($record) => $record->notes),
+                    ->tooltip(fn ($record) => $record->remarks),
             ])
             ->filters([
                 SelectFilter::make('movement_type')
                     ->options([
                         'IN' => 'Stock In',
                         'OUT' => 'Stock Out',
-                        'RESERVE' => 'Reserve',
-                        'UNRESERVE' => 'Unreserve',
                         'ADJUSTMENT' => 'Adjustment',
                     ]),
             ])
-            ->defaultSort('created_at', 'desc')->recordActions([
-                EditAction::make(),
-            ]);
+            ->defaultSort('movement_date', 'desc')
+            ->recordActions([]);
     }
 }

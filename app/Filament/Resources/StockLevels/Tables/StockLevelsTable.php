@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\StockLevels\Tables;
 
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -29,16 +28,11 @@ class StockLevelsTable
                     ->label('Reserved')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('valuation_method')
-                    ->label('Valuation')
-                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('warehouse_id')
                     ->relationship('warehouse', 'name')
                     ->label('Warehouse'),
-            ])->recordActions([
-                EditAction::make(),
-            ]);
+            ])->recordActions([]);
     }
 }

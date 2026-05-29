@@ -19,7 +19,6 @@ return new class extends Migration
             $table->foreignIdFor(Warehouse::class)->constrained('warehouses');
             $table->decimal('available_qty', 12, 2)->default(0);
             $table->decimal('reserved_qty', 12, 2)->default(0);
-            $table->enum('valuation_method', ['FIFO', 'LIFO'])->default('FIFO');
             $table->unique(['item_id', 'warehouse_id']);
             $table->timestamps();
         });

@@ -32,12 +32,7 @@ class StockLevelForm
                     ->numeric()
                     ->required()
                     ->disabled(),
-                Select::make('valuation_method')
-                    ->options([
-                        'FIFO' => 'FIFO',
-                        'LIFO' => 'LIFO',
-                    ])
-                    ->required(),
+
                 TextEntry::make('stock_level_valuation')
                     ->state(function (callable $get) use ($stockService) {
                         $itemId = $get('item_id');
@@ -59,11 +54,10 @@ class StockLevelForm
                         $available = $service->getAvailableStock($item, $warehouse);
 
                         return sprintf(
-                            'Available qty: %s<br>Reserved qty: %s<br>Inventory value (%s): %s',
+                            'Available qty: %s<br>Reserved qty: %s<br>On-hand qty: %s',
                             $available,
                             $valuation['reserved_qty'] ?? 0,
-                            $valuation['method'],
-                            number_format($valuation['inventory_value'] ?? 0, 2),
+                            $valuation['quantity'] ?? 0,
                         );
                     })
                     ->html(),

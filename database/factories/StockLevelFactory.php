@@ -26,21 +26,13 @@ class StockLevelFactory extends Factory
             'warehouse_id' => Warehouse::factory(),
             'available_qty' => $this->faker->numberBetween(100, 1000),
             'reserved_qty' => 0,
-            'valuation_method' => 'FIFO',
         ];
     }
 
     public function withReservation(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'reserved_qty' => $this->faker->numberBetween(10, 100),
-        ]);
-    }
-
-    public function lifo(): static
-    {
-        return $this->state(fn(array $attributes) => [
-            'valuation_method' => 'LIFO',
         ]);
     }
 }

@@ -12,7 +12,6 @@ class StockLevel extends BModel
         'warehouse_id',
         'available_qty',
         'reserved_qty',
-        'valuation_method',
     ];
 
     public function item(): BelongsTo

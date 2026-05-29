@@ -46,14 +46,14 @@ class StockReportingService
         ?Item $item = null,
         ?Warehouse $warehouse = null
     ): Collection {
-        $query = StockMovement::with(['item', 'warehouse', 'challan', 'invoice', 'adjustment']);
+        $query = StockMovement::with(['item', 'warehouse']);
 
         if ($fromDate) {
-            $query->whereDate('created_at', '>=', $fromDate);
+            $query->whereDate('movement_date', '>=', $fromDate);
         }
 
         if ($toDate) {
-            $query->whereDate('created_at', '<=', $toDate);
+            $query->whereDate('movement_date', '<=', $toDate);
         }
 
         if ($item) {
@@ -64,17 +64,17 @@ class StockReportingService
             $query->where('warehouse_id', $warehouse->id);
         }
 
-        return $query->orderBy('created_at', 'desc')->get()->map(function ($movement) {
+        return $query->orderByDesc('movement_date')->get()->map(function ($movement) {
             return [
-                'date' => $movement->created_at->format('Y-m-d H:i:s'),
+                'date' => $movement->movement_date->format('Y-m-d H:i:s'),
                 'item' => $movement->item->material_name,
                 'warehouse' => $movement->warehouse->name,
                 'movement_type' => $movement->movement_type,
                 'quantity' => $movement->quantity,
                 'unit_cost' => $movement->unit_cost,
                 'total_cost' => $movement->quantity * ($movement->unit_cost ?? 0),
-                'reference' => $movement->challan_id ? "Challan #{$movement->challan->challan_number}" : ($movement->invoice_id ? "Invoice #{$movement->invoice->invoice_number}" : ($movement->adjustment_id ? "Adjustment #{$movement->adjustment->id}" : 'Manual')),
-                'notes' => $movement->notes,
+                'reference' => class_basename($movement->source_type)." #{$movement->source_id}",
+                'remarks' => $movement->remarks,
             ];
         });
     }
@@ -87,7 +87,7 @@ class StockReportingService
         $movements = StockMovement::where('item_id', $item->id)
             ->where('warehouse_id', $warehouse->id)
             ->whereIn('movement_type', ['IN', 'ADJUSTMENT'])
-            ->orderBy('created_at', 'asc')
+            ->orderBy('movement_date', 'asc')
             ->get();
 
         $currentStockQty = StockLevel::where('item_id', $item->id)
@@ -103,10 +103,10 @@ class StockReportingService
             }
 
             $qtyInThisBatch = min($movement->quantity, $remainingQty);
-            $ageInDays = now()->diffInDays($movement->created_at);
+            $ageInDays = now()->diffInDays($movement->movement_date);
 
             $agingData[] = [
-                'receipt_date' => $movement->created_at->format('Y-m-d'),
+                'receipt_date' => $movement->movement_date->format('Y-m-d'),
                 'quantity' => $qtyInThisBatch,
                 'unit_cost' => $movement->unit_cost,
                 'total_cost' => $qtyInThisBatch * ($movement->unit_cost ?? 0),
@@ -139,7 +139,6 @@ class StockReportingService
                 'item' => $item->material_name,
                 'warehouse' => $stockLevel->warehouse->name,
                 'available_qty' => $stockLevel->available_qty,
-                'valuation_method' => $stockLevel->valuation_method,
                 'fifo_total_cost' => $fifoValuation['total_cost'],
                 'fifo_unit_cost' => $fifoValuation['average_cost'],
                 'lifo_total_cost' => $lifoValuation['total_cost'],

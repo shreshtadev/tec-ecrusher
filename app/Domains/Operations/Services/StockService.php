@@ -7,10 +7,12 @@ use App\Domains\Master\Models\StockLevel;
 use App\Domains\Master\Models\Warehouse;
 use App\Domains\Operations\Models\Challan;
 use App\Domains\Operations\Models\Invoice;
+use App\Domains\Operations\Models\ProductionEntry;
 use App\Domains\Operations\Models\StockMovement;
 use App\Domains\Operations\Models\StockReservation;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class StockService
 {
@@ -21,48 +23,36 @@ class StockService
      */
     public function reserve(Challan $challan, ?Warehouse $warehouse = null): StockReservation
     {
+        $warehouse ??= Warehouse::where('is_active', true)->first();
         if (! $warehouse) {
-            $warehouse = Warehouse::where('is_active', true)->first();
-            if (! $warehouse) {
-                throw new Exception('No active warehouse found');
+            throw new Exception('No active warehouse found');
+        }
+
+        return DB::transaction(function () use ($challan, $warehouse): StockReservation {
+            $stockLevel = StockLevel::where('item_id', $challan->item_id)
+                ->where('warehouse_id', $warehouse->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $stockLevel || ($stockLevel->available_qty - $stockLevel->reserved_qty) < $challan->quantity_cft) {
+                throw new Exception("Insufficient stock for {$challan->item->material_name}. Available: {$this->getAvailableStock($challan->item,$warehouse)} CFT");
             }
-        }
 
-        // Check if stock is available
-        if (! $this->validateReservation($challan->item, $warehouse, $challan->quantity_cft)) {
-            throw new Exception("Insufficient stock for {$challan->item->material_name}. Available: {$this->getAvailableStock($challan->item,$warehouse)} CFT");
-        }
+            $reservation = StockReservation::create([
+                'source_type' => Challan::class,
+                'source_id' => $challan->id,
+                'warehouse_id' => $warehouse->id,
+                'item_id' => $challan->item_id,
+                'quantity' => $challan->quantity_cft,
+                'status' => 'reserved',
+                'reserved_at' => now(),
+                'remarks' => "Reserved for Challan #{$challan->challan_number}",
+            ]);
 
-        // Create stock reservation
-        $reservation = StockReservation::create([
-            'challan_id' => $challan->id,
-            'warehouse_id' => $warehouse->id,
-            'item_id' => $challan->item_id,
-            'quantity_reserved' => $challan->quantity_cft,
-            'status' => 'reserved',
-        ]);
-
-        // Create RESERVE movement
-        StockMovement::create([
-            'item_id' => $challan->item_id,
-            'warehouse_id' => $warehouse->id,
-            'challan_id' => $challan->id,
-            'movement_type' => 'RESERVE',
-            'quantity' => $challan->quantity_cft,
-            'unit_cost' => $challan->item->price_per_unit,
-            'notes' => "Reserved for Challan #{$challan->challan_number}",
-        ]);
-
-        // Update stock level reserved quantity
-        $stockLevel = StockLevel::where('item_id', $challan->item_id)
-            ->where('warehouse_id', $warehouse->id)
-            ->first();
-
-        if ($stockLevel) {
             $stockLevel->increment('reserved_qty', $challan->quantity_cft);
-        }
 
-        return $reservation;
+            return $reservation;
+        });
     }
 
     /**
@@ -71,43 +61,45 @@ class StockService
      */
     public function finalize(Invoice $invoice): void
     {
-        $challans = $invoice->challans;
+        DB::transaction(function () use ($invoice): void {
+            foreach ($invoice->challans as $challan) {
+                $reservation = StockReservation::where('source_type', Challan::class)
+                    ->where('source_id', $challan->id)
+                    ->where('status', 'reserved')
+                    ->lockForUpdate()
+                    ->first();
 
-        foreach ($challans as $challan) {
-            $reservation = $challan->stockReservation;
+                if (! $reservation) {
+                    continue;
+                }
 
-            if (! $reservation || $reservation->status === 'finalized') {
-                continue;
-            }
+                $quantity = (float) $reservation->quantity;
+                $stockLevel = StockLevel::where('item_id', $reservation->item_id)
+                    ->where('warehouse_id', $reservation->warehouse_id)
+                    ->lockForUpdate()
+                    ->first();
 
-            $warehouse = $reservation->warehouse;
-            $item = $reservation->item;
-            $quantity = $reservation->quantity_reserved;
+                if (! $stockLevel || $stockLevel->available_qty < $quantity || $stockLevel->reserved_qty < $quantity) {
+                    throw new Exception('Stock level mismatch while finalizing reservation.');
+                }
 
-            // Create OUT movement
-            StockMovement::create([
-                'item_id' => $item->id,
-                'warehouse_id' => $warehouse->id,
-                'invoice_id' => $invoice->id,
-                'movement_type' => 'OUT',
-                'quantity' => -$quantity, // Negative for outbound
-                'unit_cost' => $item->price_per_unit,
-                'notes' => "Finalized from Invoice #{$invoice->invoice_number}",
-            ]);
+                StockMovement::create([
+                    'item_id' => $reservation->item_id,
+                    'warehouse_id' => $reservation->warehouse_id,
+                    'source_type' => Invoice::class,
+                    'source_id' => $invoice->id,
+                    'movement_type' => 'OUT',
+                    'quantity' => $quantity,
+                    'unit_cost' => $challan->item->price_per_unit,
+                    'movement_date' => now(),
+                    'remarks' => "Finalized from Invoice #{$invoice->invoice_number}",
+                ]);
 
-            // Update stock level
-            $stockLevel = StockLevel::where('item_id', $item->id)
-                ->where('warehouse_id', $warehouse->id)
-                ->first();
-
-            if ($stockLevel) {
                 $stockLevel->decrement('available_qty', $quantity);
                 $stockLevel->decrement('reserved_qty', $quantity);
+                $reservation->update(['status' => 'finalized', 'finalized_at' => now()]);
             }
-
-            // Mark reservation as finalized
-            $reservation->update(['status' => 'finalized']);
-        }
+        });
     }
 
     /**
@@ -115,37 +107,28 @@ class StockService
      */
     public function unreserve(Challan $challan): void
     {
-        $reservation = $challan->stockReservation;
+        DB::transaction(function () use ($challan): void {
+            $reservation = StockReservation::where('source_type', Challan::class)
+                ->where('source_id', $challan->id)
+                ->where('status', 'reserved')
+                ->lockForUpdate()
+                ->first();
 
-        if (! $reservation || $reservation->status !== 'reserved') {
-            return;
-        }
+            if (! $reservation) {
+                return;
+            }
 
-        $warehouse = $reservation->warehouse;
-        $item = $reservation->item;
-        $quantity = $reservation->quantity_reserved;
+            $stockLevel = StockLevel::where('item_id', $reservation->item_id)
+                ->where('warehouse_id', $reservation->warehouse_id)
+                ->lockForUpdate()
+                ->first();
 
-        // Create UNRESERVE movement
-        StockMovement::create([
-            'item_id' => $item->id,
-            'warehouse_id' => $warehouse->id,
-            'challan_id' => $challan->id,
-            'movement_type' => 'UNRESERVE',
-            'quantity' => -$quantity,
-            'notes' => "Unreserved from Challan #{$challan->challan_number}",
-        ]);
+            if ($stockLevel) {
+                $stockLevel->decrement('reserved_qty', min($stockLevel->reserved_qty, $reservation->quantity));
+            }
 
-        // Update stock level
-        $stockLevel = StockLevel::where('item_id', $item->id)
-            ->where('warehouse_id', $warehouse->id)
-            ->first();
-
-        if ($stockLevel) {
-            $stockLevel->decrement('reserved_qty', $quantity);
-        }
-
-        // Mark reservation as cancelled
-        $reservation->update(['status' => 'cancelled']);
+            $reservation->update(['status' => 'cancelled', 'cancelled_at' => now()]);
+        });
     }
 
     /**
@@ -166,11 +149,13 @@ class StockService
         StockMovement::create([
             'item_id' => $challan->item_id,
             'warehouse_id' => $warehouse->id,
-            'challan_id' => $challan->id,
+            'source_type' => Challan::class,
+            'source_id' => $challan->id,
             'movement_type' => 'IN',
             'quantity' => $returnQuantity,
             'unit_cost' => $challan->item->price_per_unit,
-            'notes' => "Return from Challan #{$challan->challan_number}",
+            'movement_date' => now(),
+            'remarks' => "Return from Challan #{$challan->challan_number}",
         ]);
 
         // Update stock level
@@ -218,7 +203,7 @@ class StockService
         $threshold = ($thresholdPercent ?? config('inventory.low_stock_threshold_percent', 10)) / 100;
 
         $query = StockLevel::with(['item:id,material_name,price_per_unit', 'warehouse:id,name,code'])
-            ->select('id', 'item_id', 'warehouse_id', 'available_qty', 'reserved_qty', 'valuation_method')
+            ->select('id', 'item_id', 'warehouse_id', 'available_qty', 'reserved_qty')
             ->where('available_qty', '>', 0)
             ->orderBy('available_qty', 'asc')
             ->limit($limit);
@@ -264,11 +249,11 @@ class StockService
      *
      * Returns detailed valuation including current cost, total value, and per-unit cost.
      */
-    public function getStockValuation(Item $item, Warehouse $warehouse, string $method = 'FIFO'): array
+    public function getStockValuation(Item $item, Warehouse $warehouse): array
     {
         $stockLevel = StockLevel::where('item_id', $item->id)
             ->where('warehouse_id', $warehouse->id)
-            ->select('id', 'available_qty', 'reserved_qty', 'valuation_method')
+            ->select('id', 'available_qty', 'reserved_qty')
             ->first();
 
         if (! $stockLevel || $stockLevel->available_qty <= 0) {
@@ -279,26 +264,9 @@ class StockService
                 'quantity' => 0,
                 'total_cost' => 0,
                 'average_cost' => 0,
-                'method' => $method,
                 'inventory_value' => 0,
             ];
         }
-
-        // Use the valuation method stored in stock level if not overridden
-        $valuationMethod = $method === 'FIFO' || $method === 'LIFO' ? $method : $stockLevel->valuation_method;
-
-        if ($valuationMethod === 'WEIGHTED_AVERAGE') {
-            $valuation = $this->calculateWeightedAverageCost($item->id, $warehouse->id, $stockLevel->available_qty);
-        } else {
-            $valuation = $this->calculateFIFOLIFOValuation(
-                $item->id,
-                $warehouse->id,
-                $stockLevel->available_qty,
-                $valuationMethod
-            );
-        }
-
-        $inventoryValue = $valuation['total_cost'];
 
         return [
             'item_id' => $item->id,
@@ -307,10 +275,6 @@ class StockService
             'quantity' => $stockLevel->available_qty,
             'reserved_qty' => $stockLevel->reserved_qty,
             'available_qty' => $this->getAvailableStock($item, $warehouse),
-            'total_cost' => $valuation['total_cost'],
-            'average_cost' => $valuation['average_cost'],
-            'inventory_value' => $inventoryValue,
-            'method' => $valuationMethod,
         ];
     }
 
@@ -373,7 +337,7 @@ class StockService
     /**
      * Initialize stock level for an item in a warehouse.
      */
-    public function initializeStockLevel(Item $item, Warehouse $warehouse, float $initialQuantity = 0, string $valuationMethod = 'FIFO'): StockLevel
+    public function initializeStockLevel(Item $item, Warehouse $warehouse, float $initialQuantity = 0): StockLevel
     {
         return StockLevel::firstOrCreate(
             [
@@ -383,7 +347,7 @@ class StockService
             [
                 'available_qty' => $initialQuantity,
                 'reserved_qty' => 0,
-                'valuation_method' => $valuationMethod,
+
             ]
         );
     }
@@ -400,10 +364,13 @@ class StockService
         $movement = StockMovement::create([
             'item_id' => $item->id,
             'warehouse_id' => $warehouse->id,
+            'source_type' => Item::class,
+            'source_id' => $item->id,
             'movement_type' => 'IN',
             'quantity' => $quantity,
             'unit_cost' => $unitCost,
-            'notes' => $reference ? "Stock received - Reference: {$reference}" : 'Stock received',
+            'movement_date' => now(),
+            'remarks' => $reference ? "Stock received - Reference: {$reference}" : 'Stock received',
         ]);
 
         // Update stock level
@@ -418,14 +385,14 @@ class StockService
      * @param  array  $items  Array of ['item_id' => id, 'warehouse_id' => id, 'quantity' => qty, 'unit_cost' => cost, 'reference' => ref]
      * @return Collection of created movements
      */
-    public function receiveStockBatch(array $items, ?string $batchReference = null): Collection
+    public function receiveStockBatch(array $items, ?string $batchReference = null)
     {
         $movements = collect();
 
         foreach ($items as $itemData) {
             try {
-                $item = Item::find($itemData['item_id']);
-                $warehouse = Warehouse::find($itemData['warehouse_id']);
+                $item = Item::findOrFail($itemData['item_id']);
+                $warehouse = Warehouse::findOrFail($itemData['warehouse_id']);
 
                 if (! $item || ! $warehouse) {
                     continue;
@@ -457,7 +424,7 @@ class StockService
         return StockMovement::where('item_id', $item->id)
             ->where('warehouse_id', $warehouse->id)
             ->where('created_at', '>=', $fromDate)
-            ->select(['id', 'movement_type', 'quantity', 'unit_cost', 'notes', 'created_at'])
+            ->select(['id', 'movement_type', 'quantity', 'unit_cost', 'remarks', 'created_at'])
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -474,7 +441,7 @@ class StockService
         if ($warehouse) {
             $query->where('warehouse_id', $warehouse->id);
         } else {
-            $query->select('id', 'item_id', 'warehouse_id', 'available_qty', 'reserved_qty', 'valuation_method');
+            $query->select('id', 'item_id', 'warehouse_id', 'available_qty', 'reserved_qty');
         }
 
         $stocks = $query->get();
@@ -526,7 +493,7 @@ class StockService
     public function getInventoryValue(?Item $item = null): array
     {
         $query = StockLevel::with(['item:id,material_name,price_per_unit', 'warehouse:id,name,code'])
-            ->select('id', 'item_id', 'warehouse_id', 'available_qty', 'reserved_qty', 'valuation_method');
+            ->select('id', 'item_id', 'warehouse_id', 'available_qty', 'reserved_qty');
 
         if ($item) {
             $query->where('item_id', $item->id);
@@ -576,10 +543,13 @@ class StockService
         $movement = StockMovement::create([
             'item_id' => $item->id,
             'warehouse_id' => $warehouse->id,
+            'source_type' => Item::class,
+            'source_id' => $item->id,
             'movement_type' => 'ADJUSTMENT',
             'quantity' => $quantityChange,
             'unit_cost' => $unitCost ?? $item->price_per_unit,
-            'notes' => "Adjustment: {$reason}",
+            'movement_date' => now(),
+            'remarks' => "Adjustment: {$reason}",
         ]);
 
         // Update stock level
@@ -632,5 +602,21 @@ class StockService
                     'lookback_days' => $lookbackDays,
                 ];
             });
+    }
+
+    public function createOnProductionEntry(ProductionEntry $productionEntry)
+    {
+        $foundItem = Item::findOrFail($productionEntry->item_id);
+        $foundWarehouse = Warehouse::findOrFail($productionEntry->warehouse_id);
+        $this->receiveStock($foundItem, $foundWarehouse, $productionEntry->quantity, $foundItem->price_per_unit);
+    }
+
+    public function updateOnProductionEntry(ProductionEntry $productionEntry)
+    {
+        if ($productionEntry->isDirty(['quantity', 'item_id', 'warehouse_id', 'date'])) {
+            $foundItem = Item::findOrFail($productionEntry->item_id);
+            $foundWarehouse = Warehouse::findOrFail($productionEntry->warehouse_id);
+            $this->receiveStock($foundItem, $foundWarehouse, $productionEntry->quantity, $foundItem->price_per_unit);
+        }
     }
 }

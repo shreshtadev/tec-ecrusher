@@ -66,7 +66,7 @@ class ChallansTable
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn(Challan $record) => $record->status === 'Pending')
+                    ->visible(fn (Challan $record) => $record->status === 'Pending')
                     ->action(function (Challan $record) {
                         // Dispatch the event
                         ChallanFinalized::dispatch($record);
@@ -77,10 +77,10 @@ class ChallansTable
                             ->send();
                     }),
                 Action::make('print')
-                    ->label('Print Challan')
+                    ->label('Print')
                     ->icon('heroicon-o-printer')
                     ->color('gray')
-                    ->url(fn(Challan $record) => route('print.challan', $record))
+                    ->url(fn (Challan $record) => route('print.challan', $record))
                     ->openUrlInNewTab(),
             ])
             ->toolbarActions([
@@ -95,8 +95,8 @@ class ChallansTable
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn() => true) // You can add logic to show/hide this action based on selection
-                    ->action(fn(Collection $records) => $records->each(fn($r) => ChallanFinalized::dispatch($r)))
+                    ->visible(fn () => true) // You can add logic to show/hide this action based on selection
+                    ->action(fn (Collection $records) => $records->each(fn ($r) => ChallanFinalized::dispatch($r)))
                     ->requiresConfirmation()
                     ->color('success')
                     ->icon('heroicon-o-document-duplicate'),
