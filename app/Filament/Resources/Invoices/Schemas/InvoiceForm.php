@@ -15,10 +15,18 @@ class InvoiceForm
             ->components([
                 TextInput::make('invoice_number')
                     ->required(),
+                Select::make('company_id')
+                    ->label('Companny')
+                    ->relationship('company', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->required()
+                    ->native(false),
                 Select::make('party_id')
                     ->label('Party')
                     ->required()
-                    ->options(fn() => Party::pluck('full_name', 'id')->toArray()),
+                    ->options(fn () => Party::pluck('full_name', 'id')->toArray()),
                 TextInput::make('total_amount')
                     ->prefix('₹')
                     ->required()
@@ -33,7 +41,7 @@ class InvoiceForm
                     ->default('Credit')
                     ->options([
                         'Credit' => 'Credit',
-                        "A/C" => 'A/C',
+                        'A/C' => 'A/C',
                         'Cash' => 'Cash',
                         'UPI' => 'UPI',
                         'Cheque' => 'Cheque',

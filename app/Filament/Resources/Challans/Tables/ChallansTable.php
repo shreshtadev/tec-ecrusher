@@ -29,19 +29,20 @@ class ChallansTable
                 TextColumn::make('party.full_name')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('company.name'),
                 TextColumn::make('vehicle.vehicle_number')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('item.material_name')
                     ->numeric()
-                    ->sortable(),
-                TextColumn::make('item.unit'),
+                    ->sortable()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('item.unit')->label('Unit')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('quantity_cft')
                     ->label('Qty')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
-                    ->searchable(),
+                    ->searchable()->badge(),
                 TextColumn::make('deleted_at')
                     ->dateTime()
                     ->sortable()

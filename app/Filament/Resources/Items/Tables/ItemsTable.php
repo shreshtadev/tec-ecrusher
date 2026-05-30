@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Items\Tables;
 
+use App\Filament\Resources\ProductionEntries\ProductionEntryResource;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -32,6 +34,14 @@ class ItemsTable
                 //
             ])
             ->recordActions([
+
+                Action::make('production')
+                    ->label('Add Stock')
+                    ->icon('heroicon-o-plus')
+                    ->color('info')
+                    ->url(fn ($record) => ProductionEntryResource::getUrl('create', [
+                        'item_id' => $record->id,
+                    ])),
                 EditAction::make(),
             ])
             ->toolbarActions([

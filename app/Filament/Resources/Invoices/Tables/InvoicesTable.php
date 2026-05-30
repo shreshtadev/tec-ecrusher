@@ -25,6 +25,7 @@ class InvoicesTable
                 TextColumn::make('party.full_name')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('company.name')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('total_amount')
                     ->money('INR')
                     ->alignment('right')
@@ -32,6 +33,7 @@ class InvoicesTable
                 TextColumn::make('driver_bata')
                     ->money('INR')
                     ->alignment('right')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->summarize(Sum::make()->money('INR')),
                 TextColumn::make('payment_mode')
                     ->searchable(),

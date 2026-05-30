@@ -26,10 +26,11 @@ class ProductionEntryForm
                             ->get()
                             ->mapWithKeys(function ($item) {
                                 return [
-                                    $item->id => "{$item->material_name} ({$item->unit})"
+                                    $item->id => "{$item->material_name} ({$item->unit})",
                                 ];
                             });
                     })
+                    ->default(request('item_id'))
                     ->searchable()
                     ->live()
                     ->native(false),
@@ -42,10 +43,11 @@ class ProductionEntryForm
                 TextInput::make('quantity')
                     ->label(function (Get $get) {
                         $itemId = $get('item_id');
-                        if (!$itemId) {
+                        if (! $itemId) {
                             return 'Quantity';
                         }
                         $item = Item::find($itemId);
+
                         return $item && $item->unit
                             ? "Quantity ({$item->unit})"
                             : 'Quantity';
@@ -53,7 +55,7 @@ class ProductionEntryForm
                     ->required()
                     ->numeric(),
                 TextInput::make('batch_no')
-                    ->prefix('BTH-')->formatStateUsing(fn(?string $state): string => $state ? "BTH-{$state}" : ''),
+                    ->prefix('BTH-')->formatStateUsing(fn (?string $state): string => $state ? "BTH-{$state}" : ''),
             ]);
     }
 }

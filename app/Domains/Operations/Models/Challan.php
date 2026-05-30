@@ -3,11 +3,13 @@
 namespace App\Domains\Operations\Models;
 
 use App\Domains\Common\Models\SModel;
-use App\Domains\Operations\Events\ChallanCreated;
+use App\Domains\Master\Models\Company;
 use App\Domains\Master\Models\Driver;
 use App\Domains\Master\Models\Item;
 use App\Domains\Master\Models\Party;
 use App\Domains\Master\Models\Vehicle;
+use App\Domains\Operations\Events\ChallanCreated;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Challan extends SModel
@@ -49,5 +51,10 @@ class Challan extends SModel
     public function stockReservation(): HasOne
     {
         return $this->hasOne(StockReservation::class);
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
     }
 }

@@ -3,12 +3,13 @@
 namespace App\Domains\Operations\Models;
 
 use App\Domains\Common\Models\SModel;
+use App\Domains\Master\Models\Company;
 use App\Domains\Master\Models\Party;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Invoice extends SModel
 {
-
     // An invoice can cover multiple challans (Trip Sheets)
     public function challans(): HasMany
     {
@@ -24,5 +25,10 @@ class Invoice extends SModel
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
     }
 }

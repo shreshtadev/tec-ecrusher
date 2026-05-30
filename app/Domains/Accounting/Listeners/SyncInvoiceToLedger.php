@@ -18,11 +18,12 @@ class SyncInvoiceToLedger
         DB::transaction(function () use ($challan) {
             // 1. Create the Invoice (The "Operations" part of the slice)
             $invoice = Invoice::create([
-                'invoice_number' => 'INV-' . str_pad($challan->id, 6, '0', STR_PAD_LEFT),
+                'invoice_number' => 'INV-'.str_pad($challan->id, 6, '0', STR_PAD_LEFT),
                 'party_id' => $challan->party_id,
                 'total_amount' => $challan->quantity_cft * $challan->item->price_per_unit,
                 'driver_bata' => 0,
                 'payment_mode' => $challan->payment_mode ?? 'Credit',
+                'company_id' => $challan->company_id,
             ]);
 
             // 2. Mark Challan as Invoiced

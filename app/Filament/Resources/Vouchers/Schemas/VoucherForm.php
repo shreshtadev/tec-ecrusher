@@ -20,7 +20,7 @@ class VoucherForm
                 Section::make('Voucher Details')
                     ->schema([
                         TextInput::make('voucher_no')
-                            ->default(fn () => 'VCH-'.date('Ymd-His'))
+                            ->default(fn() => 'VCH-' . date('Ymd-His'))
                             ->readonly()
                             ->required(),
                         DatePicker::make('voucher_date')
@@ -45,15 +45,25 @@ class VoucherForm
                         Select::make('reference_invoice_id')
                             ->label('Against Invoice (Optional)')
                             ->options(
-                                fn (Get $get) => Invoice::where('party_id', $get('party_id'))
+                                fn(Get $get) => Invoice::where('party_id', $get('party_id'))
                                     ->pluck('invoice_number', 'id')
                             )
                             ->searchable()
+                            ->live()
                             ->placeholder('Select invoice to adjust'),
 
                         TextInput::make('amount')
                             ->numeric()
                             ->prefix('₹')
+                            ->helperText(function (Get $get) {
+                                $selectedInvoiceId = $get('reference_invoice_id');
+                                if ($selectedInvoiceId) {
+                                    $invoice = Invoice::find($selectedInvoiceId);
+                                    if ($invoice) {
+                                        return 'Invoice Amount: ₹' . number_format($invoice->total_amount, 2);
+                                    }
+                                }
+                            })
                             ->required(),
 
                         Select::make('payment_mode')

@@ -28327,6 +28327,21 @@ namespace Filament\Pages {
             }
     }
 
+namespace App\Filament\Resources\Companies\Pages {
+    /**
+     */
+    class CreateCompany extends \Filament\Resources\Pages\CreateRecord {
+            }
+    /**
+     */
+    class EditCompany extends \Filament\Resources\Pages\EditRecord {
+            }
+    /**
+     */
+    class ListCompanies extends \Filament\Resources\Pages\ListRecords {
+            }
+    }
+
 namespace App\Filament\Resources\Drivers\Pages {
     /**
      */

@@ -1,0 +1,181 @@
+<?php
+
+namespace App\Filament\Resources\Companies\Schemas;
+
+use App\Domains\Common\Enums\IndianStates;
+use App\Rules\ValidUpiId;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+
+class CompanyForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Company Information')
+                    ->schema([
+                        TextInput::make('name')
+                            ->required()
+                            ->maxLength(150),
+
+                        TextInput::make('legal_name')
+                            ->maxLength(200),
+
+                        TextInput::make('gstin')
+                            ->label('GSTIN')
+                            ->maxLength(15)
+                            ->rule('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[A-Z0-9]{1}Z[A-Z0-9]{1}$/')
+                            ->live()
+                            ->afterStateUpdated(fn ($state, $set) => $set('gstin', strtoupper($state))),
+
+                        TextInput::make('pan')
+                            ->label('PAN')
+                            ->maxLength(10)
+                            ->rule('/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/')
+                            ->live()
+                            ->afterStateUpdated(fn ($state, $set) => $set('pan', strtoupper($state))),
+
+                        TextInput::make('cin')
+                            ->label('CIN')
+                            ->maxLength(21),
+
+                        Textarea::make('address')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2),
+
+                Section::make('Contact Details')
+                    ->schema([
+                        TextInput::make('phone')
+                            ->tel()
+                            ->maxLength(20),
+
+                        TextInput::make('email')
+                            ->email()
+                            ->maxLength(150),
+
+                        TextInput::make('website')
+                            ->url()
+                            ->maxLength(150),
+
+                        TextInput::make('upi_id')
+                            ->label('UPI ID')
+                            ->maxLength(100)->rules([new ValidUpiId]),
+                    ])
+                    ->columns(2),
+
+                Section::make('Location')
+                    ->schema([
+                        Select::make('state')
+                            ->options(
+                                collect(IndianStates::options())
+                                    ->mapWithKeys(
+                                        fn ($state) => [$state['name'] => $state['name']]
+                                    )
+                                    ->toArray()
+                            )
+                            ->searchable()
+                            ->live()
+                            ->afterStateUpdated(function ($state, Set $set) {
+
+                                $code = collect(IndianStates::options())
+                                    ->search(
+                                        fn ($item) => $item['name'] === $state
+                                    );
+
+                                $set('state_code', $code);
+                            }),
+
+                        TextInput::make('state_code')
+                            ->disabled()
+                            ->dehydrated(),
+                    ])
+                    ->columns(2),
+
+                Section::make('Branding')
+                    ->schema([
+                        FileUpload::make('logo')
+                            ->image()
+                            ->imageEditor()
+                            ->directory('company-logos')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Bank Details')
+                    ->schema([
+                        TextInput::make('bank_name')
+                            ->maxLength(100),
+
+                        TextInput::make('account_number')
+                            ->maxLength(50),
+
+                        TextInput::make('ifsc')
+                            ->label('IFSC')
+                            ->maxLength(11)
+                            ->live()
+                            ->afterStateUpdated(fn ($state, $set) => $set('ifsc', strtoupper($state))),
+
+                        TextInput::make('branch')
+                            ->maxLength(100),
+                    ])
+                    ->columns(2),
+
+                Section::make('Document Numbering')
+                    ->schema([
+                        TextInput::make('invoice_prefix')
+                            ->required()
+                            ->default('INV')
+                            ->maxLength(20),
+
+                        TextInput::make('challan_prefix')
+                            ->required()
+                            ->default('CHL')
+                            ->maxLength(20),
+
+                        TextInput::make('invoice_number_format')
+                            ->helperText('Example: {PREFIX}/{FY}/{NUMBER}')
+                            ->placeholder('{PREFIX}/{FY}/{NUMBER}')
+                            ->maxLength(50),
+
+                        TextInput::make('challan_number_format')
+                            ->helperText('Example: {PREFIX}/{FY}/{NUMBER}')
+                            ->placeholder('{PREFIX}/{FY}/{NUMBER}')
+                            ->maxLength(50),
+                        TextInput::make('challan_sequence')
+                            ->numeric()
+                            ->minValue(1)
+                            ->helperText('Next challan number to be generated'),
+                        TextInput::make('invoice_sequence')
+                            ->numeric()
+                            ->minValue(1)
+                            ->helperText('Next invoice number to be generated'),
+                    ])
+                    ->columns(2),
+
+                Section::make('Invoice Settings')
+                    ->schema([
+                        TextInput::make('authorized_signatory')
+                            ->maxLength(100),
+
+                        Textarea::make('invoice_terms')
+                            ->rows(4)
+                            ->columnSpanFull(),
+
+                        Textarea::make('invoice_declaration')
+                            ->rows(4)
+                            ->columnSpanFull(),
+
+                        Textarea::make('invoice_footer')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
+}

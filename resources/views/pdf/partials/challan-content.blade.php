@@ -4,8 +4,8 @@
         {{-- Left Section --}}
         <td style="vertical-align: top; text-align: left;">
             <div>
-                <span style="margin: 0; font-size: 12px;">Shruthi Stone Crusher</span>
-                <small>Nagarahalli Village, Chikkamagaluru - 577101</small>
+                <span style="margin: 0; font-size: 12px;">{{ $record->company->name }}</span>
+                <small>{{ $record->company->address }}</small>
             </div>
 
             <p style="margin-top: 4px; font-size: 11px;">
