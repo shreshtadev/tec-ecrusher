@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Widgets\DailyStats;
 use App\Filament\Widgets\MaterialSalesChart;
 use App\Filament\Widgets\MonthlyComparison;
+use App\Filament\Widgets\WorkflowStatusWidget;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -30,6 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->colors([
                 'primary' => Color::Amber,
@@ -41,9 +43,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                WorkflowStatusWidget::class,
                 DailyStats::class,
                 MonthlyComparison::class,
                 MaterialSalesChart::class,
+
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -61,6 +65,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])->renderHook(PanelsRenderHook::FOOTER, fn () => view('filament.footer'));
+            ])->renderHook(PanelsRenderHook::FOOTER, fn() => view('filament.footer'));
     }
 }
