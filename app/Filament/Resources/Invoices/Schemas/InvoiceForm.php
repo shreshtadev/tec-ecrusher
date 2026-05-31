@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Invoices\Schemas;
 
+use App\Domains\Common\Enums\PaymentOpts;
 use App\Domains\Master\Models\Party;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -26,7 +27,7 @@ class InvoiceForm
                 Select::make('party_id')
                     ->label('Party')
                     ->required()
-                    ->options(fn () => Party::pluck('full_name', 'id')->toArray()),
+                    ->options(fn() => Party::pluck('full_name', 'id')->toArray()),
                 TextInput::make('total_amount')
                     ->prefix('₹')
                     ->required()
@@ -39,15 +40,7 @@ class InvoiceForm
                 Select::make('payment_mode')
                     ->required()
                     ->default('Credit')
-                    ->options([
-                        'Credit' => 'Credit',
-                        'A/C' => 'A/C',
-                        'Cash' => 'Cash',
-                        'UPI' => 'UPI',
-                        'Cheque' => 'Cheque',
-                        'NEFT' => 'NEFT',
-                        'RTGS' => 'RTGS',
-                    ]),
+                    ->options(PaymentOpts::options()),
             ]);
     }
 }

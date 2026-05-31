@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Vouchers\Schemas;
 
+use App\Domains\Common\Enums\PaymentOpts;
 use App\Domains\Operations\Models\Invoice;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -67,15 +68,7 @@ class VoucherForm
                             ->required(),
 
                         Select::make('payment_mode')
-                            ->options([
-                                'Cash' => 'Cash',
-                                'A/C' => 'A/C',
-                                'Credit Card' => 'Credit Card',
-                                'Bank Transfer' => 'Bank Transfer',
-                                'UPI' => 'UPI',
-                                'Cheque' => 'Cheque',
-                                'Other' => 'Other',
-                            ])->default('A/C')->native(false),
+                            ->options(PaymentOpts::options())->default(PaymentOpts::AC)->native(false),
                     ])->columns(2),
 
                 Textarea::make('remarks')->columnSpanFull(),
