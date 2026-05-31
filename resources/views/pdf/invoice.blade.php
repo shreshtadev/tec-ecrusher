@@ -228,7 +228,7 @@
                 </td>
 
                 <td width="50%" class="right">
-                    For YOUR STONE CRUSHER NAME
+                    For {{ $record->company->name }}
 
                     <br><br><br>
 

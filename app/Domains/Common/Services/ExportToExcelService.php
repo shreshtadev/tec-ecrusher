@@ -38,50 +38,107 @@ class ExportToExcelService
             return self::streamDownload($spreadsheet, $fileName);
         }
 
-        /**
-         * Determine fields automatically
-         */
         $firstItem = $items->first();
 
         $fields ??= array_keys(
             $firstItem->getAttributes()
         );
 
-        /**
-         * Write headers
-         */
-        foreach ($fields as $columnIndex => $field) {
+        /*
+|--------------------------------------------------------------------------
+| Support both:
+|--------------------------------------------------------------------------
+|
+| [
+|     'challan_number',
+|     'quantity_cft',
+| ]
+|
+| and
+|
+| [
+|     'challan_number' => 'Challan No',
+|     'party.full_name' => 'Party',
+| ]
+|
+*/
+
+        $isAssociative = array_keys($fields) !== range(
+            0,
+            count($fields) - 1
+        );
+
+        $fieldKeys = $isAssociative
+            ? array_keys($fields)
+            : $fields;
+
+        $headers = $isAssociative
+            ? array_values($fields)
+            : array_map(
+                fn(string $field) => Str::headline($field),
+                $fields
+            );
+
+        /*
+|--------------------------------------------------------------------------
+| Headers
+|--------------------------------------------------------------------------
+*/
+
+        foreach ($headers as $columnIndex => $header) {
+
             $column = $columnIndex + 1;
 
             $cell = Coordinate::stringFromColumnIndex($column) . '1';
 
-            $sheet->setCellValue($cell, Str::headline($field));
+            $sheet->setCellValue($cell, $header);
         }
 
-        /**
-         * Write rows
-         */
+        /*
+|--------------------------------------------------------------------------
+| Rows
+|--------------------------------------------------------------------------
+*/
+
         foreach ($items as $rowIndex => $item) {
-            foreach ($fields as $columnIndex => $field) {
+
+            foreach ($fieldKeys as $columnIndex => $field) {
+
                 $column = $columnIndex + 1;
                 $row = $rowIndex + 2;
 
                 $value = data_get($item, $field);
 
-                if (is_array($value) || is_object($value)) {
-                    $value = json_encode($value, JSON_THROW_ON_ERROR);
+                if ($value instanceof \BackedEnum) {
+                    $value = $value->value;
+                }
+
+                if ($value instanceof \DateTimeInterface) {
+                    $value = $value->format('Y-m-d H:i:s');
+                }
+
+                if (is_array($value)) {
+                    $value = json_encode(
+                        $value,
+                        JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
+                    );
                 }
 
                 $cell = Coordinate::stringFromColumnIndex($column) . $row;
+
                 $sheet->setCellValue($cell, $value);
             }
         }
 
-        /**
-         * Auto-size columns
-         */
-        foreach (range(1, count($fields)) as $columnIndex) {
-            $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(
+        /*
+|--------------------------------------------------------------------------
+| Auto Size
+|--------------------------------------------------------------------------
+*/
+
+        foreach (range(1, count($headers)) as $columnIndex) {
+
+            $columnLetter = Coordinate::stringFromColumnIndex(
                 $columnIndex
             );
 

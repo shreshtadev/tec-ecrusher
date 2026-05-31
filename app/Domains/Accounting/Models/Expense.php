@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Expense extends SModel
 {
     protected $casts = [
-        'expense_date' => 'date',
+        'expenditure_date' => 'date',
         'amount' => 'decimal:2',
     ];
 

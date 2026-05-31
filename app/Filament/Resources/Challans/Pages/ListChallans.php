@@ -10,6 +10,7 @@ use Filament\Resources\Pages\ListRecords;
 use App\Domains\Common\Services\ExportToExcelService;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
+use App\Domains\Common\Enums\TripsheetColumnDef;
 
 class ListChallans extends ListRecords
 {
@@ -28,11 +29,20 @@ class ListChallans extends ListRecords
                         $start = Carbon::now()->startOfDay();
                         $end = Carbon::now()->endOfDay();
 
-                        $items = (clone $query)->whereBetween('created_at', [$start, $end])->get();
+                        $items = (clone $query)
+                            ->with([
+                                'party',
+                                'driver',
+                                'vehicle',
+                                'item',
+                                'invoice',
+                            ])
+                            ->whereBetween('created_at', [$start, $end])
+                            ->get();
 
                         return ExportToExcelService::download(
                             $items,
-                            null,
+                            TripsheetColumnDef::columns(),
                             'Challans - Day',
                             'challans-day-' . Carbon::now()->format('Y-m-d') . '.xlsx'
                         );
@@ -46,11 +56,19 @@ class ListChallans extends ListRecords
                         $start = Carbon::now()->startOfWeek();
                         $end = Carbon::now()->endOfWeek();
 
-                        $items = (clone $query)->whereBetween('created_at', [$start, $end])->get();
-
+                        $items = (clone $query)
+                            ->with([
+                                'party',
+                                'driver',
+                                'vehicle',
+                                'item',
+                                'invoice',
+                            ])
+                            ->whereBetween('created_at', [$start, $end])
+                            ->get();
                         return ExportToExcelService::download(
                             $items,
-                            null,
+                            TripsheetColumnDef::columns(),
                             'Challans - Week',
                             'challans-week-' . Carbon::now()->format('Y-m-d') . '.xlsx'
                         );
@@ -76,12 +94,33 @@ class ListChallans extends ListRecords
                         $end = Carbon::parse($data['end_date'])->endOfDay();
 
                         $items = (clone $query)
+                            ->with([
+                                'party',
+                                'driver',
+                                'vehicle',
+                                'item',
+                                'invoice',
+                            ])
                             ->whereBetween('created_at', [$start, $end])
                             ->get();
+                        // $items = $items->map(function ($challan) {
+                        //     return [
+                        //         'Challan No' => $challan->challan_number,
+                        //         'Date' => $challan->created_at->format('Y-m-d'),
+
+                        //         'Party' => $challan->party?->full_name,
+                        //         'Driver' => $challan->driver?->full_name,
+                        //         'Vehicle' => $challan->vehicle?->vehicle_number,
+                        //         'Item' => $challan->item?->material_name,
+                        //         'Invoice' => $challan->invoice?->invoice_number,
+
+                        //         'Quantity' => $challan->quantity_qft,
+                        //     ];
+                        // });
 
                         return ExportToExcelService::download(
                             $items,
-                            null,
+                            TripsheetColumnDef::columns(),
                             'Challans',
                             sprintf(
                                 'challans-%s-to-%s.xlsx',

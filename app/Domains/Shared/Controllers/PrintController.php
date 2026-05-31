@@ -2,6 +2,7 @@
 
 namespace App\Domains\Shared\Controllers;
 
+use App\Domains\Accounting\Models\Expense;
 use App\Http\Controllers\Controller;
 use App\Domains\Operations\Models\Challan;
 use App\Domains\Operations\Models\Invoice;
@@ -26,5 +27,11 @@ class PrintController extends Controller
     {
         return Pdf::loadView('pdf.voucher', compact('record'))
             ->stream("Voucher_{$record->voucher_no}.pdf");
+    }
+
+    public function expense(Expense $record)
+    {
+        return Pdf::loadView('pdf.expense', compact('record'))
+            ->stream("Expense_{$record->expense_number}.pdf");
     }
 }

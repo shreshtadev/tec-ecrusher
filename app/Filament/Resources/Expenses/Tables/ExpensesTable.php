@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\Expenses\Tables;
 
+use App\Domains\Accounting\Models\Expense;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -23,8 +26,9 @@ class ExpensesTable
                 TextColumn::make('category')
                     ->searchable(),
                 TextColumn::make('amount')
-                    ->numeric()
-                    ->sortable(),
+                    ->money('INR')
+                    ->alignment('right')
+                    ->summarize(Sum::make()->money('INR')),
                 TextColumn::make('reference_no')
                     ->searchable(),
                 TextColumn::make('deleted_at')
@@ -45,6 +49,12 @@ class ExpensesTable
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('print')
+                    ->label('Print')
+                    ->icon('heroicon-o-printer')
+                    ->color('gray')
+                    ->url(fn(Expense $record) => route('print.expense', $record))
+                    ->openUrlInNewTab(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
