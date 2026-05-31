@@ -30,6 +30,7 @@ class PartyForm
                     ->options([
                         'Customer' => 'Customer',
                         'Supplier' => 'Supplier',
+                        'Employee' => 'Employee',
                         'Other' => 'Other',
                     ])
                     ->required()

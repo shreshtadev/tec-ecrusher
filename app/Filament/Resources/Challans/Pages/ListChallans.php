@@ -22,7 +22,7 @@ class ListChallans extends ListRecords
             CreateAction::make(),
             ActionGroup::make([
                 Action::make('export_by_day')
-                    ->label('By Day')
+                    ->label('Tripsheet - Today')
                     ->action(function () {
                         $query = $this->getFilteredTableQuery();
 
@@ -43,13 +43,13 @@ class ListChallans extends ListRecords
                         return ExportToExcelService::download(
                             $items,
                             TripsheetColumnDef::columns(),
-                            'Challans - Day',
-                            'challans-day-' . Carbon::now()->format('Y-m-d') . '.xlsx'
+                            'Tripsheets - Day',
+                            'tripsheets-day-' . Carbon::now()->format('Y-m-d') . '.xlsx'
                         );
                     }),
 
                 Action::make('export_by_week')
-                    ->label('By Week')
+                    ->label('Tripsheet - Week')
                     ->action(function () {
                         $query = $this->getFilteredTableQuery();
 
@@ -69,8 +69,8 @@ class ListChallans extends ListRecords
                         return ExportToExcelService::download(
                             $items,
                             TripsheetColumnDef::columns(),
-                            'Challans - Week',
-                            'challans-week-' . Carbon::now()->format('Y-m-d') . '.xlsx'
+                            'Tripsheets - Week',
+                            'tripsheets-week-' . Carbon::now()->format('Y-m-d') . '.xlsx'
                         );
                     }),
                 Action::make('export_custom')
@@ -103,27 +103,13 @@ class ListChallans extends ListRecords
                             ])
                             ->whereBetween('created_at', [$start, $end])
                             ->get();
-                        // $items = $items->map(function ($challan) {
-                        //     return [
-                        //         'Challan No' => $challan->challan_number,
-                        //         'Date' => $challan->created_at->format('Y-m-d'),
-
-                        //         'Party' => $challan->party?->full_name,
-                        //         'Driver' => $challan->driver?->full_name,
-                        //         'Vehicle' => $challan->vehicle?->vehicle_number,
-                        //         'Item' => $challan->item?->material_name,
-                        //         'Invoice' => $challan->invoice?->invoice_number,
-
-                        //         'Quantity' => $challan->quantity_qft,
-                        //     ];
-                        // });
 
                         return ExportToExcelService::download(
                             $items,
                             TripsheetColumnDef::columns(),
-                            'Challans',
+                            'Tripsheets',
                             sprintf(
-                                'challans-%s-to-%s.xlsx',
+                                'tripsheets-%s-to-%s.xlsx',
                                 $start->format('Y-m-d'),
                                 $end->format('Y-m-d')
                             )

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('state', 5)->default('KA');
             $table->string('postal_code', 12)->nullable();
             $table->string('contact_number', 20)->nullable();
-            $table->enum('party_type', ['Customer', 'Supplier', 'Other'])->default('Customer');
+            $table->enum('party_type', ['Customer', 'Supplier', 'Employee', 'Other'])->default('Customer');
             $table->timestamps();
         });
     }

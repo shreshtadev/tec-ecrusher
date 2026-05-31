@@ -18,8 +18,9 @@ class ExpenseForm
                     ->placeholder('Expenditure Date')
                     ->required(),
                 Select::make('party_id')
-                    ->label('Vendor/Customer/Supplier')
-                    ->relationship('party', 'full_name'),
+                    ->label('Party')
+                    ->relationship('party', 'full_name')
+                    ->native(false),
                 Select::make('category')
                     ->options([
                         'Diesel' => 'Diesel',
