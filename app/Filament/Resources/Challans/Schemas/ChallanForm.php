@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Challans\Schemas;
 
 use App\Domains\Common\Enums\PaymentOpts;
+use App\Domains\Master\Models\Company;
 use App\Domains\Master\Models\Driver;
 use App\Domains\Master\Models\Item;
 use App\Domains\Master\Models\Vehicle;
@@ -23,9 +24,8 @@ class ChallanForm
                 Section::make('Challan Details')
                     ->schema([
                         TextInput::make('challan_number')
-                            ->default(fn() => 'CHL-' . strtoupper(uniqid())) // Or your custom logic
-                            ->readonly()
-                            ->required(),
+                            ->hiddenOn('create')
+                            ->readonly('edit'),
 
                         TextInput::make('status')
                             ->readOnly()->default('Pending'),
@@ -33,17 +33,21 @@ class ChallanForm
                 Section::make('Payment Details')->schema([
                     Select::make('payment_mode')
                         ->options(PaymentOpts::options())->default(PaymentOpts::AC)->native(false),
+                    TextInput::make('driver_bata')->numeric()->default(0),
                 ]),
 
                 Section::make('Assignments')
                     ->schema([
                         Select::make('company_id')
-                            ->label('Companny')
+                            ->label('Company')
                             ->relationship('company', 'name')
                             ->searchable()
                             ->preload()
                             ->live()
                             ->required()
+                            ->default(function () {
+                                return Company::count() === 1 ? Company::first()->id : null;
+                            })
                             ->native(false),
                         // 1. Party Select
                         Select::make('party_id')

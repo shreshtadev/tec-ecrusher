@@ -8,30 +8,31 @@ use App\Domains\Operations\Models\Challan;
 use App\Domains\Operations\Models\Invoice;
 use App\Domains\Accounting\Models\Voucher;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
 
 class PrintController extends Controller
 {
     public function challan(Challan $record)
     {
         return Pdf::loadView('pdf.challan', compact('record'))
-            ->stream("Challan_{$record->challan_number}.pdf");
+            ->stream("Challan_{Str::slug($record->challan_number)}.pdf");
     }
 
     public function invoice(Invoice $record)
     {
         return Pdf::loadView('pdf.invoice', compact('record'))
-            ->stream("Invoice_{$record->invoice_number}.pdf");
+            ->stream("Invoice_{Str::slug($record->invoice_number)}.pdf");
     }
 
     public function voucher(Voucher $record)
     {
         return Pdf::loadView('pdf.voucher', compact('record'))
-            ->stream("Voucher_{$record->voucher_no}.pdf");
+            ->stream("Voucher_{Str::slug($record->voucher_no)}.pdf");
     }
 
     public function expense(Expense $record)
     {
         return Pdf::loadView('pdf.expense', compact('record'))
-            ->stream("Expense_{$record->expense_number}.pdf");
+            ->stream("Expense_{Str::slug($record->expense_number)}.pdf");
     }
 }

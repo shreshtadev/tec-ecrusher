@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\Challans\Tables;
 
 use App\Domains\Operations\Events\ChallanFinalized;
+use App\Domains\Operations\Events\ChallansFinalized;
 use App\Domains\Operations\Models\Challan;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -11,12 +13,15 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Notifications\Collection;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 
 class ChallansTable
 {
@@ -67,7 +72,7 @@ class ChallansTable
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (Challan $record) => $record->status === 'Pending')
+                    ->visible(fn(Challan $record) => $record->status === 'Pending')
                     ->action(function (Challan $record) {
                         // Dispatch the event
                         ChallanFinalized::dispatch($record);
@@ -81,7 +86,7 @@ class ChallansTable
                     ->label('Print')
                     ->icon('heroicon-o-printer')
                     ->color('gray')
-                    ->url(fn (Challan $record) => route('print.challan', $record))
+                    ->url(fn(Challan $record) => route('print.challan', $record))
                     ->openUrlInNewTab(),
             ])
             ->toolbarActions([
@@ -96,8 +101,25 @@ class ChallansTable
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn () => true) // You can add logic to show/hide this action based on selection
-                    ->action(fn (Collection $records) => $records->each(fn ($r) => ChallanFinalized::dispatch($r)))
+                    ->visible(fn() => true)
+                    ->action(function (Collection $records) {
+                        try {
+                            ChallansFinalized::dispatch($records);
+                            Notification::make()
+                                ->title('Challans Finalized')
+                                ->success()
+                                ->send();
+                        } catch (Exception $e) {
+                            logger()->error('Error finalizing challans: ' . $e->getMessage(), [
+                                'exception' => $e,
+                                'record_ids' => $records->pluck('id'),
+                            ]);
+                            Notification::make()
+                                ->title($e->getMessage() ?: 'Error finalizing challans')
+                                ->danger()
+                                ->send();
+                        }
+                    })
                     ->requiresConfirmation()
                     ->color('success')
                     ->icon('heroicon-o-document-duplicate'),

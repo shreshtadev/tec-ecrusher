@@ -15,46 +15,54 @@ class CompaniesTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Company Name')
                     ->searchable(),
                 TextColumn::make('legal_name')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('gstin')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('pan')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('phone')
+                    ->label('Phone Number')
                     ->searchable(),
                 TextColumn::make('email')
                     ->label('Email address')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('website')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('state')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('state_code')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('cin')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('upi_id')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('invoice_number_format')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('challan_number_format')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('logo')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('bank_name')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('account_number')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('ifsc')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('branch')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('invoice_prefix')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('challan_prefix')
-                    ->searchable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('voucher_prefix')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('voucher_number_format')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('voucher_sequence')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('authorized_signatory')
                     ->searchable(),
                 TextColumn::make('created_at')

@@ -88,13 +88,13 @@
 
                     {{ $record->party->full_name }}<br>
 
-                    {{ $record->party->address ?? '' }}<br>
+                    {{ $record->party->address_line_1 ?? '' }}<br>
 
                     GSTIN:
                     {{ $record->party->gst_number ?? 'N/A' }}<br>
 
                     Mobile:
-                    {{ $record->party->mobile_number ?? 'N/A' }}
+                    {{ $record->party->contact_number ?? 'N/A' }}
                 </td>
             </tr>
         </table>

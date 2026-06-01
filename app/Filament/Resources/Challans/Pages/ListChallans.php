@@ -11,6 +11,7 @@ use App\Domains\Common\Services\ExportToExcelService;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use App\Domains\Common\Enums\TripsheetColumnDef;
+use Filament\Notifications\Notification;
 
 class ListChallans extends ListRecords
 {
@@ -19,7 +20,10 @@ class ListChallans extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()->failureNotification(Notification::make()
+                ->danger()
+                ->title('Tripsheet/Stock Error')
+                ->body('We could not save your submission. Please check inventory.'),),
             ActionGroup::make([
                 Action::make('export_by_day')
                     ->label('Tripsheet - Today')

@@ -2,7 +2,6 @@
 
 namespace App\Domains\Accounting\Listeners;
 
-use App\Domains\Common\Enums\VoucherOpts;
 use App\Domains\Common\Events\VoucherSaved;
 use Illuminate\Support\Facades\Log;
 
@@ -21,12 +20,6 @@ class VoucherSavedListener
      */
     public function handle(VoucherSaved $event): void
     {
-        if ($event->voucher->type === VoucherOpts::RECEIPT) {
-            Log::info('A receipt voucher has been saved with ID: ' . $event->voucher->id);
-        }
-
-        if ($event->voucher->type === VoucherOpts::PAYMENT) {
-            Log::info('A payment voucher has been saved with ID: ' . $event->voucher->id);
-        }
+        Log::info('A ' . $event->voucher->type . ' voucher has been saved with ID: ' . $event->voucher->voucher_number);
     }
 }

@@ -13,6 +13,7 @@ use App\Domains\Operations\Models\StockReservation;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class StockService
 {
@@ -50,6 +51,7 @@ class StockService
             ]);
 
             $stockLevel->increment('reserved_qty', $challan->quantity_cft);
+            $challan->company()->increment('invoice_sequence');
 
             return $reservation;
         });
@@ -617,6 +619,107 @@ class StockService
             $foundItem = Item::findOrFail($productionEntry->item_id);
             $foundWarehouse = Warehouse::findOrFail($productionEntry->warehouse_id);
             $this->receiveStock($foundItem, $foundWarehouse, $productionEntry->quantity, $foundItem->price_per_unit);
+        }
+    }
+
+    public function createFromChallans(Collection $challans, array $driverBatas): Invoice
+    {
+        if ($challans->isEmpty()) {
+            throw ValidationException::withMessages([
+                'challans' => 'No challans selected.',
+            ]);
+        }
+
+        // Load required relations once
+        $challans->loadMissing([
+            'item',
+            'party',
+        ]);
+
+        $this->validateChallans($challans);
+
+        return DB::transaction(function () use ($challans) {
+
+            $first = $challans->first();
+
+            $invoice = Invoice::create([
+                'party_id'      => $first->party_id,
+                'company_id'    => $first->company_id,
+                'payment_mode'  => $first->payment_mode ?? 'Credit',
+                'driver_bata'   => array_sum($challans->pluck('driver_bata')->toArray()),
+                'total_amount'  => $this->calculateTotal($challans),
+            ]);
+
+            $challans->each(function (Challan $challan) use ($invoice) {
+
+                $challan->update([
+                    'invoice_id' => $invoice->id,
+                    'status'     => 'Invoiced',
+                ]);
+            });
+
+            return $invoice;
+        });
+    }
+
+    protected function calculateTotal(Collection $challans): float
+    {
+        return $challans->sum(function (Challan $challan) {
+
+            return $challan->quantity_cft
+                * $challan->item->price_per_unit;
+        });
+    }
+
+    protected function validateChallans(Collection $challans): void
+    {
+        $this->ensureSameParty($challans);
+        $this->ensureSameCompany($challans);
+        $this->ensureNotAlreadyInvoiced($challans);
+        $this->ensurePendingStatus($challans);
+    }
+
+    protected function ensureSameParty(Collection $challans): void
+    {
+        if ($challans->pluck('party_id')->unique()->count() > 1) {
+            throw ValidationException::withMessages([
+                'challans' => 'All challans must belong to the same party.',
+            ]);
+        }
+    }
+
+    protected function ensureSameCompany(Collection $challans): void
+    {
+        if ($challans->pluck('company_id')->unique()->count() > 1) {
+            throw ValidationException::withMessages([
+                'challans' => 'All challans must belong to the same company.',
+            ]);
+        }
+    }
+
+    protected function ensurePendingStatus(Collection $challans): void
+    {
+        $invalid = $challans->first(
+            fn(Challan $challan) => $challan->status !== 'Pending'
+        );
+
+        if ($invalid) {
+            throw ValidationException::withMessages([
+                'challans' => "Challan {$invalid->challan_number} is not Pending.",
+            ]);
+        }
+    }
+
+    protected function ensureNotAlreadyInvoiced(Collection $challans): void
+    {
+        $invalid = $challans->first(
+            fn(Challan $challan) => filled($challan->invoice_id)
+        );
+
+        if ($invalid) {
+            throw ValidationException::withMessages([
+                'challans' => "Challan {$invalid->challan_number} is already invoiced.",
+            ]);
         }
     }
 }

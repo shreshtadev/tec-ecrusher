@@ -30,16 +30,16 @@ class CompanyForm
                         TextInput::make('gstin')
                             ->label('GSTIN')
                             ->maxLength(15)
-                            ->rule('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[A-Z0-9]{1}Z[A-Z0-9]{1}$/')
+                            ->regex('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[A-Z0-9]{1}Z[A-Z0-9]{1}$/')
                             ->live()
-                            ->afterStateUpdated(fn ($state, $set) => $set('gstin', strtoupper($state))),
+                            ->afterStateUpdated(fn($state, $set) => $set('gstin', strtoupper($state))),
 
                         TextInput::make('pan')
                             ->label('PAN')
                             ->maxLength(10)
-                            ->rule('/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/')
+                            ->regex('/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/')
                             ->live()
-                            ->afterStateUpdated(fn ($state, $set) => $set('pan', strtoupper($state))),
+                            ->afterStateUpdated(fn($state, $set) => $set('pan', strtoupper($state))),
 
                         TextInput::make('cin')
                             ->label('CIN')
@@ -55,7 +55,7 @@ class CompanyForm
                     ->schema([
                         TextInput::make('phone')
                             ->tel()
-                            ->maxLength(20),
+                            ->maxLength(11),
 
                         TextInput::make('email')
                             ->email()
@@ -77,7 +77,7 @@ class CompanyForm
                             ->options(
                                 collect(IndianStates::options())
                                     ->mapWithKeys(
-                                        fn ($state) => [$state['name'] => $state['name']]
+                                        fn($state) => [$state['name'] => $state['name']]
                                     )
                                     ->toArray()
                             )
@@ -87,7 +87,7 @@ class CompanyForm
 
                                 $code = collect(IndianStates::options())
                                     ->search(
-                                        fn ($item) => $item['name'] === $state
+                                        fn($item) => $item['name'] === $state
                                     );
 
                                 $set('state_code', $code);
@@ -120,7 +120,7 @@ class CompanyForm
                             ->label('IFSC')
                             ->maxLength(11)
                             ->live()
-                            ->afterStateUpdated(fn ($state, $set) => $set('ifsc', strtoupper($state))),
+                            ->afterStateUpdated(fn($state, $set) => $set('ifsc', strtoupper($state))),
 
                         TextInput::make('branch')
                             ->maxLength(100),
@@ -135,20 +135,32 @@ class CompanyForm
                             ->maxLength(20),
 
                         TextInput::make('challan_prefix')
+                            ->label('Tripsheet Prefix')
                             ->required()
                             ->default('CHL')
+                            ->maxLength(20),
+                        TextInput::make('voucher_prefix')
+                            ->label('Voucher Prefix')
+                            ->required()
+                            ->default('VCH')
                             ->maxLength(20),
 
                         TextInput::make('invoice_number_format')
                             ->helperText('Example: {PREFIX}/{FY}/{NUMBER}')
                             ->placeholder('{PREFIX}/{FY}/{NUMBER}')
                             ->maxLength(50),
+                        TextInput::make('voucher_number_format')
+                            ->helperText('Example: {PREFIX}/{FY}/{NUMBER}')
+                            ->placeholder('{PREFIX}/{FY}/{NUMBER}')
+                            ->maxLength(50),
 
                         TextInput::make('challan_number_format')
+                            ->label('Tripsheet Number Format')
                             ->helperText('Example: {PREFIX}/{FY}/{NUMBER}')
                             ->placeholder('{PREFIX}/{FY}/{NUMBER}')
                             ->maxLength(50),
                         TextInput::make('challan_sequence')
+                            ->label('Next Tripsheet Number')
                             ->numeric()
                             ->minValue(1)
                             ->helperText('Next challan number to be generated'),
@@ -156,6 +168,11 @@ class CompanyForm
                             ->numeric()
                             ->minValue(1)
                             ->helperText('Next invoice number to be generated'),
+                        TextInput::make('voucher_sequence')
+                            ->label('Next Voucher Number')
+                            ->numeric()
+                            ->minValue(1)
+                            ->helperText('Next voucher number to be generated'),
                     ])
                     ->columns(2),
 

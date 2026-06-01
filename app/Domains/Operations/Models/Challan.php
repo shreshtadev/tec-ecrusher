@@ -2,7 +2,9 @@
 
 namespace App\Domains\Operations\Models;
 
+use App\Domains\Common\Enums\DocOpts;
 use App\Domains\Common\Models\SModel;
+use App\Domains\Common\Services\DocumentNumberGenerator;
 use App\Domains\Master\Models\Company;
 use App\Domains\Master\Models\Driver;
 use App\Domains\Master\Models\Item;
@@ -16,6 +18,15 @@ class Challan extends SModel
 {
     protected static function booted(): void
     {
+        static::creating(function (self $challan) {
+            if (!$challan->challan_number) {
+                $challan->challan_number =
+                    DocumentNumberGenerator::generate(
+                        $challan->company,
+                        DocOpts::Challan
+                    );
+            }
+        });
         static::created(function (self $challan) {
             ChallanCreated::dispatch($challan);
         });

@@ -15,7 +15,8 @@ class InvoiceForm
         return $schema
             ->components([
                 TextInput::make('invoice_number')
-                    ->required(),
+                    ->hiddenOn('create')
+                    ->readOnly('edit'),
                 Select::make('company_id')
                     ->label('Companny')
                     ->relationship('company', 'name')

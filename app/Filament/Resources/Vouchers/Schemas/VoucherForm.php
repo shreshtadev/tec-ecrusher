@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Vouchers\Schemas;
 
+use App\Domains\Common\Enums\IndianStates;
 use App\Domains\Common\Enums\PaymentOpts;
 use App\Domains\Operations\Models\Invoice;
 use Filament\Forms\Components\DatePicker;
@@ -18,12 +19,13 @@ class VoucherForm
     {
         return $schema
             ->components([
+                Section::make('Basic Information')
+                    ->schema([TextInput::make('voucher_no')
+                        ->label('Voucher #')
+
+                        ->readonly('edit'),])->hiddenOn('create'),
                 Section::make('Voucher Details')
                     ->schema([
-                        TextInput::make('voucher_no')
-                            ->default(fn() => 'VCH-' . date('Ymd-His'))
-                            ->readonly()
-                            ->required(),
                         DatePicker::make('voucher_date')
                             ->default(now())
                             ->required(),
@@ -31,7 +33,7 @@ class VoucherForm
                             ->options(['Payment' => 'Payment (Out)', 'Receipt' => 'Receipt (In)'])
                             ->required()
                             ->native(false),
-                    ])->columns(3),
+                    ])->columns(2),
 
                 Section::make('Transaction')
                     ->schema([
@@ -39,7 +41,27 @@ class VoucherForm
                             ->relationship('party', 'full_name')
                             ->searchable()
                             ->preload()
-                            ->live() // Watch for changes to filter invoices
+                            ->live()
+                            ->createOptionForm([
+                                TextInput::make('full_name')
+                                    ->required(),
+                                Select::make('state')
+                                    ->options(IndianStates::selectStateOptions())
+                                    ->default('KA')
+                                    ->searchable()
+                                    ->native(false)
+                                    ->required(),
+                                TextInput::make('contact_number')->tel()->required(),
+                                Select::make('party_type')
+                                    ->options([
+                                        'Customer' => 'Customer',
+                                        'Supplier' => 'Supplier',
+                                        'Employee' => 'Employee',
+                                        'Other' => 'Other',
+                                    ])
+                                    ->required()
+                                    ->native(false),
+                            ])
                             ->required(),
 
                         // Adjustment logic: Filter invoices by the selected party
@@ -72,6 +94,6 @@ class VoucherForm
                     ])->columns(2),
 
                 Textarea::make('remarks')->columnSpanFull(),
-            ]);
+            ])->disabled('edit');
     }
 }

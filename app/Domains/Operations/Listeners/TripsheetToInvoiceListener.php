@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Domains\Accounting\Listeners;
+namespace App\Domains\Operations\Listeners;
 
 use App\Domains\Operations\Events\ChallanFinalized;
 use App\Domains\Operations\Models\Invoice;
 use App\Domains\Operations\Services\StockService;
 use Illuminate\Support\Facades\DB;
 
-class SyncInvoiceToLedger
+class TripsheetToInvoiceListener
 {
     public function __construct(private StockService $stockService) {}
 
@@ -16,17 +16,14 @@ class SyncInvoiceToLedger
         $challan = $event->challan;
 
         DB::transaction(function () use ($challan) {
-            // 1. Create the Invoice (The "Operations" part of the slice)
             $invoice = Invoice::create([
-                'invoice_number' => 'INV-'.str_pad($challan->id, 6, '0', STR_PAD_LEFT),
                 'party_id' => $challan->party_id,
                 'total_amount' => $challan->quantity_cft * $challan->item->price_per_unit,
-                'driver_bata' => 0,
+                'driver_bata' => $challan->driver_bata,
                 'payment_mode' => $challan->payment_mode ?? 'Credit',
                 'company_id' => $challan->company_id,
             ]);
 
-            // 2. Mark Challan as Invoiced
             $challan->update([
                 'invoice_id' => $invoice->id,
                 'status' => 'Invoiced',
