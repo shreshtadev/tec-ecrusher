@@ -115,7 +115,7 @@ class ChallansTable
                                 'record_ids' => $records->pluck('id'),
                             ]);
                             Notification::make()
-                                ->title($e->getMessage() ?: 'Error finalizing challans')
+                                ->title('Error finalizing challans.')
                                 ->danger()
                                 ->send();
                         }
