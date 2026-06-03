@@ -28551,6 +28551,13 @@ namespace App\Filament\Resources\Warehouses\Pages {
             }
     }
 
+namespace App\Filament\Pages {
+    /**
+     */
+    class PartyReport extends \Filament\Pages\Page {
+            }
+    }
+
 namespace Filament\Auth\Pages {
     /**
      * @property-read Action $registerAction

@@ -25,9 +25,9 @@ class Voucher extends SModel
 
     protected static function booted()
     {
-        static::created(function ($voucher) {
-            if (!$voucher->voucher_number) {
-                $voucher->voucher_number = DocumentNumberGenerator::generate(
+        static::creating(function ($voucher) {
+            if (!$voucher->voucher_no) {
+                $voucher->voucher_no = DocumentNumberGenerator::generate(
                     $voucher->invoice->company,
                     DocOpts::Voucher
                 );
@@ -36,9 +36,9 @@ class Voucher extends SModel
 
         static::saved(function ($voucher) {
             if ($voucher->voucher_type === 'Receipt') {
-                return PaymentCollected::dispatch($voucher);
+                PaymentCollected::dispatch($voucher);
             }
-            return PaymentMade::dispatch($voucher);
+            PaymentMade::dispatch($voucher);
         });
     }
 }

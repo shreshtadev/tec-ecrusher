@@ -14,7 +14,7 @@ class ChallansFinalized
     /**
      * Create a new event instance.
      */
-    public function __construct(public Collection $challans, public array $driverBatas = [])
+    public function __construct(public Collection $challans)
     {
         //
     }

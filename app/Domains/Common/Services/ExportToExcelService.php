@@ -26,6 +26,7 @@ class ExportToExcelService
         ?array $fields = null,
         string $sheetName = 'Sheet1',
         string $fileName = 'export.xlsx',
+        ?bool $isForTripSheet = false,
     ): StreamedResponse {
         $spreadsheet = new Spreadsheet();
 
@@ -114,7 +115,11 @@ class ExportToExcelService
                 }
 
                 if ($value instanceof \DateTimeInterface) {
-                    $value = $value->format('Y-m-d H:i:s');
+                    if ($isForTripSheet) {
+                        $value = $value->format('H:i');
+                    } else {
+                        $value = $value->format('Y-m-d H:i:s');
+                    }
                 }
 
                 if (is_array($value)) {

@@ -123,10 +123,21 @@ class ChallanForm
                             ->searchable()
                             ->live()
                             ->required()
-                            ->native(false),
+                            ->native(false)
+                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                $item = Item::find($state);
+
+                                if ($item) {
+                                    $set('rate_at_sale', $item->price_per_unit);
+
+                                    $quantity = $get('quantity_cft') ?? 0;
+                                    $set('amount', $item->price_per_unit * $quantity);
+                                }
+                            }),
 
                         TextInput::make('quantity_cft')
                             ->label('Quantity')
+                            ->live()
                             ->numeric()
                             ->required()
                             ->prefix(function (Get $get) {
@@ -137,8 +148,33 @@ class ChallanForm
                                 }
 
                                 return Item::find($itemId)?->unit;
-                            })->placeholder('Select an item first')
-                            ->readOnly(fn(Get $get) => blank($get('item_id'))),
+                            })
+                            ->placeholder('Select an item first')
+                            ->readOnly(fn(Get $get) => blank($get('item_id')))
+                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                $rate = $get('rate_at_sale') ?? 0;
+                                $set('amount', $rate * ($state ?? 0));
+                            }),
+
+                        TextInput::make('rate_at_sale')
+                            ->label('Rate at Sale')
+                            ->numeric()
+                            ->live()
+                            ->prefix('₹')
+                            ->required()
+                            ->readOnly(fn(Get $get) => blank($get('item_id')))
+                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                $quantity = $get('quantity_cft') ?? 0;
+                                $set('amount', ($state ?? 0) * $quantity);
+                            }),
+
+                        TextInput::make('amount')
+                            ->label('Amount')
+                            ->numeric()
+                            ->prefix('₹')
+                            ->required()
+                            ->readOnly()
+                            ->default(0),
                     ])->columns(2),
 
             ])->disabled(fn($record) => $record?->status === 'Invoiced');

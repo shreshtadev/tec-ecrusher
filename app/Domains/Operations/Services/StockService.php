@@ -51,7 +51,6 @@ class StockService
             ]);
 
             $stockLevel->increment('reserved_qty', $challan->quantity_cft);
-            $challan->company()->increment('invoice_sequence');
 
             return $reservation;
         });
@@ -622,7 +621,7 @@ class StockService
         }
     }
 
-    public function createFromChallans(Collection $challans, array $driverBatas): Invoice
+    public function createFromChallans(Collection $challans): Invoice
     {
         if ($challans->isEmpty()) {
             throw ValidationException::withMessages([
@@ -666,8 +665,7 @@ class StockService
     {
         return $challans->sum(function (Challan $challan) {
 
-            return $challan->quantity_cft
-                * $challan->item->price_per_unit;
+            return $challan->amount;
         });
     }
 

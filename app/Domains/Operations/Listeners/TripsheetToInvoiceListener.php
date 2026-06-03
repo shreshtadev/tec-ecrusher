@@ -18,9 +18,9 @@ class TripsheetToInvoiceListener
         DB::transaction(function () use ($challan) {
             $invoice = Invoice::create([
                 'party_id' => $challan->party_id,
-                'total_amount' => $challan->quantity_cft * $challan->item->price_per_unit,
+                'total_amount' => $challan->amount,
                 'driver_bata' => $challan->driver_bata,
-                'payment_mode' => $challan->payment_mode ?? 'Credit',
+                'payment_mode' => $challan->payment_mode,
                 'company_id' => $challan->company_id,
             ]);
 

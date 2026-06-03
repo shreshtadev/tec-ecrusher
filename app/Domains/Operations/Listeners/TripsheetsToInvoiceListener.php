@@ -11,8 +11,7 @@ class TripsheetsToInvoiceListener
     public function handle(ChallansFinalized $event)
     {
         $tripsheets = $event->challans;
-        $driverBatas = $event->driverBatas;
-        $invoice = $this->stockService->createFromChallans($tripsheets, $driverBatas);
+        $invoice = $this->stockService->createFromChallans($tripsheets);
 
         // Finalize the invoice after creation
         $this->stockService->finalize($invoice);

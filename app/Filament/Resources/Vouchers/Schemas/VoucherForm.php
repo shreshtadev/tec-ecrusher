@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Vouchers\Schemas;
 
+use App\Domains\Accounting\Models\Voucher;
 use App\Domains\Common\Enums\IndianStates;
 use App\Domains\Common\Enums\PaymentOpts;
 use App\Domains\Operations\Models\Invoice;
@@ -20,10 +21,11 @@ class VoucherForm
         return $schema
             ->components([
                 Section::make('Basic Information')
-                    ->schema([TextInput::make('voucher_no')
-                        ->label('Voucher #')
-
-                        ->readonly('edit'),])->hiddenOn('create'),
+                    ->schema([
+                        TextInput::make('voucher_no')
+                            ->label('Voucher #')
+                            ->readonly('edit'),
+                    ])->hiddenOn('create'),
                 Section::make('Voucher Details')
                     ->schema([
                         DatePicker::make('voucher_date')
@@ -80,12 +82,28 @@ class VoucherForm
                             ->prefix('₹')
                             ->helperText(function (Get $get) {
                                 $selectedInvoiceId = $get('reference_invoice_id');
-                                if ($selectedInvoiceId) {
-                                    $invoice = Invoice::find($selectedInvoiceId);
-                                    if ($invoice) {
-                                        return 'Invoice Amount: ₹' . number_format($invoice->total_amount, 2);
-                                    }
+
+                                if (! $selectedInvoiceId) {
+                                    return null;
                                 }
+
+                                $invoice = Invoice::find($selectedInvoiceId);
+
+                                if (! $invoice) {
+                                    return null;
+                                }
+
+                                $voucherTotal = Voucher::where('reference_invoice_id', $selectedInvoiceId)
+                                    ->sum('amount');
+
+                                $balance = $invoice->total_amount - $voucherTotal;
+
+                                return sprintf(
+                                    'Invoice Amount: ₹%s • Applied Vouchers: ₹%s • Balance: ₹%s',
+                                    number_format($invoice->total_amount, 2),
+                                    number_format($voucherTotal, 2),
+                                    number_format($balance, 2)
+                                );
                             })
                             ->required(),
 
@@ -94,6 +112,6 @@ class VoucherForm
                     ])->columns(2),
 
                 Textarea::make('remarks')->columnSpanFull(),
-            ])->disabled('edit');
+            ]);
     }
 }

@@ -48,7 +48,8 @@ class ListChallans extends ListRecords
                             $items,
                             TripsheetColumnDef::columns(),
                             'Tripsheets - Day',
-                            'tripsheets-day-' . Carbon::now()->format('Y-m-d') . '.xlsx'
+                            'tripsheets-day-' . Carbon::now()->format('Y-m-d') . '.xlsx',
+                            true
                         );
                     }),
 
@@ -74,7 +75,8 @@ class ListChallans extends ListRecords
                             $items,
                             TripsheetColumnDef::columns(),
                             'Tripsheets - Week',
-                            'tripsheets-week-' . Carbon::now()->format('Y-m-d') . '.xlsx'
+                            'tripsheets-week-' . Carbon::now()->format('Y-m-d') . '.xlsx',
+                            true
                         );
                     }),
                 Action::make('export_custom')
@@ -116,10 +118,11 @@ class ListChallans extends ListRecords
                                 'tripsheets-%s-to-%s.xlsx',
                                 $start->format('Y-m-d'),
                                 $end->format('Y-m-d')
-                            )
+                            ),
+                            true
                         );
                     })
-            ]),
+            ])->icon('heroicon-o-printer'),
         ];
     }
 }
