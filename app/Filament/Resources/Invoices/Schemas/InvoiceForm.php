@@ -28,7 +28,7 @@ class InvoiceForm
                 Select::make('party_id')
                     ->label('Party')
                     ->required()
-                    ->options(fn() => Party::pluck('full_name', 'id')->toArray()),
+                    ->options(fn() => Party::pluck('full_name', 'id')->toArray())->native(false),
                 TextInput::make('total_amount')
                     ->prefix('₹')
                     ->required()
@@ -41,7 +41,8 @@ class InvoiceForm
                 Select::make('payment_mode')
                     ->required()
                     ->default('Credit')
-                    ->options(PaymentOpts::options()),
+                    ->options(PaymentOpts::options())
+                    ->native(false),
             ]);
     }
 }

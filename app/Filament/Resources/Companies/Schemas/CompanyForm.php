@@ -148,31 +148,32 @@ class CompanyForm
                         TextInput::make('invoice_number_format')
                             ->helperText('Example: {PREFIX}/{FY}/{NUMBER}')
                             ->placeholder('{PREFIX}/{FY}/{NUMBER}')
+                            ->hidden()
                             ->maxLength(50),
                         TextInput::make('voucher_number_format')
                             ->helperText('Example: {PREFIX}/{FY}/{NUMBER}')
                             ->placeholder('{PREFIX}/{FY}/{NUMBER}')
+                            ->hidden()
                             ->maxLength(50),
 
                         TextInput::make('challan_number_format')
                             ->label('Tripsheet Number Format')
                             ->helperText('Example: {PREFIX}/{FY}/{NUMBER}')
                             ->placeholder('{PREFIX}/{FY}/{NUMBER}')
+                            ->hidden()
                             ->maxLength(50),
                         TextInput::make('challan_sequence')
-                            ->label('Next Tripsheet Number')
+                            ->label('Current Tripsheet Number')
                             ->numeric()
-                            ->minValue(1)
-                            ->helperText('Next challan number to be generated'),
+                            ->minValue(1),
                         TextInput::make('invoice_sequence')
+                            ->label('Current Invoice Number')
                             ->numeric()
-                            ->minValue(1)
-                            ->helperText('Next invoice number to be generated'),
+                            ->minValue(1),
                         TextInput::make('voucher_sequence')
-                            ->label('Next Voucher Number')
+                            ->label('Current Voucher Number')
                             ->numeric()
-                            ->minValue(1)
-                            ->helperText('Next voucher number to be generated'),
+                            ->minValue(1),
                     ])
                     ->columns(2),
 
