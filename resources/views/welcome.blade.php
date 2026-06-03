@@ -49,7 +49,8 @@
     <header
         class="w-full text-sm sticky top-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b border-[#19140015] dark:border-[#3E3E3A]">
         <div class="flex items-center justify-between gap-4 px-6 lg:px-8 py-4 max-w-6xl mx-auto w-full">
-            <div class="text-lg font-semibold dark:text-[#EDEDEC]">SS Crusher</div>
+            <div class="text-lg font-semibold dark:text-[#EDEDEC]"><img src="/images/SSC_LOGO.svg" alt="TechSathya"
+                    class="h-10 inline">Shruthi Stone Crusher</div>
             @if (Route::has('login'))
                 <nav class="flex items-center justify-end gap-4">
                     @auth
@@ -76,7 +77,9 @@
         <!-- Hero Section with Video Background -->
         <section class="w-full max-w-6xl mb-16">
             <div class="relative rounded-2xl overflow-hidden mb-12 h-96 lg:h-125 bg-zinc-900 dark:bg-zinc-950">
-                <video class="absolute inset-0 w-full h-full object-cover" autoplay muted playsinline>
+                <video id="loopingVideo"
+                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out opacity-100"
+                    autoplay muted playsinline>
                     <source src="/images/shruthistonecrusher.mp4" type="video/mp4">
                 </video>
                 <div class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"></div>
@@ -175,7 +178,9 @@
         <div class="max-w-6xl mx-auto px-6 lg:px-8">
             <p class="text-center">
                 © {{ now()->format('Y') }} <a href="https://techsathya.in"
-                    class="text-blue-600 dark:text-blue-400 hover:underline">TechSathya</a>. All rights reserved.
+                    class="text-blue-600 dark:text-blue-400 hover:underline"><img
+                        src="/images/logos/Tech_SathyA_Logo.svg" alt="TechSathya" class="h-10 inline">TechSathyA</a>.
+                All rights reserved.
                 Powered
                 by <a href="https://shreshtasmg.in" class="text-blue-600 dark:text-blue-400 hover:underline">Shreshta
                     SMG</a>.
@@ -183,5 +188,41 @@
         </div>
     </footer>
 </body>
+<script>
+    const video = document.getElementById('loopingVideo');
+    let playCount = 0;
+    const maxPlays = 1;
+
+    video.addEventListener('timeupdate', function() {
+        // 1 second before the video ends, start easing out
+        const fadePoint = video.duration - 1;
+
+        if (video.currentTime >= fadePoint && !video.classList.contains('opacity-0')) {
+            video.classList.remove('opacity-100');
+            video.classList.add('opacity-0');
+        }
+    });
+
+    video.addEventListener('ended', function() {
+        playCount++;
+
+        if (playCount >= maxPlays) {
+            video.pause();
+            video.currentTime = 0; // Reset to the first frame
+
+            // Bring back opacity so the first frame is visible
+            video.classList.remove('opacity-0');
+            video.classList.add('opacity-100');
+            return;
+        }
+
+        video.currentTime = 0;
+        video.play();
+
+        // Ease the video back in for the next loop
+        video.classList.remove('opacity-0');
+        video.classList.add('opacity-100');
+    });
+</script>
 
 </html>

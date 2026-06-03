@@ -67,7 +67,7 @@
                 &copy; {{ now()->format('Y') }}
                 <a href="https://techsathya.in" target="_blank" rel="noopener noreferrer"
                     class="custom-filament-footer-link">
-                    techsathya.in
+                    <img src="/images/logos/Tech_SathyA_Logo.svg" alt="TechSathya" class="h-10 inline">TechSathyA
                 </a>. All rights reserved.
             </p>
             <p>
