@@ -11,6 +11,7 @@ use App\Domains\Common\Services\ExportToExcelService;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use App\Domains\Common\Enums\TripsheetColumnDef;
+use App\Domains\Master\Models\StockLevel;
 use Filament\Notifications\Notification;
 
 class ListChallans extends ListRecords
@@ -20,10 +21,28 @@ class ListChallans extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()->failureNotification(Notification::make()
-                ->danger()
-                ->title('Tripsheet/Stock Error')
-                ->body('We could not save your submission. Please check inventory.'),),
+            CreateAction::make()
+                ->failureNotification(Notification::make()
+                    ->danger()
+                    ->title('Tripsheet/Stock Error')
+                    ->body('We could not save your submission. Please check inventory.'),)->before(function (Action $action) {
+                    $data = $action->getLivewire()->form->getState();
+
+                    $itemId = $data['item_id'] ?? null;
+                    $quantity = $data['quantity_cft'] ?? null;
+
+                    if ($itemId && $quantity) {
+                        $availableStock = StockLevel::where('item_id', $itemId)->pluck('available_qty')->first();
+
+                        if ($quantity > $availableStock) {
+                            return false; // Prevent form submission
+                        }
+                    }
+
+                    return true; // Allow form submission
+                })->visible(
+                    fn() => StockLevel::where('available_qty', '>', 0)->exists()
+                ),
             ActionGroup::make([
                 Action::make('export_by_day')
                     ->label('Tripsheet - Today')

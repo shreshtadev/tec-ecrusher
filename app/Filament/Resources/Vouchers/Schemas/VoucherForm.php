@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Vouchers\Schemas;
 use App\Domains\Accounting\Models\Voucher;
 use App\Domains\Common\Enums\IndianStates;
 use App\Domains\Common\Enums\PaymentOpts;
+use App\Domains\Common\Enums\VoucherOpts;
+use App\Domains\Master\Models\Company;
 use App\Domains\Operations\Models\Invoice;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -32,9 +34,30 @@ class VoucherForm
                             ->default(now())
                             ->required(),
                         Select::make('voucher_type')
-                            ->options(['Payment' => 'Payment (Out)', 'Receipt' => 'Receipt (In)'])
+                            ->options(function () {
+                                $opts = VoucherOpts::options();
+
+                                foreach ($opts as $key => $label) {
+                                    if ($key === VoucherOpts::PAYMENT) {
+                                        $opts[$key] = 'Payment (Out)';
+                                    } elseif ($key === VoucherOpts::RECEIPT) {
+                                        $opts[$key] = 'Receipt (In)';
+                                    } else {
+                                        $opts[$key] = $label;
+                                    }
+                                }
+
+                                return $opts;
+                            })
                             ->required()
                             ->native(false),
+                        Select::make('company_id')
+                            ->relationship('company', 'name')
+                            ->default(fn() => Company::query()->value('id'))
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->required(),
                     ])->columns(2),
 
                 Section::make('Transaction')
