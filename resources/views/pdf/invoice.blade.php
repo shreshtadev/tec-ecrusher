@@ -41,6 +41,16 @@
         <table>
             <tr>
                 <td class="center no-border">
+                    @if ($record->company->logo)
+                        @php
+                            $logoPath = ltrim($record->company->logo, '/');
+                            $logoPath = Storage::disk('local')->path($logoPath);
+                        @endphp
+
+                        <img src="{{ $logoPath }}" alt="{{ $record->company->name }} Logo"
+                            style="max-height: 80px; max-width: 180px; display: block; margin: 0 auto 10px;" />
+                    @endif
+
                     <div class="heading">{{ $record->company->name }}</div>
                     <div>{{ $record->company->address }}</div>
                     <div>GSTIN: {{ $record->company->gstin ?? 'N/A' }}</div>
