@@ -163,9 +163,4 @@ class PartyReport extends Page implements HasSchemas
             'item_sales' => $itemWiseSales,
         ];
     }
-
-    public static function canAccess(): bool
-    {
-        return auth()->user()->can('view_party_report');
-    }
 }
