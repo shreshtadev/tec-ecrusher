@@ -49,8 +49,8 @@
     <header
         class="w-full text-sm sticky top-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b border-[#19140015] dark:border-[#3E3E3A]">
         <div class="flex items-center justify-between gap-4 px-6 lg:px-8 py-4 max-w-6xl mx-auto w-full">
-            <div class="text-lg font-semibold dark:text-[#EDEDEC]"><img src="/images/SSC_LOGO.svg" alt="TechSathya"
-                    class="h-10 inline">Shruthi Stone Crusher</div>
+            <div class="text-lg font-semibold dark:text-[#EDEDEC]"><img src="/images/logos/SSC_LOGO.svg"
+                    alt="TechSathya - SSC" class="h-10 inline">Shruthi Stone Crusher</div>
             @if (Route::has('login'))
                 <nav class="flex items-center justify-end gap-4">
                     @auth
