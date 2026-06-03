@@ -7,6 +7,7 @@ use App\Domains\Master\Models\Party;
 use App\Domains\Operations\Models\Challan;
 use App\Domains\Operations\Models\Invoice;
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -19,7 +20,7 @@ use UnitEnum;
 
 class PartyReport extends Page implements HasSchemas
 {
-    use InteractsWithSchemas;
+    use InteractsWithSchemas, HasPageShield;
     protected string $view = 'filament.pages.party-report';
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::Reports;
@@ -161,5 +162,10 @@ class PartyReport extends Page implements HasSchemas
             'largest_invoice' => (clone $baseQuery)->max('total_amount'),
             'item_sales' => $itemWiseSales,
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('view_party_report');
     }
 }
