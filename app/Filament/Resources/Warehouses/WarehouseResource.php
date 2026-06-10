@@ -2,14 +2,14 @@
 
 namespace App\Filament\Resources\Warehouses;
 
-use App\Domains\Common\Enums\NavigGroup;
-use App\Domains\Master\Models\Warehouse;
-use App\Domains\Operations\Services\StockService;
+use App\Enums\NavigGroup;
 use App\Filament\Resources\Warehouses\Pages\CreateWarehouse;
 use App\Filament\Resources\Warehouses\Pages\EditWarehouse;
 use App\Filament\Resources\Warehouses\Pages\ListWarehouses;
 use App\Filament\Resources\Warehouses\Schemas\WarehouseForm;
 use App\Filament\Resources\Warehouses\Tables\WarehousesTable;
+use App\Models\Warehouse;
+use App\Services\StockService;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

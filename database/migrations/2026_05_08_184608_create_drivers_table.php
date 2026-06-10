@@ -1,6 +1,6 @@
 <?php
 
-use App\Domains\Master\Models\Party;
+use App\Models\Party;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,9 +14,9 @@ return new class extends Migration
     {
         Schema::create('drivers', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Party::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Party::class)->constrained()->onDelete('cascade')->nullable();
             $table->string('full_name', 120);
-            $table->string('phone_number', 20)->nullable();
+            $table->string('phone_number', 20);
             $table->timestamps();
         });
     }

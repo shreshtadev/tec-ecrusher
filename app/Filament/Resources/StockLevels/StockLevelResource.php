@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\StockLevels;
 
-use App\Domains\Common\Enums\NavigGroup;
-use App\Domains\Master\Models\StockLevel;
+use App\Enums\NavigGroup;
 use App\Filament\Resources\StockLevels\Pages\ListStockLevels;
 use App\Filament\Resources\StockLevels\Tables\StockLevelsTable;
+use App\Models\StockLevel;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;

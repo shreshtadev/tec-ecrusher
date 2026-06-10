@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\StockMovements\Schemas;
 
-use App\Domains\Master\Models\Item;
-use App\Domains\Master\Models\Warehouse;
-use App\Domains\Operations\Services\StockService;
+use App\Models\Item;
+use App\Models\Warehouse;
+use App\Services\StockService;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 

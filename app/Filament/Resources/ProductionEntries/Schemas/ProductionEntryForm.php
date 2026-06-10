@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\ProductionEntries\Schemas;
 
-use App\Domains\Master\Models\Item;
-use App\Domains\Master\Models\Warehouse;
+use App\Models\Item;
+use App\Models\Warehouse;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -16,8 +16,7 @@ class ProductionEntryForm
     {
         return $schema
             ->components([
-                DatePicker::make('production_entry_date')
-                    ->required(),
+                DatePicker::make('production_entry_date'),
                 Select::make('item_id')
                     ->label('Item')
                     ->required()
@@ -39,7 +38,7 @@ class ProductionEntryForm
                     ->required()
                     ->options(function () {
                         return Warehouse::pluck('name', 'id');
-                    })->native(false),
+                    })->native(false)->default(fn (Select $component): string => array_key_first($component->getOptions())),
                 TextInput::make('quantity')
                     ->label(function (Get $get) {
                         $itemId = $get('item_id');
@@ -55,7 +54,12 @@ class ProductionEntryForm
                     ->required()
                     ->numeric(),
                 TextInput::make('batch_no')
-                    ->prefix('BTH-')->formatStateUsing(fn (?string $state): string => $state ? "BTH-{$state}" : ''),
+                    ->prefix('BTH-')
+                    ->formatStateUsing(
+                        fn (?string $state): string => ($state && ! str_starts_with($state, 'BTH-'))
+                            ? "BTH-{$state}"
+                            : ($state ?? '')
+                    ),
             ]);
     }
 }

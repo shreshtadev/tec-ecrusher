@@ -1,13 +1,13 @@
 <?php
 
-use App\Domains\Shared\Controllers\PrintController;
+use App\Http\Controllers\PrintController;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 Route::redirect('/login', '/admin/login', 301)->name('admin.login');
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::redirect("/dashboard", "/admin")->name('admin.dashboard');
+    Route::redirect('/dashboard', '/admin')->name('admin.dashboard');
     Route::get('/admin/logout', function () {
         // Log out the current user for the active Filament panel
         Filament::auth()->logout();

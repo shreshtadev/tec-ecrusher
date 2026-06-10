@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Invoices\Tables;
 
-use App\Domains\Operations\Models\Invoice;
+use App\Models\Invoice;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;

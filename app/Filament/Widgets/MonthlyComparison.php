@@ -2,8 +2,9 @@
 
 namespace App\Filament\Widgets;
 
-use App\Domains\Accounting\Models\Voucher;
-use App\Domains\Operations\Models\Invoice;
+use App\Enums\VoucherOpts;
+use App\Models\Invoice;
+use App\Models\Voucher;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
 
@@ -13,7 +14,7 @@ class MonthlyComparison extends ChartWidget
 
     protected function getData(): array
     {
-        $months = collect(range(1, 12))->map(fn ($month) => Carbon::create(null, $month, 1)->format('M'));
+        $months = collect(range(1, 12))->map(fn($month) => Carbon::create(null, $month, 1)->format('M'));
         $sales = Invoice::selectRaw('MONTH(created_at) as month, SUM(total_amount) as total')
             ->whereYear('created_at', date('Y'))
             ->groupBy('month')
@@ -22,15 +23,15 @@ class MonthlyComparison extends ChartWidget
 
         // Query Collections - Changed strftime to MONTH and fixed column names
         $collections = Voucher::selectRaw('MONTH(voucher_date) as month, SUM(amount) as total')
-            ->where('voucher_type', 'Receipt')
+            ->where('voucher_type', VoucherOpts::RECEIPT)
             ->whereYear('voucher_date', date('Y'))
             ->groupBy('month')
             ->pluck('total', 'month')
             ->all();
 
         // Map data (The key needs to be the integer month if using MONTH())
-        $salesData = collect(range(1, 12))->map(fn ($m) => $sales[$m] ?? 0);
-        $collectionData = collect(range(1, 12))->map(fn ($m) => $collections[$m] ?? 0);
+        $salesData = collect(range(1, 12))->map(fn($m) => $sales[$m] ?? 0);
+        $collectionData = collect(range(1, 12))->map(fn($m) => $collections[$m] ?? 0);
 
         return [
             'datasets' => [

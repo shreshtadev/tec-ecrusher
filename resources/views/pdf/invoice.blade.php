@@ -1,249 +1,493 @@
-    <style>
-        body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 12px;
-        }
+<style>
+    @page {
+        size: A4 landscape;
+        margin: 10mm;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+    * {
+        box-sizing: border-box;
+    }
 
-        th,
-        td {
-            border: 1px solid #000;
-            padding: 5px;
-        }
+    body {
+        font-family: DejaVu Sans, sans-serif;
+        font-size: 11px;
+        color: #2c2c2c;
+        margin: 0;
+    }
 
-        .no-border {
-            border: none !important;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        .center {
-            text-align: center;
-        }
+    .text-right {
+        text-align: right;
+    }
 
-        .right {
-            text-align: right;
-        }
+    .text-center {
+        text-align: center;
+    }
 
-        .heading {
-            font-size: 18px;
-            font-weight: bold;
-        }
+    .text-bold {
+        font-weight: bold;
+    }
 
-        .sub-heading {
-            font-size: 14px;
-            font-weight: bold;
-        }
-    </style>
-    <div style="font-family: DejaVu Sans, Arial, sans-serif;">
-        <table>
-            <tr>
-                <td class="center no-border">
-                    @if ($record->company->logo)
-                        @php
-                            $logoPath = ltrim($record->company->logo, '/');
-                            $logoPath = Storage::disk('local')->path($logoPath);
-                        @endphp
+    .border {
+        border: 1px solid #bdbdbd;
+    }
 
-                        <img src="{{ $logoPath }}" alt="{{ $record->company->name }} Logo"
-                            style="max-height: 80px; max-width: 180px; display: block; margin: 0 auto 10px;" />
-                    @endif
+    .section-header {
+        background: #f4f4f4;
+        font-weight: bold;
+        padding: 8px;
+        border-bottom: 1px solid #bdbdbd;
+    }
 
-                    <div class="heading">{{ $record->company->name }}</div>
-                    <div>{{ $record->company->address }}</div>
-                    <div>GSTIN: {{ $record->company->gstin ?? 'N/A' }}</div>
-                    <div>Phone: {{ $record->company->phone ?? 'N/A' }}</div>
-                </td>
-            </tr>
-        </table>
+    .company-header {
+        border-bottom: 3px solid #2f2f2f;
+        padding-bottom: 10px;
+        margin-bottom: 12px;
+    }
 
-        <h2 class="center">INVOICE</h2>
+    .company-name {
+        font-size: 24px;
+        font-weight: bold;
+        letter-spacing: .5px;
+        margin-bottom: 4px;
+    }
 
-        {{-- INVOICE DETAILS --}}
-        <table>
-            <tr>
-                <td>
-                    <strong>Invoice No:</strong>
-                    {{ $record->invoice_number }}
-                </td>
+    .company-details {
+        font-size: 10px;
+        line-height: 1.5;
+    }
 
-                <td>
-                    <strong>Date:</strong>
-                    {{ $record->created_at->format('d-m-Y') }}
-                </td>
-            </tr>
+    .invoice-banner {
+        margin-top: 10px;
+        margin-bottom: 12px;
+        border: 2px solid #333;
+        padding: 8px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
 
-            <tr>
-                <td>
-                    <strong>Payment Mode:</strong>
-                    {{ $record->payment_mode }}
-                </td>
+    .info-table td {
+        border: 1px solid #cfcfcf;
+        padding: 8px;
+        vertical-align: top;
+    }
 
-                <td>
-                    <strong>Total Challans:</strong>
-                    {{ $record->challans->count() }}
-                </td>
-            </tr>
-        </table>
+    .bill-title {
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 6px;
+    }
 
-        <br>
+    .items-table {
+        margin-top: 15px;
+    }
 
-        {{-- CUSTOMER DETAILS --}}
-        <table>
-            <tr>
-                <td>
-                    <strong>Bill To</strong><br>
+    .items-table thead th {
+        background: #efefef;
+        border: 1px solid #999;
+        padding: 8px;
+        font-size: 11px;
+        font-weight: bold;
+    }
 
-                    {{ $record->party->full_name }}<br>
+    .items-table tbody td {
+        border: 1px solid #cfcfcf;
+        padding: 7px;
+    }
 
-                    {{ $record->party->address_line_1 ?? '' }}<br>
+    .challan-row {
+        background: #fafafa;
+        font-weight: bold;
+    }
+
+    .summary-wrapper {
+        margin-top: 12px;
+    }
+
+    .summary-table {
+        width: 38%;
+        margin-left: auto;
+    }
+
+    .summary-table td {
+        border: 1px solid #cfcfcf;
+        padding: 8px;
+    }
+
+    .grand-total {
+        background: #f2f2f2;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .amount-words {
+        margin-top: 14px;
+        border: 1px solid #cfcfcf;
+        padding: 10px;
+    }
+
+    .reference-box {
+        margin-top: 10px;
+        border: 1px solid #cfcfcf;
+        padding: 10px;
+    }
+
+    .signature-section {
+        margin-top: 45px;
+    }
+
+    .signature-table td {
+        border: none;
+        vertical-align: bottom;
+    }
+
+    .signature-line {
+        margin-top: 50px;
+        border-top: 1px solid #444;
+        width: 220px;
+        padding-top: 4px;
+    }
+
+    .footer-note {
+        margin-top: 20px;
+        font-size: 9px;
+        text-align: center;
+        color: #666;
+    }
+</style>
+
+<div>
+
+    {{-- COMPANY HEADER --}}
+    <table class="company-header">
+        <tr>
+
+            {{-- Left: Logo --}}
+            <td style="width:20%; border:none; vertical-align:middle;">
+
+                @if ($record->company->logo)
+                    @php
+                        $logoPath = ltrim($record->company->logo, '/');
+                        $logoPath = Storage::disk('local')->path($logoPath);
+                    @endphp
+
+                    <img src="{{ $logoPath }}" alt="{{ $record->company->name }}"
+                        style="max-height:90px; max-width:180px;">
+                @endif
+
+            </td>
+
+            {{-- Center: Company Details --}}
+            <td style="width:60%; border:none; text-align:center; vertical-align:middle;">
+
+                <div class="company-name">
+                    {{ strtoupper($record->company->name) }}
+                </div>
+
+                <div class="company-details">
+                    {{ $record->company->address }}
+                    <br>
 
                     GSTIN:
-                    {{ $record->party->gst_number ?? 'N/A' }}<br>
+                    {{ $record->company->gstin ?? 'N/A' }}
 
-                    Mobile:
-                    {{ $record->party->contact_number ?? 'N/A' }}
-                </td>
-            </tr>
-        </table>
+                    &nbsp;&nbsp;|&nbsp;&nbsp;
 
-        <br>
+                    Phone:
+                    {{ $record->company->phone ?? 'N/A' }}
+                </div>
 
-        {{-- MATERIAL DETAILS --}}
-        <table>
-            <thead>
-                <tr>
-                    <th>Sl</th>
-                    <th>Challan No</th>
-                    <th>Date</th>
-                    <th>Material</th>
-                    <th>Vehicle</th>
-                    <th>Driver</th>
-                    <th>Quantity</th>
-                </tr>
-            </thead>
+            </td>
 
-            <tbody>
+            {{-- Right: Empty spacer --}}
+            <td style="width:20%; border:none;">
+                &nbsp;
+            </td>
 
-                @foreach ($record->challans as $index => $challan)
+        </tr>
+    </table>
+
+    {{-- TITLE --}}
+    <div class="invoice-banner">
+        INVOICE
+    </div>
+
+    {{-- CUSTOMER + INVOICE DETAILS --}}
+    <table class="info-table">
+
+        <tr>
+
+            <td width="55%">
+
+                <div class="bill-title">
+                    BILL TO
+                </div>
+
+                <strong>
+                    {{ $record->party->full_name }}
+                </strong>
+
+                <br>
+
+                {{ $record->party->address_line_1 }}
+
+                <br>
+
+                GSTIN:
+                {{ $record->party->gst_number ?? 'N/A' }}
+
+                <br>
+
+                Mobile:
+                {{ $record->party->contact_number ?? 'N/A' }}
+
+            </td>
+
+            <td width="45%">
+
+                <table>
+
                     <tr>
-                        <td>{{ $index + 1 }}</td>
-
-                        <td>{{ $challan->challan_number }}</td>
-
-                        <td>{{ $challan->created_at->format('d-m-Y') }}</td>
-
-                        <td>{{ $challan->item->material_name ?? '' }}</td>
-
-                        <td>{{ $challan->vehicle->vehicle_number ?? '' }}</td>
-
-                        <td>{{ $challan->driver->driver_name ?? '' }}</td>
-
-                        <td class="right">
-                            {{ number_format($challan->quantity_cft, 2) }}
-                            {{ $challan->item->unit ?? 'CFT' }}
+                        <td width="45%">
+                            <strong>Invoice Number</strong>
                         </td>
+
+                        <td>
+                            {{ $record->invoice_number }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <strong>Invoice Date</strong>
+                        </td>
+
+                        <td>
+                            {{ $record->created_at->format('d-m-Y') }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <strong>Payment Mode</strong>
+                        </td>
+
+                        <td>
+                            {{ $record->payment_mode }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <strong>Total Challans</strong>
+                        </td>
+
+                        <td>
+                            {{ $record->challans->count() }}
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+
+        </tr>
+
+    </table>
+
+    {{-- ITEMS --}}
+    <table class="items-table">
+
+        <thead>
+
+            <tr>
+                <th width="4%">#</th>
+                <th width="10%">Challan No</th>
+                <th width="8%">Date</th>
+                <th width="22%">Material</th>
+                <th width="10%">Vehicle</th>
+                <th width="12%">Driver</th>
+                <th width="10%">Quantity</th>
+                <th width="10%">Rate</th>
+                <th width="14%">Amount</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            @php
+                $rowNo = 1;
+                $totalQty = 0;
+            @endphp
+
+            @foreach ($record->challans as $challan)
+                @php
+                    $challanTotal = $challan->challan_items->sum('amount');
+                @endphp
+
+                @foreach ($challan->challan_items as $item)
+                    @php
+                        $totalQty += $item->quantity_cft;
+                    @endphp
+
+                    <tr>
+
+                        <td class="text-center">
+                            {{ $rowNo++ }}
+                        </td>
+
+                        <td>
+                            {{ $challan->challan_number }}
+                        </td>
+
+                        <td>
+                            {{ $challan->created_at->format('d-m-Y') }}
+                        </td>
+
+                        <td>
+                            {{ $item->item->material_name }}
+                        </td>
+
+                        <td>
+                            {{ $challan->vehicle->vehicle_number ?? '-' }}
+                        </td>
+
+                        <td>
+                            {{ $challan->driver->driver_name ?? '-' }}
+                        </td>
+
+                        <td class="text-right">
+                            {{ number_format($item->quantity_cft, 2) }}
+                        </td>
+
+                        <td class="text-right">
+                            ₹{{ number_format($item->rate_at_sale, 2) }}
+                        </td>
+
+                        <td class="text-right">
+                            ₹{{ number_format($item->amount, 2) }}
+                        </td>
+
                     </tr>
                 @endforeach
 
-            </tbody>
-        </table>
+                <tr class="challan-row">
 
-        <br>
+                    <td colspan="8" class="text-right">
+                        Challan Total :
+                    </td>
 
-        {{-- SUMMARY --}}
-        <table>
-            <tr>
-                <td width="70%">
+                    <td class="text-right">
+                        ₹{{ number_format($challanTotal, 2) }}
+                    </td>
 
-                    <strong>Challan References:</strong><br>
+                </tr>
+            @endforeach
 
-                    {{ $record->challans->pluck('challan_number')->implode(', ') }}
+        </tbody>
 
-                </td>
+    </table>
 
-                <td>
+    {{-- TOTALS --}}
+    <table style="width:100%; margin-top:12px; border-collapse:collapse;">
+        <tr>
 
-                    <table>
-                        <tr>
-                            <td>Total Quantity</td>
-                            <td class="right">
-                                {{ number_format($record->challans->sum('quantity_cft'), 2) }}
-                            </td>
-                        </tr>
+            {{-- LEFT SIDE --}}
+            <td style="width:60%; vertical-align:top; padding-right:10px;">
 
-                        <tr>
-                            <td>Driver Bata</td>
-                            <td class="right">
-                                ₹{{ number_format($record->driver_bata, 2) }}
-                            </td>
-                        </tr>
+                <div class="amount-words">
+                    <strong>Amount in Words :</strong><br>
 
-                        <tr>
-                            <td>Taxable Value</td>
-                            <td class="right">
-                                ₹{{ number_format($record->total_amount, 2) }}
-                            </td>
-                        </tr>
-
-                        {{-- Future GST Support --}}
-                        <tr>
-                            <td>CGST</td>
-                            <td class="right">₹0.00</td>
-                        </tr>
-
-                        <tr>
-                            <td>SGST</td>
-                            <td class="right">₹0.00</td>
-                        </tr>
-
-                        <tr>
-                            <td><strong>Grand Total</strong></td>
-                            <td class="right">
-                                <strong>
-                                    ₹{{ number_format($record->total_amount, 2) }}
-                                </strong>
-                            </td>
-                        </tr>
-
-                    </table>
-
-                </td>
-            </tr>
-        </table>
-
-        <br>
-
-        {{-- AMOUNT IN WORDS --}}
-        <table>
-            <tr>
-                <td>
-                    <strong>Amount in Words:</strong>
-
-                    {{ \NumberFormatter::create('en_IN', \NumberFormatter::SPELLOUT)->format($record->total_amount) }}
+                    {{ ucfirst(\NumberFormatter::create('en_IN', \NumberFormatter::SPELLOUT)->format($record->total_amount)) }}
                     Rupees Only
-                </td>
-            </tr>
-        </table>
+                </div>
 
-        <br><br>
+            </td>
 
-        {{-- FOOTER --}}
-        <table>
-            <tr>
-                <td width="50%">
-                    Customer Signature
-                </td>
+            {{-- RIGHT SIDE --}}
+            <td style="width:40%; vertical-align:top;">
 
-                <td width="50%" class="right">
-                    For {{ $record->company->name }}
+                <table class="summary-table" style="width:100%; margin-left:0;">
 
-                    <br><br><br>
+                    <tr>
+                        <td>Total Quantity</td>
+                        <td class="text-right">
+                            {{ number_format($totalQty, 2) }}
+                        </td>
+                    </tr>
 
-                    Authorized Signatory
-                </td>
-            </tr>
-        </table>
+                    <tr>
+                        <td>Driver Bata</td>
+                        <td class="text-right">
+                            ₹{{ number_format($record->driver_bata, 2) }}
+                        </td>
+                    </tr>
+
+                    <tr class="grand-total">
+                        <td>Grand Total</td>
+                        <td class="text-right">
+                            ₹{{ number_format($record->total_amount, 2) }}
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+
+        </tr>
+    </table>
+
+    {{-- CHALLAN REFERENCES --}}
+    <div class="reference-box">
+
+        <strong>Challan References :</strong>
+
+        <span>{{ $record->challans->pluck('challan_number')->implode(', ') }}</span>
+
     </div>
+
+    {{-- SIGNATURES --}}
+    <div class="signature-section">
+
+        <table class="signature-table">
+
+            <tr>
+
+                <td width="50%">
+
+                    <div class="signature-line">
+                        Customer Signature
+                    </div>
+
+                </td>
+
+                <td width="50%" align="right">
+
+                    <div class="signature-line" style="margin-left:auto;">
+                        Authorized Signatory
+                    </div>
+
+                    <div style="margin-top:6px;">
+                        For {{ $record->company->name }}
+                    </div>
+
+                </td>
+
+            </tr>
+
+        </table>
+
+    </div>
+
+    <div class="footer-note">
+        This is a computer-generated invoice and does not require a physical signature.
+    </div>
+
+</div>

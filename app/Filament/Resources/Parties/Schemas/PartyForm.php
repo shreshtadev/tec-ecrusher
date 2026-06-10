@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Parties\Schemas;
 
-use App\Domains\Common\Enums\IndianStates;
+use App\Enums\IndianStates;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;

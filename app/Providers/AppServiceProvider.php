@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
-use App\Domains\Operations\Models\ProductionEntry;
-use App\Domains\Operations\Observers\ProductionEntryObserver;
+use App\Models\InvoiceItem;
+use App\Models\ProductionEntry;
+use App\Observers\InvoiceItemObserver;
+use App\Observers\ProductionEntryObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         ProductionEntry::observe(ProductionEntryObserver::class);
+        InvoiceItem::observe(InvoiceItemObserver::class);
     }
 
     /**

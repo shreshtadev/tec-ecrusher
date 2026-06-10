@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\StockMovements;
 
-use App\Domains\Common\Enums\NavigGroup;
-use App\Domains\Operations\Models\StockMovement;
+use App\Enums\NavigGroup;
 use App\Filament\Resources\StockMovements\Pages\ListStockMovements;
 use App\Filament\Resources\StockMovements\Tables\StockMovementsTable;
+use App\Models\StockMovement;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;

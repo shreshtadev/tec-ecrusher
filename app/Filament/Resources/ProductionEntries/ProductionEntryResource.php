@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\ProductionEntries;
 
-use App\Domains\Common\Enums\NavigGroup;
-use App\Domains\Operations\Models\ProductionEntry;
+use App\Enums\NavigGroup;
 use App\Filament\Resources\ProductionEntries\Pages\CreateProductionEntry;
 use App\Filament\Resources\ProductionEntries\Pages\EditProductionEntry;
 use App\Filament\Resources\ProductionEntries\Pages\ListProductionEntries;
 use App\Filament\Resources\ProductionEntries\Schemas\ProductionEntryForm;
 use App\Filament\Resources\ProductionEntries\Tables\ProductionEntriesTable;
+use App\Models\ProductionEntry;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Invoices\Schemas;
 
-use App\Domains\Common\Enums\PaymentOpts;
-use App\Domains\Master\Models\Party;
+use App\Enums\PaymentOpts;
+use App\Models\Party;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -32,6 +32,7 @@ class InvoiceForm
                 TextInput::make('total_amount')
                     ->prefix('₹')
                     ->required()
+                    ->default(0)
                     ->numeric(),
                 TextInput::make('driver_bata')
                     ->prefix('₹')
@@ -40,7 +41,7 @@ class InvoiceForm
                     ->default(0),
                 Select::make('payment_mode')
                     ->required()
-                    ->default('Credit')
+                    ->default(PaymentOpts::AC)
                     ->options(PaymentOpts::options())
                     ->native(false),
             ]);

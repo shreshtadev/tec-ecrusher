@@ -2,28 +2,32 @@
 
 namespace App\Filament\Pages;
 
-use App\Domains\Common\Enums\NavigGroup;
-use App\Domains\Master\Models\Party;
-use App\Domains\Operations\Models\Challan;
-use App\Domains\Operations\Models\Invoice;
+use App\Enums\NavigGroup;
+use App\Models\Challan;
+use App\Models\Invoice;
+use App\Models\Party;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Support\Icons\Heroicon;
 use Filament\Pages\Page;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use UnitEnum;
 
 class PartyReport extends Page implements HasSchemas
 {
-    use InteractsWithSchemas, HasPageShield;
+    use HasPageShield, InteractsWithSchemas;
+
     protected string $view = 'filament.pages.party-report';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
+
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::Reports;
+
     public ?array $data = [];
 
     public array $reportData = [];

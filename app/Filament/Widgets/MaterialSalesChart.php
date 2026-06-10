@@ -16,7 +16,8 @@ class MaterialSalesChart extends ChartWidget
     {
         $data = DB::table('invoices')
             ->join('challans', 'invoices.id', '=', 'challans.invoice_id')
-            ->join('items', 'challans.item_id', '=', 'items.id')
+            ->join('challan_items', 'challans.id', '=', 'challan_items.challan_id')
+            ->join('items', 'challan_items.item_id', '=', 'items.id')
             ->whereMonth('invoices.created_at', now()->month)
             ->whereYear('invoices.created_at', now()->year)
             ->select('items.material_name', DB::raw('SUM(invoices.total_amount) as total_revenue'))

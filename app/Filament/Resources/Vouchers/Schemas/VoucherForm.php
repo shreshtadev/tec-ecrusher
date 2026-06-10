@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\Vouchers\Schemas;
 
-use App\Domains\Accounting\Models\Voucher;
-use App\Domains\Common\Enums\IndianStates;
-use App\Domains\Common\Enums\PaymentOpts;
-use App\Domains\Common\Enums\VoucherOpts;
-use App\Domains\Master\Models\Company;
-use App\Domains\Operations\Models\Invoice;
+use App\Enums\IndianStates;
+use App\Enums\PaymentOpts;
+use App\Enums\VoucherOpts;
+use App\Models\Company;
+use App\Models\Invoice;
+use App\Models\Voucher;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -50,6 +50,7 @@ class VoucherForm
                                 return $opts;
                             })
                             ->required()
+                            ->live()
                             ->native(false),
                         Select::make('company_id')
                             ->relationship('company', 'name')
@@ -133,6 +134,41 @@ class VoucherForm
                         Select::make('payment_mode')
                             ->options(PaymentOpts::options())->default(PaymentOpts::AC)->native(false),
                     ])->columns(2),
+                Section::make('Additional Information')
+                    ->schema([
+                        Select::make('from_account_id')
+                            ->label('From Account')
+                            ->relationship(
+                                'fromAccount',
+                                'title',
+                                modifyQueryUsing: fn($query, Get $get) =>
+                                $query->where('id', '!=', $get('to_account_id'))
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->required(fn(Get $get): bool => in_array(
+                                $get('voucher_type'),
+                                [VoucherOpts::PAYMENT, VoucherOpts::RECEIPT]
+                            ))
+                            ->different('to_account_id', 'From Account must be different from To Account'),
+                        Select::make('to_account_id')
+                            ->label('To Account')
+                            ->relationship(
+                                'toAccount',
+                                'title',
+                                modifyQueryUsing: fn($query, Get $get) =>
+                                $query->where('id', '!=', $get('from_account_id'))
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->required(fn(Get $get): bool => in_array(
+                                $get('voucher_type'),
+                                [VoucherOpts::PAYMENT, VoucherOpts::RECEIPT]
+                            ))
+                            ->different('from_account_id', 'To Account must be different from From Account'),
+                    ]),
 
                 Textarea::make('remarks')->columnSpanFull(),
             ]);

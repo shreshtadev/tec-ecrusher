@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Vouchers\Pages;
 
-use App\Domains\Common\Enums\VoucherColumnDef;
-use App\Domains\Common\Services\ExportToExcelService;
+use App\Enums\VoucherColumnDef;
 use App\Filament\Resources\Vouchers\VoucherResource;
+use App\Services\ExportToExcelService;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -41,7 +41,7 @@ class ListVouchers extends ListRecords
                             $items,
                             VoucherColumnDef::columns(),
                             'Vouchers - Today',
-                            'vouchers-day-' . Carbon::now()->format('Y-m-d') . '.xlsx',
+                            'vouchers-day-'.Carbon::now()->format('Y-m-d').'.xlsx',
                             false
                         );
                     }),
@@ -66,7 +66,7 @@ class ListVouchers extends ListRecords
                             $items,
                             VoucherColumnDef::columns(),
                             'Vouchers - Week',
-                            'vouchers-week-' . Carbon::now()->format('Y-m-d') . '.xlsx',
+                            'vouchers-week-'.Carbon::now()->format('Y-m-d').'.xlsx',
                             false
                         );
                     }),

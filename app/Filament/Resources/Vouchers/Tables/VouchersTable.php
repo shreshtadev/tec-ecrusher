@@ -2,7 +2,8 @@
 
 namespace App\Filament\Resources\Vouchers\Tables;
 
-use App\Domains\Accounting\Models\Voucher;
+use App\Enums\VoucherOpts;
+use App\Models\Voucher;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -36,8 +37,8 @@ class VouchersTable
                 TextColumn::make('voucher_type')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
-                        'Receipt' => 'success', // Green for incoming money
-                        'Payment' => 'danger',  // Red for outgoing money
+                        VoucherOpts::RECEIPT => 'success', // Green for incoming money
+                        VoucherOpts::PAYMENT => 'danger',  // Red for outgoing money
                     }),
                 TextColumn::make('amount')
                     ->money('INR')

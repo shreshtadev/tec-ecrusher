@@ -2,9 +2,10 @@
 
 namespace App\Filament\Widgets;
 
-use App\Domains\Accounting\Models\Voucher;
-use App\Domains\Operations\Models\Challan;
-use App\Domains\Operations\Models\Invoice;
+use App\Enums\VoucherOpts;
+use App\Models\Challan;
+use App\Models\Invoice;
+use App\Models\Voucher;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -31,7 +32,7 @@ class DailyStats extends StatsOverviewWidget
 
             Stat::make(
                 'Today\'s Sales',
-                '₹'.number_format(
+                '₹' . number_format(
                     (float) Invoice::whereDate('created_at', $today)->sum('total_amount'),
                     2
                 )
@@ -42,8 +43,8 @@ class DailyStats extends StatsOverviewWidget
 
             Stat::make(
                 'Today\'s Collections',
-                '₹'.number_format(
-                    (float) Voucher::where('voucher_type', 'Receipt')
+                '₹' . number_format(
+                    (float) Voucher::where('voucher_type', VoucherOpts::RECEIPT)
                         ->whereDate('voucher_date', $today)
                         ->sum('amount'),
                     2
@@ -61,7 +62,7 @@ class DailyStats extends StatsOverviewWidget
 
             Stat::make(
                 'Total Sales',
-                '₹'.number_format(
+                '₹' . number_format(
                     Invoice::sum('total_amount'),
                     2
                 )
@@ -72,7 +73,7 @@ class DailyStats extends StatsOverviewWidget
 
             Stat::make(
                 'Total Collections',
-                '₹'.number_format(
+                '₹' . number_format(
                     Voucher::where('voucher_type', 'Receipt')->sum('amount'),
                     2
                 )

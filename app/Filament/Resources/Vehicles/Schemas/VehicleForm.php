@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Vehicles\Schemas;
 
-use App\Domains\Common\Enums\UnitOpts;
-use App\Domains\Common\Enums\VehicleOpts;
+use App\Enums\UnitOpts;
+use App\Enums\VehicleOpts;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -15,13 +15,11 @@ class VehicleForm
         return $schema
             ->components([
                 Select::make('party_id')
-                    ->relationship('party', 'full_name')
-                    ->required(),
+                    ->relationship('party', 'full_name'),
                 TextInput::make('vehicle_number')
                     ->required(),
                 TextInput::make('capacity_cft')
                     ->label('Capacity')
-                    ->required()
                     ->numeric(),
                 Select::make('unit')
                     ->required()
@@ -44,7 +42,6 @@ class VehicleForm
                             ->toArray()
                     )->allowHtml()->native(false),
                 Select::make('vehicle_type')
-                    ->required()
                     ->native(false)
                     ->allowHtml()
                     ->options(

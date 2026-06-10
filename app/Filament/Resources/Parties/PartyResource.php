@@ -2,14 +2,14 @@
 
 namespace App\Filament\Resources\Parties;
 
-use App\Domains\Common\Enums\NavigGroup;
-use App\Domains\Master\Models\Party;
+use App\Enums\NavigGroup;
 use App\Filament\Resources\Parties\Pages\CreateParty;
 use App\Filament\Resources\Parties\Pages\EditParty;
 use App\Filament\Resources\Parties\Pages\ListParties;
 use App\Filament\Resources\Parties\PartyResource\RelationManagers\VehiclesRelationManager;
 use App\Filament\Resources\Parties\Schemas\PartyForm;
 use App\Filament\Resources\Parties\Tables\PartiesTable;
+use App\Models\Party;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

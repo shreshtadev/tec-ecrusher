@@ -2,14 +2,13 @@
 
 namespace App\Filament\Resources\Challans;
 
-use App\Domains\Common\Enums\NavigGroup;
-use App\Domains\Master\Models\StockLevel;
-use App\Domains\Operations\Models\Challan;
+use App\Enums\NavigGroup;
 use App\Filament\Resources\Challans\Pages\CreateChallan;
 use App\Filament\Resources\Challans\Pages\EditChallan;
 use App\Filament\Resources\Challans\Pages\ListChallans;
 use App\Filament\Resources\Challans\Schemas\ChallanForm;
 use App\Filament\Resources\Challans\Tables\ChallansTable;
+use App\Models\Challan;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Drivers;
 
-use App\Domains\Common\Enums\NavigGroup;
-use App\Domains\Master\Models\Driver;
+use App\Enums\NavigGroup;
 use App\Filament\Resources\Drivers\Pages\CreateDriver;
 use App\Filament\Resources\Drivers\Pages\EditDriver;
 use App\Filament\Resources\Drivers\Pages\ListDrivers;
 use App\Filament\Resources\Drivers\Schemas\DriverForm;
 use App\Filament\Resources\Drivers\Tables\DriversTable;
+use App\Models\Driver;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -21,6 +21,7 @@ class DriverResource extends Resource
     protected static ?string $model = Driver::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::MasterData;
 
     protected static ?string $recordTitleAttribute = 'full_name';

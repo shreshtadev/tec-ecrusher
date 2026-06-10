@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Companies;
 
-use App\Domains\Common\Enums\NavigGroup;
-use App\Domains\Master\Models\Company;
+use App\Enums\NavigGroup;
 use App\Filament\Resources\Companies\Pages\CreateCompany;
 use App\Filament\Resources\Companies\Pages\EditCompany;
 use App\Filament\Resources\Companies\Pages\ListCompanies;
 use App\Filament\Resources\Companies\Schemas\CompanyForm;
 use App\Filament\Resources\Companies\Tables\CompaniesTable;
+use App\Models\Company;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

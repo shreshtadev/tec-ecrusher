@@ -16,8 +16,5 @@ class DatabaseSeeder extends Seeder
         // $this->call([
         //     TestDataSeeder::class,
         // ]);
-
-        // $superAdmin = User::firstWhere('email', env('USER_ADMIN_ACCESS'));
-        // $superAdmin->assignRole('super_admin');
     }
 }

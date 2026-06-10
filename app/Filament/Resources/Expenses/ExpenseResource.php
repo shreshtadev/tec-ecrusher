@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Expenses;
 
-use App\Domains\Accounting\Models\Expense;
-use App\Domains\Common\Enums\NavigGroup;
+use App\Enums\NavigGroup;
 use App\Filament\Resources\Expenses\Pages\CreateExpense;
 use App\Filament\Resources\Expenses\Pages\EditExpense;
 use App\Filament\Resources\Expenses\Pages\ListExpenses;
 use App\Filament\Resources\Expenses\Schemas\ExpenseForm;
 use App\Filament\Resources\Expenses\Tables\ExpensesTable;
+use App\Models\Expense;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Expenses\Tables;
 
-use App\Domains\Accounting\Models\Expense;
+use App\Models\Expense;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -53,7 +53,7 @@ class ExpensesTable
                     ->label('Print')
                     ->icon('heroicon-o-printer')
                     ->color('gray')
-                    ->url(fn(Expense $record) => route('print.expense', $record))
+                    ->url(fn (Expense $record) => route('print.expense', $record))
                     ->openUrlInNewTab(),
             ])
             ->toolbarActions([

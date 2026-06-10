@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\StockLevels\Schemas;
 
-use App\Domains\Master\Models\Item;
-use App\Domains\Master\Models\Warehouse;
-use App\Domains\Operations\Services\StockService;
+use App\Models\Item;
+use App\Models\Warehouse;
+use App\Services\StockService;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;

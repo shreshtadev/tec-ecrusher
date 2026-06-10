@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\StockReservations;
 
-use App\Domains\Common\Enums\NavigGroup;
-use App\Domains\Operations\Models\StockReservation;
+use App\Enums\NavigGroup;
 use App\Filament\Resources\StockReservations\Pages\ListStockReservations;
 use App\Filament\Resources\StockReservations\Tables\StockReservationsTable;
+use App\Models\StockReservation;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;

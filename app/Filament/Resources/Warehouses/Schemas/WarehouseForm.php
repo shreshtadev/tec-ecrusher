@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Warehouses\Schemas;
 
-use App\Domains\Operations\Services\StockService;
+use App\Services\StockService;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;

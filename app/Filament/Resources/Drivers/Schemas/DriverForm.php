@@ -13,12 +13,11 @@ class DriverForm
         return $schema
             ->components([
                 Select::make('party_id')
-                    ->relationship('party', 'full_name')
-                    ->required(),
+                    ->relationship('party', 'full_name')->native(false),
                 TextInput::make('full_name')
                     ->required(),
                 TextInput::make('phone_number')
-                    ->tel(),
+                    ->tel()->required(),
             ]);
     }
 }

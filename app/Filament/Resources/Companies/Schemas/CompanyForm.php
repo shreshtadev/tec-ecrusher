@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Companies\Schemas;
 
-use App\Domains\Common\Enums\IndianStates;
+use App\Enums\IndianStates;
 use App\Rules\ValidUpiId;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -32,14 +32,14 @@ class CompanyForm
                             ->maxLength(15)
                             ->regex('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[A-Z0-9]{1}Z[A-Z0-9]{1}$/')
                             ->live()
-                            ->afterStateUpdated(fn($state, $set) => $set('gstin', strtoupper($state))),
+                            ->afterStateUpdated(fn ($state, $set) => $set('gstin', strtoupper($state))),
 
                         TextInput::make('pan')
                             ->label('PAN')
                             ->maxLength(10)
                             ->regex('/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/')
                             ->live()
-                            ->afterStateUpdated(fn($state, $set) => $set('pan', strtoupper($state))),
+                            ->afterStateUpdated(fn ($state, $set) => $set('pan', strtoupper($state))),
 
                         TextInput::make('cin')
                             ->label('CIN')
@@ -77,7 +77,7 @@ class CompanyForm
                             ->options(
                                 collect(IndianStates::options())
                                     ->mapWithKeys(
-                                        fn($state) => [$state['name'] => $state['name']]
+                                        fn ($state) => [$state['name'] => $state['name']]
                                     )
                                     ->toArray()
                             )
@@ -87,7 +87,7 @@ class CompanyForm
 
                                 $code = collect(IndianStates::options())
                                     ->search(
-                                        fn($item) => $item['name'] === $state
+                                        fn ($item) => $item['name'] === $state
                                     );
 
                                 $set('state_code', $code);
@@ -120,7 +120,7 @@ class CompanyForm
                             ->label('IFSC')
                             ->maxLength(11)
                             ->live()
-                            ->afterStateUpdated(fn($state, $set) => $set('ifsc', strtoupper($state))),
+                            ->afterStateUpdated(fn ($state, $set) => $set('ifsc', strtoupper($state))),
 
                         TextInput::make('branch')
                             ->maxLength(100),
@@ -165,15 +165,15 @@ class CompanyForm
                         TextInput::make('challan_sequence')
                             ->label('Current Tripsheet Number')
                             ->numeric()
-                            ->minValue(1),
+                            ->minValue(0),
                         TextInput::make('invoice_sequence')
                             ->label('Current Invoice Number')
                             ->numeric()
-                            ->minValue(1),
+                            ->minValue(0),
                         TextInput::make('voucher_sequence')
                             ->label('Current Voucher Number')
                             ->numeric()
-                            ->minValue(1),
+                            ->minValue(0),
                     ])
                     ->columns(2),
 

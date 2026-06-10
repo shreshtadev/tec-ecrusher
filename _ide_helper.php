@@ -28263,18 +28263,18 @@ namespace Livewire\Features\SupportTesting {
             }
     }
 
-namespace App\Filament\Resources\Challans\Pages {
+namespace App\Filament\Resources\Accounts\Pages {
     /**
      */
-    class CreateChallan extends \Filament\Resources\Pages\CreateRecord {
+    class CreateAccount extends \Filament\Resources\Pages\CreateRecord {
             }
     /**
      */
-    class EditChallan extends \Filament\Resources\Pages\EditRecord {
+    class EditAccount extends \Filament\Resources\Pages\EditRecord {
             }
     /**
      */
-    class ListChallans extends \Filament\Resources\Pages\ListRecords {
+    class ListAccounts extends \Filament\Resources\Pages\ListRecords {
             }
     }
 
@@ -28324,6 +28324,21 @@ namespace Filament\Pages {
     /**
      */
     class SimplePage extends \Filament\Pages\BasePage {
+            }
+    }
+
+namespace App\Filament\Resources\Challans\Pages {
+    /**
+     */
+    class CreateChallan extends \Filament\Resources\Pages\CreateRecord {
+            }
+    /**
+     */
+    class EditChallan extends \Filament\Resources\Pages\EditRecord {
+            }
+    /**
+     */
+    class ListChallans extends \Filament\Resources\Pages\ListRecords {
             }
     }
 

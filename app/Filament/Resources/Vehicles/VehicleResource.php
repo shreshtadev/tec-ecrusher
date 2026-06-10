@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Vehicles;
 
-use App\Domains\Common\Enums\NavigGroup;
-use App\Domains\Master\Models\Vehicle;
+use App\Enums\NavigGroup;
 use App\Filament\Resources\Vehicles\Pages\CreateVehicle;
 use App\Filament\Resources\Vehicles\Pages\EditVehicle;
 use App\Filament\Resources\Vehicles\Pages\ListVehicles;
 use App\Filament\Resources\Vehicles\Schemas\VehicleForm;
 use App\Filament\Resources\Vehicles\Tables\VehiclesTable;
+use App\Models\Vehicle;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -21,6 +21,7 @@ class VehicleResource extends Resource
     protected static ?string $model = Vehicle::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::MasterData;
 
     protected static ?string $recordTitleAttribute = 'vehicle_number';

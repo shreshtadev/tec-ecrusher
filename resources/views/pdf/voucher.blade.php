@@ -112,7 +112,7 @@
     <table class="details" style="border-top:1px solid #eee;">
         <tr>
             <td style="width:55%; border-right:1px solid #f0f0f0;">
-                <strong>{{ $record->voucher_type === \App\Domains\Common\Enums\VoucherOpts::RECEIPT ? 'Received From' : 'Paid To' }}</strong>
+                <strong>{{ $record->voucher_type === \App\Enums\VoucherOpts::RECEIPT ? 'Received From' : 'Paid To' }}</strong>
                 <div style="margin-top:6px;"><strong>{{ $record->party->full_name }}</strong></div>
                 <div class="small-muted">{{ $record->party->address_line_1 ?? '' }}</div>
                 <div class="small-muted">GSTIN: {{ $record->party->gst_number ?? 'N/A' }} | Mobile:

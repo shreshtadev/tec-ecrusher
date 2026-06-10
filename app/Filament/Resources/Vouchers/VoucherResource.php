@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Vouchers;
 
-use App\Domains\Accounting\Models\Voucher;
-use App\Domains\Common\Enums\NavigGroup;
+use App\Enums\NavigGroup;
 use App\Filament\Resources\Vouchers\Pages\CreateVoucher;
 use App\Filament\Resources\Vouchers\Pages\EditVoucher;
 use App\Filament\Resources\Vouchers\Pages\ListVouchers;
 use App\Filament\Resources\Vouchers\Schemas\VoucherForm;
 use App\Filament\Resources\Vouchers\Tables\VouchersTable;
+use App\Models\Voucher;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -23,6 +23,7 @@ class VoucherResource extends Resource
     protected static ?string $model = Voucher::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::Accounting;
 
     protected static ?string $recordTitleAttribute = 'voucher_no';

@@ -2,13 +2,14 @@
 
 namespace App\Filament\Resources\Invoices;
 
-use App\Domains\Common\Enums\NavigGroup;
-use App\Domains\Operations\Models\Invoice;
+use App\Enums\NavigGroup;
+use App\Filament\Resources\Invoices\InvoiceResource\RelationManagers\InvoiceItemsRelationManager;
 use App\Filament\Resources\Invoices\Pages\CreateInvoice;
 use App\Filament\Resources\Invoices\Pages\EditInvoice;
 use App\Filament\Resources\Invoices\Pages\ListInvoices;
 use App\Filament\Resources\Invoices\Schemas\InvoiceForm;
 use App\Filament\Resources\Invoices\Tables\InvoicesTable;
+use App\Models\Invoice;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -23,6 +24,7 @@ class InvoiceResource extends Resource
     protected static ?string $model = Invoice::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::Operation;
 
     protected static ?string $recordTitleAttribute = 'invoice_number';
@@ -40,7 +42,7 @@ class InvoiceResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            InvoiceItemsRelationManager::class,
         ];
     }
 

@@ -2,16 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Domains\Accounting\Models\Expense;
-use App\Domains\Accounting\Models\Voucher;
-use App\Domains\Master\Models\Company;
-use App\Domains\Master\Models\Driver;
-use App\Domains\Master\Models\Item;
-use App\Domains\Master\Models\Party;
-use App\Domains\Master\Models\Vehicle;
-use App\Domains\Operations\Models\Challan;
-use App\Domains\Operations\Models\Invoice;
-use App\Domains\Operations\Models\ProductionEntry;
+use App\Enums\VoucherOpts;
 use App\Filament\Resources\Challans\ChallanResource;
 use App\Filament\Resources\Companies\CompanyResource;
 use App\Filament\Resources\Drivers\DriverResource;
@@ -22,6 +13,16 @@ use App\Filament\Resources\Parties\PartyResource;
 use App\Filament\Resources\ProductionEntries\ProductionEntryResource;
 use App\Filament\Resources\Vehicles\VehicleResource;
 use App\Filament\Resources\Vouchers\VoucherResource;
+use App\Models\Challan;
+use App\Models\Company;
+use App\Models\Driver;
+use App\Models\Expense;
+use App\Models\Invoice;
+use App\Models\Item;
+use App\Models\Party;
+use App\Models\ProductionEntry;
+use App\Models\Vehicle;
+use App\Models\Voucher;
 use Filament\Widgets\Widget;
 
 class WorkflowStatusWidget extends Widget
@@ -139,7 +140,7 @@ class WorkflowStatusWidget extends Widget
                             'title' => 'Receipt Vouchers',
                             'icon' => 'heroicon-m-banknotes',
                             'count' => Voucher::query()
-                                ->where('voucher_type', 'Receipt')
+                                ->where('voucher_type', VoucherOpts::RECEIPT)
                                 ->count(),
                             'status' => ! $invoiceExists
                                 ? 'locked'
@@ -151,7 +152,7 @@ class WorkflowStatusWidget extends Widget
                             'title' => 'Payment Vouchers',
                             'icon' => 'heroicon-m-credit-card',
                             'count' => Voucher::query()
-                                ->where('voucher_type', 'Payment')
+                                ->where('voucher_type', VoucherOpts::PAYMENT)
                                 ->count(),
                             'status' => 'completed',
                             'url' => VoucherResource::getUrl(),
