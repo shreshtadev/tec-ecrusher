@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Invoices\Schemas;
 
 use App\Enums\PaymentOpts;
+use App\Models\Company;
 use App\Models\Party;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -24,6 +25,7 @@ class InvoiceForm
                     ->preload()
                     ->live()
                     ->required()
+                    ->default(fn() => Company::query()->value('id'))
                     ->native(false),
                 Select::make('party_id')
                     ->label('Party')

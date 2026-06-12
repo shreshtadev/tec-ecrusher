@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Enums\NavigGroup;
 use App\Models\Challan;
+use App\Models\ChallanItem;
 use App\Models\Invoice;
 use App\Models\Party;
 use BackedEnum;
@@ -119,20 +120,21 @@ class PartyReport extends Page implements HasSchemas
             ->where('party_id', $this->data['party_id'])
             ->whereBetween('created_at', [$from, $to]);
 
-        $itemWiseSales = Challan::query()
-            ->join('items', 'items.id', '=', 'challans.item_id')
+        $itemWiseSales = ChallanItem::query()
+            ->join('challans', 'challans.id', '=', 'challan_items.challan_id')
+            ->join('items', 'items.id', '=', 'challan_items.item_id')
             ->join('invoices', 'invoices.id', '=', 'challans.invoice_id')
             ->selectRaw('
-        challans.item_id,
+        challan_items.item_id,
         items.material_name,
         items.price_per_unit,
-        SUM(challans.quantity_cft) as total_qty,
-        SUM(challans.quantity_cft * items.price_per_unit) as total_amount
+        SUM(challan_items.quantity_cft) as total_qty,
+        SUM(challan_items.amount) as total_amount
     ')
             ->where('invoices.party_id', $this->data['party_id'])
             ->whereBetween('invoices.created_at', [$from, $to])
             ->groupBy(
-                'challans.item_id',
+                'challan_items.item_id',
                 'items.material_name',
                 'items.price_per_unit'
             )
@@ -144,8 +146,8 @@ class PartyReport extends Page implements HasSchemas
 
             'total_amount' => (clone $baseQuery)->sum('total_amount'),
 
-            'total_qty' => Challan::query()
-                ->whereHas('invoice', function ($query) use ($from, $to) {
+            'total_qty' => ChallanItem::query()
+                ->whereHas('challan.invoice', function ($query) use ($from, $to) {
                     $query
                         ->where('party_id', $this->data['party_id'])
                         ->whereBetween('created_at', [$from, $to]);

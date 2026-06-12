@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('category', 20); // e.g., Diesel, Maintenance, Salary, Electricity
             $table->foreignIdFor(Party::class)->constrained()->onDelete('cascade');
             $table->decimal('amount', 15, 2);
-            $table->string('reference_no', 50)->nullable();
             $table->text('notes')->nullable();
             $table->softDeletes();
             $table->timestamps();

@@ -22,7 +22,7 @@ class StockReservationsTable
                 TextColumn::make('quantity')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('status')
+                TextColumn::make('status')->formatStateUsing(fn(string $state) => ucfirst($state))
                     ->badge(),
                 TextColumn::make('created_at')
                     ->dateTime()

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Expenses\Schemas;
 
+use App\Enums\ExpenseOpts;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -22,17 +23,17 @@ class ExpenseForm
                     ->relationship('party', 'full_name')
                     ->native(false),
                 Select::make('category')
-                    ->options([
-                        'Diesel' => 'Diesel',
-                        'Maintenance' => 'Maintenance',
-                        'Salary' => 'Salary',
-                        'Electricity' => 'Electricity',
-                    ])
-                    ->required()->default('Diesel'),
+                    ->options(collect(ExpenseOpts::cases())
+                        ->mapWithKeys(fn($case) => [
+                            $case->value => ucfirst(str_replace('_', ' ', $case->value)),
+                        ])
+                        ->toArray())
+                    ->required()
+                    ->native(false)
+                    ->default(ExpenseOpts::Diesel->value),
                 TextInput::make('amount')
                     ->required()
                     ->numeric(),
-                TextInput::make('reference_no'),
                 Textarea::make('notes')
                     ->columnSpanFull(),
             ]);

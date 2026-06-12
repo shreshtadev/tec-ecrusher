@@ -7,6 +7,7 @@ use App\Enums\PaymentOpts;
 use App\Enums\VoucherOpts;
 use App\Models\Company;
 use App\Models\Invoice;
+use App\Models\Party;
 use App\Models\Voucher;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -14,7 +15,9 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 
 class VoucherForm
 {
@@ -34,6 +37,9 @@ class VoucherForm
                             ->default(now())
                             ->required(),
                         Select::make('voucher_type')
+                            ->disabled()
+                            ->dehydrated()
+                            ->placeholder('Select party first')
                             ->options(function () {
                                 $opts = VoucherOpts::options();
 
@@ -42,6 +48,12 @@ class VoucherForm
                                         $opts[$key] = 'Payment (Out)';
                                     } elseif ($key === VoucherOpts::RECEIPT) {
                                         $opts[$key] = 'Receipt (In)';
+                                    } elseif ($key === VoucherOpts::JOURNAL) {
+                                        $opts[$key] = 'Journal Entry';
+                                    } elseif ($key === VoucherOpts::CREDIT_NOTE) {
+                                        $opts[$key] = 'Credit Note';
+                                    } elseif ($key === VoucherOpts::DEBIT_NOTE) {
+                                        $opts[$key] = 'Debit Note';
                                     } else {
                                         $opts[$key] = $label;
                                     }
@@ -68,6 +80,17 @@ class VoucherForm
                             ->searchable()
                             ->preload()
                             ->live()
+                            ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                $partyId = $get('party_id');
+                                $foundParty = Party::where('id', $partyId)->first();
+                                $partyType = $foundParty?->party_type;
+
+                                if ($partyType === 'Customer') {
+                                    $set('voucher_type', VoucherOpts::RECEIPT);
+                                } elseif ($partyType === 'Supplier' || $partyType === 'Employee') {
+                                    $set('voucher_type', VoucherOpts::PAYMENT);
+                                }
+                            })
                             ->createOptionForm([
                                 TextInput::make('full_name')
                                     ->required(),
@@ -91,7 +114,7 @@ class VoucherForm
                             ->required(),
 
                         // Adjustment logic: Filter invoices by the selected party
-                        Select::make('reference_invoice_id')
+                        Select::make('invoice_id')
                             ->label('Against Invoice (Optional)')
                             ->options(
                                 fn(Get $get) => Invoice::where('party_id', $get('party_id'))
@@ -105,7 +128,7 @@ class VoucherForm
                             ->numeric()
                             ->prefix('₹')
                             ->helperText(function (Get $get) {
-                                $selectedInvoiceId = $get('reference_invoice_id');
+                                $selectedInvoiceId = $get('invoice_id');
 
                                 if (! $selectedInvoiceId) {
                                     return null;
@@ -117,17 +140,17 @@ class VoucherForm
                                     return null;
                                 }
 
-                                $voucherTotal = Voucher::where('reference_invoice_id', $selectedInvoiceId)
+                                $voucherTotal = Voucher::where('invoice_id', $selectedInvoiceId)
                                     ->sum('amount');
 
-                                $balance = $invoice->total_amount - $voucherTotal;
+                                $totalAmount = $invoice->total_amount + $invoice->driver_bata;
 
-                                return sprintf(
-                                    'Invoice Amount: ₹%s • Applied Vouchers: ₹%s • Balance: ₹%s',
-                                    number_format($invoice->total_amount, 2),
-                                    number_format($voucherTotal, 2),
-                                    number_format($balance, 2)
-                                );
+                                $balance = $totalAmount - $voucherTotal;
+                                $helperText = "Invoice Total: <strong>₹{$totalAmount}</strong><br>" .
+                                    "Already Adjusted: <strong>₹{$voucherTotal}</strong><br>" .
+                                    "Balance: <strong>₹{$balance}</strong>";
+
+                                return new HtmlString($helperText);
                             })
                             ->required(),
 
@@ -150,7 +173,7 @@ class VoucherForm
                             ->required(fn(Get $get): bool => in_array(
                                 $get('voucher_type'),
                                 [VoucherOpts::PAYMENT, VoucherOpts::RECEIPT]
-                            ))
+                            ) && $get('payment_mode') !== PaymentOpts::CASH)
                             ->different('to_account_id', 'From Account must be different from To Account'),
                         Select::make('to_account_id')
                             ->label('To Account')
@@ -166,10 +189,9 @@ class VoucherForm
                             ->required(fn(Get $get): bool => in_array(
                                 $get('voucher_type'),
                                 [VoucherOpts::PAYMENT, VoucherOpts::RECEIPT]
-                            ))
+                            ) && $get('payment_mode') !== PaymentOpts::CASH)
                             ->different('from_account_id', 'To Account must be different from From Account'),
                     ]),
-
                 Textarea::make('remarks')->columnSpanFull(),
             ]);
     }

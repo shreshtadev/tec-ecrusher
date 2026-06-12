@@ -30,6 +30,10 @@ class InvoicesTable
                     ->money('INR')
                     ->alignment('right')
                     ->summarize(Sum::make()->money('INR')),
+                TextColumn::make('outstanding_amount')
+                    ->money('INR')
+                    ->alignment('right')
+                    ->summarize(Sum::make()->money('INR')),
                 TextColumn::make('driver_bata')
                     ->money('INR')
                     ->alignment('right')
@@ -59,7 +63,7 @@ class InvoicesTable
                     ->label('Print Invoice')
                     ->icon('heroicon-o-printer')
                     ->color('gray')
-                    ->url(fn (Invoice $record) => route('print.invoice', $record))
+                    ->url(fn(Invoice $record) => route('print.invoice', $record))
                     ->openUrlInNewTab(),
             ])
             ->toolbarActions([

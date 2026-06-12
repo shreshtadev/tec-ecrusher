@@ -29,7 +29,8 @@ class VouchersTable
                 TextColumn::make('voucher_date')
                     ->label('Voucher Date')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('party.full_name')
                     ->label('Party Name')
                     ->searchable()

@@ -28387,6 +28387,20 @@ namespace App\Filament\Resources\Expenses\Pages {
             }
     }
 
+namespace App\Filament\Resources\Invoices\InvoiceResource\RelationManagers {
+    /**
+     */
+    class InvoiceItemsRelationManager extends \Filament\Resources\RelationManagers\RelationManager {
+            }
+    }
+
+namespace Filament\Resources\RelationManagers {
+    /**
+     */
+    class RelationManager extends \Livewire\Component {
+            }
+    }
+
 namespace App\Filament\Resources\Invoices\Pages {
     /**
      */
@@ -28436,13 +28450,6 @@ namespace App\Filament\Resources\Parties\PartyResource\RelationManagers {
     /**
      */
     class VehiclesRelationManager extends \Filament\Resources\RelationManagers\RelationManager {
-            }
-    }
-
-namespace Filament\Resources\RelationManagers {
-    /**
-     */
-    class RelationManager extends \Livewire\Component {
             }
     }
 

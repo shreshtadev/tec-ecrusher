@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use App\Enums\DocOpts;
-use App\Events\PaymentCollected;
-use App\Events\PaymentMade;
 use App\Services\DocumentNumberGenerator;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -17,7 +15,7 @@ class Voucher extends SModel
 
     public function invoice(): BelongsTo
     {
-        return $this->belongsTo(Invoice::class, 'reference_invoice_id');
+        return $this->belongsTo(Invoice::class, 'invoice_id');
     }
 
     public function company(): BelongsTo
@@ -35,6 +33,16 @@ class Voucher extends SModel
         return $this->belongsTo(Account::class, 'to_account_id');
     }
 
+    public function allocations()
+    {
+        return $this->hasMany(InvoiceAllocation::class);
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
+
     protected static function booted()
     {
         static::creating(function ($voucher) {
@@ -44,13 +52,6 @@ class Voucher extends SModel
                     DocOpts::Voucher
                 );
             }
-        });
-
-        static::saved(function ($voucher) {
-            if ($voucher->voucher_type === 'Receipt') {
-                PaymentCollected::dispatch($voucher);
-            }
-            PaymentMade::dispatch($voucher);
         });
     }
 }

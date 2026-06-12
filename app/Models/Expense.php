@@ -15,4 +15,14 @@ class Expense extends SModel
     {
         return $this->belongsTo(Party::class);
     }
+
+    public function voucher(): BelongsTo
+    {
+        return $this->belongsTo(Voucher::class);
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
+    }
 }

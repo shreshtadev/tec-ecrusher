@@ -47,4 +47,29 @@ class Invoice extends SModel
     {
         return $this->hasMany(InvoiceItem::class);
     }
+
+    public function allocations()
+    {
+        return $this->hasMany(InvoiceAllocation::class);
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+    public function recalculateOutstanding(): void
+    {
+        $allocated = $this->allocations()->sum('allocated_amount');
+        $outstanding = ($this->total_amount + $this->driver_bata) - $allocated;
+
+        $this->update([
+            'outstanding_amount' => $outstanding,
+            'payment_status' => match (true) {
+                $outstanding <= 0 => 'paid',
+                $allocated > 0 => 'partial',
+                default => 'unpaid',
+            },
+        ]);
+    }
 }

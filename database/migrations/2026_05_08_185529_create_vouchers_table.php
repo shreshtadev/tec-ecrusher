@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal('amount', 12, 2);
             $table->string('payment_mode', 20)->default('Cash');
             $table->text('remarks')->nullable();
-            $table->foreignIdFor(Invoice::class, 'reference_invoice_id')->nullable()->constrained('invoices');
+            $table->foreignIdFor(Invoice::class, 'invoice_id')->nullable()->constrained('invoices');
             $table->softDeletes();
             $table->timestamps();
         });

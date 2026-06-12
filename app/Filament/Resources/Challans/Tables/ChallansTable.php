@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Challans\Tables;
 use App\Events\ChallanFinalized;
 use App\Events\ChallansFinalized;
 use App\Models\Challan;
+use App\Services\StockService;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -64,26 +65,11 @@ class ChallansTable
             ])
             ->recordActions([
                 EditAction::make(),
-                Action::make('finalize')
-                    ->label('Finalize')
-                    ->icon('heroicon-o-check-badge')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->visible(fn (Challan $record) => $record->status === 'Pending')
-                    ->action(function (Challan $record) {
-                        // Dispatch the event
-                        ChallanFinalized::dispatch($record);
-
-                        Notification::make()
-                            ->title('Challan Finalized')
-                            ->success()
-                            ->send();
-                    }),
                 Action::make('print')
                     ->label('Print')
                     ->icon('heroicon-o-printer')
                     ->color('gray')
-                    ->url(fn (Challan $record) => route('print.challan', $record))
+                    ->url(fn(Challan $record) => route('print.challan', $record))
                     ->openUrlInNewTab(),
             ])
             ->toolbarActions([
@@ -98,16 +84,17 @@ class ChallansTable
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn () => true)
+                    ->visible(fn() => true)
                     ->action(function (Collection $records) {
                         try {
+
                             ChallansFinalized::dispatch($records);
                             Notification::make()
                                 ->title('Challans Finalized')
                                 ->success()
                                 ->send();
                         } catch (Exception $e) {
-                            logger()->error('Error finalizing challans: '.$e->getMessage(), [
+                            logger()->error('Error finalizing challans: ' . $e->getMessage(), [
                                 'exception' => $e,
                                 'record_ids' => $records->pluck('id'),
                             ]);

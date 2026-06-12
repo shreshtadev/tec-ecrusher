@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Enums\ExpenseOpts;
+use App\Enums\PaymentOpts;
 use App\Models\Challan;
+use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\ProductionEntry;
@@ -20,11 +23,10 @@ class StockService
     /**
      * Reserve stock for all items in a challan.
      *
-     * @return Collection of StockReservation records
      *
      * @throws Exception if stock is insufficient for any item
      */
-    public function reserve(Challan $challan, ?Warehouse $warehouse = null): Collection
+    public function reserve(Challan $challan, ?Warehouse $warehouse = null): void
     {
         $warehouse ??= Warehouse::where('is_active', true)->first();
         if (! $warehouse) {
@@ -37,37 +39,30 @@ class StockService
             throw new Exception('Challan has no items to reserve');
         }
 
-        return DB::transaction(function () use ($challan, $warehouse): Collection {
-            $reservations = new Collection;
+        foreach ($challan->challan_items as $challanItem) {
+            $stockLevel = StockLevel::where('item_id', $challanItem->item_id)
+                ->where('warehouse_id', $warehouse->id)
+                ->lockForUpdate()
+                ->first();
 
-            foreach ($challan->challan_items as $challanItem) {
-                $stockLevel = StockLevel::where('item_id', $challanItem->item_id)
-                    ->where('warehouse_id', $warehouse->id)
-                    ->lockForUpdate()
-                    ->first();
-
-                $availableStock = $this->getAvailableStock($challanItem->item, $warehouse);
-                if (! $stockLevel || $availableStock < $challanItem->quantity_cft) {
-                    throw new Exception("Insufficient stock for {$challanItem->item->material_name}. Available: {$availableStock} CFT");
-                }
-
-                $reservation = StockReservation::create([
-                    'source_type' => Challan::class,
-                    'source_id' => $challan->id,
-                    'warehouse_id' => $warehouse->id,
-                    'item_id' => $challanItem->item_id,
-                    'quantity' => $challanItem->quantity_cft,
-                    'status' => 'reserved',
-                    'reserved_at' => now(),
-                    'remarks' => "Reserved for Challan #{$challan->challan_number}",
-                ]);
-
-                $stockLevel->increment('reserved_qty', $challanItem->quantity_cft);
-                $reservations->push($reservation);
+            $availableStock = $this->getAvailableStock($challanItem->item, $warehouse);
+            if (! $stockLevel || $availableStock < $challanItem->quantity_cft) {
+                throw new Exception("Insufficient stock for {$challanItem->item->material_name}. Available: {$availableStock} CFT");
             }
 
-            return $reservations;
-        });
+            $reservation = StockReservation::create([
+                'source_type' => Challan::class,
+                'source_id' => $challan->id,
+                'warehouse_id' => $warehouse->id,
+                'item_id' => $challanItem->item_id,
+                'quantity' => $challanItem->quantity_cft,
+                'status' => 'reserved',
+                'reserved_at' => now(),
+                'remarks' => "Reserved for Challan #{$challan->challan_number}",
+            ]);
+
+            $stockLevel->increment('reserved_qty', $challanItem->quantity_cft);
+        }
     }
 
     /**
@@ -76,50 +71,48 @@ class StockService
      */
     public function finalize(Invoice $invoice): void
     {
-        DB::transaction(function () use ($invoice): void {
-            foreach ($invoice->challans as $challan) {
-                $challan->load('challan_items.item');
+        foreach ($invoice->challans as $challan) {
+            $challan->load('challan_items.item');
 
-                foreach ($challan->challan_items as $challanItem) {
-                    $reservation = StockReservation::where('source_type', Challan::class)
-                        ->where('source_id', $challan->id)
-                        ->where('item_id', $challanItem->item_id)
-                        ->where('status', 'reserved')
-                        ->lockForUpdate()
-                        ->first();
+            foreach ($challan->challan_items as $challanItem) {
+                $reservation = StockReservation::where('source_type', Challan::class)
+                    ->where('source_id', $challan->id)
+                    ->where('item_id', $challanItem->item_id)
+                    ->where('status', 'reserved')
+                    ->lockForUpdate()
+                    ->first();
 
-                    if (! $reservation) {
-                        continue;
-                    }
-
-                    $quantity = (float) $reservation->quantity;
-                    $stockLevel = StockLevel::where('item_id', $reservation->item_id)
-                        ->where('warehouse_id', $reservation->warehouse_id)
-                        ->lockForUpdate()
-                        ->first();
-
-                    if (! $stockLevel || $stockLevel->available_qty < $quantity || $stockLevel->reserved_qty < $quantity) {
-                        throw new Exception('Stock level mismatch while finalizing reservation.');
-                    }
-
-                    StockMovement::create([
-                        'item_id' => $reservation->item_id,
-                        'warehouse_id' => $reservation->warehouse_id,
-                        'source_type' => Invoice::class,
-                        'source_id' => $invoice->id,
-                        'movement_type' => 'OUT',
-                        'quantity' => $quantity,
-                        'unit_cost' => $challanItem->rate_at_sale,
-                        'movement_date' => now(),
-                        'remarks' => "Finalized from Invoice #{$invoice->invoice_number}",
-                    ]);
-
-                    $stockLevel->decrement('available_qty', $quantity);
-                    $stockLevel->decrement('reserved_qty', $quantity);
-                    $reservation->update(['status' => 'finalized', 'finalized_at' => now()]);
+                if (! $reservation) {
+                    continue;
                 }
+
+                $quantity = (float) $reservation->quantity;
+                $stockLevel = StockLevel::where('item_id', $reservation->item_id)
+                    ->where('warehouse_id', $reservation->warehouse_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $stockLevel || $stockLevel->available_qty < $quantity || $stockLevel->reserved_qty < $quantity) {
+                    throw new Exception('Stock level mismatch while finalizing reservation.');
+                }
+
+                StockMovement::create([
+                    'item_id' => $reservation->item_id,
+                    'warehouse_id' => $reservation->warehouse_id,
+                    'source_type' => Invoice::class,
+                    'source_id' => $invoice->id,
+                    'movement_type' => 'OUT',
+                    'quantity' => $quantity,
+                    'unit_cost' => $challanItem->rate_at_sale,
+                    'movement_date' => now(),
+                    'remarks' => "Finalized from Invoice #{$invoice->invoice_number}",
+                ]);
+
+                $stockLevel->decrement('available_qty', $quantity);
+                $stockLevel->decrement('reserved_qty', $quantity);
+                $reservation->update(['status' => 'finalized', 'finalized_at' => now()]);
             }
-        });
+        }
     }
 
     /**
@@ -646,6 +639,35 @@ class StockService
             });
     }
 
+    public function createInvoice(Challan $challan): Invoice
+    {
+        $invoice = Invoice::create([
+            'party_id' => $challan->party_id,
+            'total_amount' => $challan->challan_items->sum('amount') + $challan->driver_bata,
+            'driver_bata' => $challan->driver_bata,
+            'payment_mode' => $challan->payment_mode ?? PaymentOpts::AC,
+            'company_id' => $challan->company_id,
+        ]);
+
+        if ($challan->driver_bata > 0) {
+            Expense::create([
+                'expenditure_date' => $challan->created_at,
+                'invoice_id' => $invoice->id,
+                'amount' => $challan->driver_bata,
+                'category' => ExpenseOpts::DriverBata->value,
+                'party_id' => $challan->party->id,
+                'notes' => 'Driver Bata for Challan #' . $challan->challan_number,
+            ]);
+        }
+
+
+        $challan->update([
+            'invoice_id' => $invoice->id,
+            'status' => 'Invoiced',
+        ]);
+        return $invoice;
+    }
+
     public function createOnProductionEntry(ProductionEntry $productionEntry)
     {
         $foundItem = Item::findOrFail($productionEntry->item_id);
@@ -681,14 +703,24 @@ class StockService
         return DB::transaction(function () use ($challans) {
 
             $first = $challans->first();
+            $totalDriverBata = $challans->sum('driver_bata');
 
             $invoice = Invoice::create([
                 'party_id' => $first->party_id,
                 'company_id' => $first->company_id,
-                'payment_mode' => $first->payment_mode ?? 'Credit',
-                'driver_bata' => array_sum($challans->pluck('driver_bata')->toArray()),
+                'payment_mode' => $first->payment_mode ?? PaymentOpts::AC,
+                'driver_bata' => $totalDriverBata,
                 'total_amount' => $this->calculateTotal($challans),
             ]);
+
+            if ($totalDriverBata > 0) {
+                Expense::create([
+                    'expenditure_date' => $invoice->created_at,
+                    'invoice_id' => $invoice->id,
+                    'amount' => $totalDriverBata,
+                    'description' => 'Driver Bata for Invoice #' . $invoice->invoice_number,
+                ]);
+            }
 
             $challans->each(function (Challan $challan) use ($invoice) {
 

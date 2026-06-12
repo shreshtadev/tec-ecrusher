@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Expenses\Tables;
 
+use App\Enums\ExpenseOpts;
 use App\Models\Expense;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -23,14 +24,12 @@ class ExpensesTable
                 TextColumn::make('expenditure_date')
                     ->date()
                     ->sortable(),
-                TextColumn::make('category')
+                TextColumn::make('category')->badge()->formatStateUsing(fn(string $state): string => ExpenseOpts::displayValz(ExpenseOpts::from($state)))
                     ->searchable(),
                 TextColumn::make('amount')
                     ->money('INR')
                     ->alignment('right')
                     ->summarize(Sum::make()->money('INR')),
-                TextColumn::make('reference_no')
-                    ->searchable(),
                 TextColumn::make('deleted_at')
                     ->dateTime()
                     ->sortable()
@@ -53,7 +52,7 @@ class ExpensesTable
                     ->label('Print')
                     ->icon('heroicon-o-printer')
                     ->color('gray')
-                    ->url(fn (Expense $record) => route('print.expense', $record))
+                    ->url(fn(Expense $record) => route('print.expense', $record))
                     ->openUrlInNewTab(),
             ])
             ->toolbarActions([

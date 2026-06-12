@@ -285,11 +285,31 @@
 
                     <tr>
                         <td>
-                            <strong>Total Challans</strong>
+                            <strong>
+                                @if (
+                                    $record->challans->filter(function ($challan) {
+                                            return $challan->challan_items->isNotEmpty();
+                                        })->isNotEmpty())
+                                    Total Challans
+                                @elseif ($record->invoiceItems->isNotEmpty())
+                                    Total Items
+                                @else
+                                    Total Challans
+                                @endif
+                            </strong>
                         </td>
 
                         <td>
-                            {{ $record->challans->count() }}
+                            @if (
+                                $record->challans->filter(function ($challan) {
+                                        return $challan->challan_items->isNotEmpty();
+                                    })->isNotEmpty())
+                                {{ $record->challans->count() }}
+                            @elseif ($record->invoiceItems->isNotEmpty())
+                                {{ $record->invoiceItems->count() }}
+                            @else
+                                0
+                            @endif
                         </td>
                     </tr>
 
@@ -325,16 +345,87 @@
             @php
                 $rowNo = 1;
                 $totalQty = 0;
+                $hasChallanItems = $record->challans
+                    ->filter(function ($challan) {
+                        return $challan->challan_items->isNotEmpty();
+                    })
+                    ->isNotEmpty();
+                $showInvoiceItems = !$hasChallanItems && $record->invoiceItems->isNotEmpty();
+                $invoiceItemReferences = $record->invoiceItems
+                    ->map(function ($invoiceItem) {
+                        return $invoiceItem->item->material_name ?? 'Item #' . $invoiceItem->id;
+                    })
+                    ->implode(', ');
             @endphp
 
-            @foreach ($record->challans as $challan)
-                @php
-                    $challanTotal = $challan->challan_items->sum('amount');
-                @endphp
-
-                @foreach ($challan->challan_items as $item)
+            @if ($hasChallanItems)
+                @foreach ($record->challans as $challan)
                     @php
-                        $totalQty += $item->quantity_cft;
+                        $challanTotal = $challan->challan_items->sum('amount');
+                    @endphp
+
+                    @foreach ($challan->challan_items as $item)
+                        @php
+                            $totalQty += $item->quantity_cft;
+                        @endphp
+
+                        <tr>
+
+                            <td class="text-center">
+                                {{ $rowNo++ }}
+                            </td>
+
+                            <td>
+                                {{ $challan->challan_number }}
+                            </td>
+
+                            <td>
+                                {{ $challan->created_at->format('d-m-Y') }}
+                            </td>
+
+                            <td>
+                                {{ $item->item->material_name }}
+                            </td>
+
+                            <td>
+                                {{ $challan->vehicle->vehicle_number ?? '-' }}
+                            </td>
+
+                            <td>
+                                {{ $challan->driver->driver_name ?? '-' }}
+                            </td>
+
+                            <td class="text-right">
+                                {{ number_format($item->quantity_cft, 2) }}
+                            </td>
+
+                            <td class="text-right">
+                                ₹{{ number_format($item->rate_at_sale, 2) }}
+                            </td>
+
+                            <td class="text-right">
+                                ₹{{ number_format($item->amount, 2) }}
+                            </td>
+
+                        </tr>
+                    @endforeach
+
+                    <tr class="challan-row">
+
+                        <td colspan="8" class="text-right">
+                            Challan Total :
+                        </td>
+
+                        <td class="text-right">
+                            ₹{{ number_format($challanTotal, 2) }}
+                        </td>
+
+                    </tr>
+                @endforeach
+            @elseif ($showInvoiceItems)
+                @foreach ($record->invoiceItems as $item)
+                    @php
+                        $totalQty += $item->quantity;
                     @endphp
 
                     <tr>
@@ -344,27 +435,27 @@
                         </td>
 
                         <td>
-                            {{ $challan->challan_number }}
+                            -
                         </td>
 
                         <td>
-                            {{ $challan->created_at->format('d-m-Y') }}
+                            {{ $record->created_at->format('d-m-Y') }}
                         </td>
 
                         <td>
-                            {{ $item->item->material_name }}
+                            {{ $item->item->material_name ?? 'N/A' }}
                         </td>
 
                         <td>
-                            {{ $challan->vehicle->vehicle_number ?? '-' }}
+                            -
                         </td>
 
                         <td>
-                            {{ $challan->driver->driver_name ?? '-' }}
+                            -
                         </td>
 
                         <td class="text-right">
-                            {{ number_format($item->quantity_cft, 2) }}
+                            {{ number_format($item->quantity, 2) }}
                         </td>
 
                         <td class="text-right">
@@ -381,15 +472,21 @@
                 <tr class="challan-row">
 
                     <td colspan="8" class="text-right">
-                        Challan Total :
+                        Invoice Total :
                     </td>
 
                     <td class="text-right">
-                        ₹{{ number_format($challanTotal, 2) }}
+                        ₹{{ number_format($record->total_amount, 2) }}
                     </td>
 
                 </tr>
-            @endforeach
+            @else
+                <tr>
+                    <td colspan="9" class="text-center">
+                        No invoice or challan details available.
+                    </td>
+                </tr>
+            @endif
 
         </tbody>
 
@@ -443,15 +540,6 @@
 
         </tr>
     </table>
-
-    {{-- CHALLAN REFERENCES --}}
-    <div class="reference-box">
-
-        <strong>Challan References :</strong>
-
-        <span>{{ $record->challans->pluck('challan_number')->implode(', ') }}</span>
-
-    </div>
 
     {{-- SIGNATURES --}}
     <div class="signature-section">
