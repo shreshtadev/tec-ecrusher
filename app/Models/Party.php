@@ -26,4 +26,9 @@ class Party extends BModel
     {
         return $this->hasMany(Expense::class);
     }
+
+    public function itemPrices()
+    {
+        return $this->hasMany(PartyItemPrice::class);
+    }
 }

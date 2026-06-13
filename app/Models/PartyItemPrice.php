@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-class InvoiceItem extends BModel
-{
 
-    public function invoice()
+class PartyItemPrice extends BModel
+{
+    public function party()
     {
-        return $this->belongsTo(Invoice::class);
+        return $this->belongsTo(Party::class);
     }
 
     public function item()

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Challans\Schemas;
 
 use App\Enums\PaymentOpts;
 use App\Models\Item;
+use App\Models\PartyItemPrice;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput; // 1. Imported the Repeater
@@ -53,13 +54,23 @@ class ChallanForm
                                     ->live()
                                     ->required()
                                     ->native(false)
-                                    ->afterStateUpdated(function ($state, Set $set) {
+                                    ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                        $partyId = $get('../../party_id');
+
                                         $item = Item::find($state);
-                                        if ($item) {
-                                            $set('rate_at_sale', $item->price_per_unit);
-                                            $set('quantity_cft', 0);
-                                            $set('amount', 0);
+
+                                        if (! $item) {
+                                            return;
                                         }
+
+                                        $price = PartyItemPrice::query()
+                                            ->where('party_id', $partyId)
+                                            ->where('item_id', $state)
+                                            ->value('price_per_unit');
+
+                                        $set('rate_at_sale', $price ?? $item->price_per_unit);
+                                        $set('quantity_cft', 0);
+                                        $set('amount', 0);
                                     }),
 
                                 TextInput::make('quantity_cft')
@@ -123,7 +134,23 @@ class ChallanForm
                             ->live()
                             ->disabled(fn(Get $get) => blank($get('company_id')))
                             ->dehydrated()
-                            ->afterStateUpdated(fn(Set $set) => $set('vehicle_id', null))
+                            ->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                $itemId = $get('item_id');
+                                $item = Item::where('id', $itemId)->first();
+                                $price = PartyItemPrice::query()
+                                    ->where('party_id', $state)
+                                    ->where('item_id', $itemId)
+                                    ->value('price_per_unit');
+                                if ($item) {
+                                    if (!$price) {
+                                        $price ??= $item->price_per_unit;
+                                    }
+                                    $set('rate_at_sale', $price);
+                                    $set('quantity_cft', 0);
+                                    $set('amount', 0);
+                                }
+                                $set('vehicle_id', null);
+                            })
                             ->required()->native(false),
 
                         Select::make('vehicle_id')

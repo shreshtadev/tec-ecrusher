@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Parties\PartyResource\RelationManagers;
+namespace App\Filament\Resources\Parties\RelationManagers;
 
 use App\Filament\Resources\Vehicles\VehicleResource;
 use Filament\Actions\CreateAction;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Invoices\InvoiceResource\RelationManagers;
+namespace App\Filament\Resources\Invoices\RelationManagers;
 
 use App\Filament\Resources\InvoiceItems\InvoiceItemResource;
 use Filament\Actions\CreateAction;

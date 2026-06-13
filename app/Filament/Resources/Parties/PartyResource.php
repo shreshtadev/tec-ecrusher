@@ -6,7 +6,8 @@ use App\Enums\NavigGroup;
 use App\Filament\Resources\Parties\Pages\CreateParty;
 use App\Filament\Resources\Parties\Pages\EditParty;
 use App\Filament\Resources\Parties\Pages\ListParties;
-use App\Filament\Resources\Parties\PartyResource\RelationManagers\VehiclesRelationManager;
+use App\Filament\Resources\Parties\RelationManagers\ItemPricesRelationManager;
+use App\Filament\Resources\Parties\RelationManagers\VehiclesRelationManager;
 use App\Filament\Resources\Parties\Schemas\PartyForm;
 use App\Filament\Resources\Parties\Tables\PartiesTable;
 use App\Models\Party;
@@ -40,6 +41,7 @@ class PartyResource extends Resource
     public static function getRelations(): array
     {
         return [
+            ItemPricesRelationManager::class,
             VehiclesRelationManager::class,
         ];
     }

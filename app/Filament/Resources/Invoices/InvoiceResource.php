@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Invoices;
 
 use App\Enums\NavigGroup;
-use App\Filament\Resources\Invoices\InvoiceResource\RelationManagers\InvoiceItemsRelationManager;
+use App\Filament\Resources\Invoices\RelationManagers\InvoiceItemsRelationManager;
 use App\Filament\Resources\Invoices\Pages\CreateInvoice;
 use App\Filament\Resources\Invoices\Pages\EditInvoice;
 use App\Filament\Resources\Invoices\Pages\ListInvoices;
