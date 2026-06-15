@@ -36,4 +36,9 @@ class Party extends BModel
     {
         return $this->hasMany(Account::class);
     }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
 }

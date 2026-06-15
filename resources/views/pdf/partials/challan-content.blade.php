@@ -44,29 +44,84 @@
     </tr>
 </table>
 
-<table style="width: 100%; margin-top: 30px; font-size: 1rem; border-collapse: collapse;border-spacing: 0 10px;">
+<!-- Main Details Section -->
+<table style="width: 100%; margin-top: 30px; font-size: 1rem; border-collapse: collapse; border-spacing: 0 10px;">
     <tr>
-        <td style="padding: 2px 0;"><strong>Party:</strong></td>
+        <td style="padding: 2px 0; width: 50%;"><strong>Party:</strong></td>
         <td style="padding: 2px 0;">{{ $record->party->full_name ?? 'N/A' }}</td>
     </tr>
     <tr>
         <td style="padding: 2px 0;"><strong>Vehicle:</strong></td>
-        <td style="padding: 2px 0;">{{ $record->vehicle->vehicle_number }}</td>
+        <td style="padding: 2px 0;">{{ $record->vehicle->vehicle_number ?? 'N/A' }}</td>
     </tr>
-    <tr>
-        <td style="padding: 2px 0;"><strong>Quantity:</strong></td>
-        <td style="padding: 2px 0;">{{ $record->quantity_cft }} CFT</td>
-    </tr>
-    <tr>
-        <td style="padding: 2px 0;"><strong>Material:</strong></td>
-        <td style="padding: 2px 0;">{{ $record->item->material_name }}</td>
-    </tr>
-
+    @if ($record->driver)
+        <tr>
+            <td style="padding: 2px 0;"><strong>Driver:</strong></td>
+            <td style="padding: 2px 0;">{{ $record->driver->name ?? 'N/A' }}</td>
+        </tr>
+    @endif
     <tr>
         <td style="padding: 2px 0;"><strong>Payment:</strong></td>
-        <td style="padding: 2px 0;">{{ $record->payment_mode }}</td>
+        <td style="padding: 2px 0;">{{ $record->payment_mode ?? 'N/A' }}</td>
     </tr>
-
 </table>
 
-<div style="height: 20mm;"></div>
+<!-- Items Section -->
+@if ($record->challan_items && $record->challan_items->count() > 0)
+    <table
+        style="width: 100%; margin-top: 20px; font-size: 0.95rem; border-collapse: collapse; border: 1px solid #000;">
+        <thead>
+            <tr style="border-bottom: 1px solid #000;">
+                <th style="padding: 5px; text-align: left; border-right: 1px solid #000;"><strong>Material</strong></th>
+                <th style="padding: 5px; text-align: center; border-right: 1px solid #000;"><strong>Unit</strong></th>
+                <th style="padding: 5px; text-align: center;"><strong>Quantity</strong></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($record->challan_items as $challanItem)
+                <tr style="border-bottom: 1px solid #000;">
+                    <td style="padding: 5px; border-right: 1px solid #000;">
+                        {{ $challanItem->item->material_name ?? 'N/A' }}</td>
+                    <td style="padding: 5px; text-align: center; border-right: 1px solid #000;">
+                        {{ $challanItem->item->unit ?? 'N/A' }}</td>
+                    <td style="padding: 5px; text-align: center;">{{ number_format($challanItem->quantity_cft, 2) }}
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+@else
+    <!-- Fallback for single item if no challan_items -->
+    @if ($record->item)
+        <table
+            style="width: 100%; margin-top: 20px; font-size: 0.95rem; border-collapse: collapse; border: 1px solid #000;">
+            <tr style="border-bottom: 1px solid #000;">
+                <td style="padding: 5px;"><strong>Material:</strong></td>
+                <td style="padding: 5px;">NIL</td>
+            </tr>
+            <tr>
+                <td style="padding: 5px;"><strong>Quantity:</strong></td>
+                <td style="padding: 5px;">NIL
+                </td>
+            </tr>
+        </table>
+    @endif
+@endif
+
+<!-- Signature Section -->
+<div style="margin-top: 30px; width: 100%;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <td
+                style="width: 50%; padding-top: 20px; border-top: 1px solid #000; text-align: center; font-size: 0.9rem;">
+                Driver Sign.
+            </td>
+            <td
+                style="width: 50%; padding-top: 20px; border-top: 1px solid #000; text-align: center; font-size: 0.9rem;">
+                Officer Sign.
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div style="height: 10mm;"></div>

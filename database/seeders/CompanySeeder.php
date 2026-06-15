@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Account;
 use App\Models\Company;
 use Illuminate\Database\Seeder;
 
@@ -12,10 +13,11 @@ class CompanySeeder extends Seeder
      */
     public function run(): void
     {
-        Company::firstOrCreate(
+        $company = Company::firstOrCreate(
             ['id' => 1],
             [
                 'name' => 'Shruthi Stone Crusher',
+                'address' => 'Nagarahalli Village, Chikkamagaluru - 577101'
             ]
         );
     }

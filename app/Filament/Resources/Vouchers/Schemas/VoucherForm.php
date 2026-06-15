@@ -188,14 +188,8 @@ class VoucherForm
                             ->relationship(
                                 name: 'toAccount',
                                 titleAttribute: 'title',
-                                modifyQueryUsing: function ($query, Get $get) {
-                                    $partyId = $get('party_id');
-                                    $baseFilter = $query->where('id', '!=', $get('from_account_id'));
-                                    if (!blank($partyId)) {
-                                        return $baseFilter->whereNull('party_id')->orWhere('party_id', '!=', $partyId);
-                                    }
-                                    return $baseFilter;
-                                }
+                                modifyQueryUsing: fn($query, Get $get) =>
+                                $query->where('id', '!=', $get('from_account_id'))
                             )
                             ->searchable()
                             ->preload()
