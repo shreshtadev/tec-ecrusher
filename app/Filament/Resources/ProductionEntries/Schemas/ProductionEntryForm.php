@@ -16,7 +16,7 @@ class ProductionEntryForm
     {
         return $schema
             ->components([
-                DatePicker::make('production_entry_date'),
+                DatePicker::make('production_entry_date')->label('Entry Date')->default(now()),
                 Select::make('item_id')
                     ->label('Item')
                     ->required()
@@ -38,7 +38,7 @@ class ProductionEntryForm
                     ->required()
                     ->options(function () {
                         return Warehouse::pluck('name', 'id');
-                    })->native(false)->default(fn (Select $component): string => array_key_first($component->getOptions())),
+                    })->native(false)->default(fn(Select $component): string => array_key_first($component->getOptions())),
                 TextInput::make('quantity')
                     ->label(function (Get $get) {
                         $itemId = $get('item_id');
@@ -56,7 +56,7 @@ class ProductionEntryForm
                 TextInput::make('batch_no')
                     ->prefix('BTH-')
                     ->formatStateUsing(
-                        fn (?string $state): string => ($state && ! str_starts_with($state, 'BTH-'))
+                        fn(?string $state): string => ($state && ! str_starts_with($state, 'BTH-'))
                             ? "BTH-{$state}"
                             : ($state ?? '')
                     ),

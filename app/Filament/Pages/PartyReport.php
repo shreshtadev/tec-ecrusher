@@ -25,7 +25,7 @@ class PartyReport extends Page implements HasSchemas
 
     protected string $view = 'filament.pages.party-report';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartPie;
 
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::Reports;
 
@@ -118,7 +118,7 @@ class PartyReport extends Page implements HasSchemas
 
         $baseQuery = Invoice::query()
             ->where('party_id', $this->data['party_id'])
-            ->whereBetween('created_at', [$from, $to]);
+            ->whereBetween('challan_date', [$from, $to]);
 
         $itemWiseSales = ChallanItem::query()
             ->join('challans', 'challans.id', '=', 'challan_items.challan_id')
@@ -132,7 +132,7 @@ class PartyReport extends Page implements HasSchemas
         SUM(challan_items.amount) as total_amount
     ')
             ->where('invoices.party_id', $this->data['party_id'])
-            ->whereBetween('invoices.created_at', [$from, $to])
+            ->whereBetween('invoices.challan_date', [$from, $to])
             ->groupBy(
                 'challan_items.item_id',
                 'items.material_name',
@@ -150,14 +150,14 @@ class PartyReport extends Page implements HasSchemas
                 ->whereHas('challan.invoice', function ($query) use ($from, $to) {
                     $query
                         ->where('party_id', $this->data['party_id'])
-                        ->whereBetween('created_at', [$from, $to]);
+                        ->whereBetween('challan_date', [$from, $to]);
                 })
                 ->sum('quantity_cft'),
 
             'invoices' => (clone $baseQuery)
                 ->select([
                     'invoice_number',
-                    'created_at',
+                    'challan_date',
                     'total_amount',
                     'party_id',
                 ])

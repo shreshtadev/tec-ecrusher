@@ -26,20 +26,17 @@ class StockService
      *
      * @throws Exception if stock is insufficient for any item
      */
-    public function reserve(Challan $challan, ?Warehouse $warehouse = null): void
+    public function reserve(Challan $challan): void
     {
-        $warehouse ??= Warehouse::where('is_active', true)->first();
-        if (! $warehouse) {
-            throw new Exception('No active warehouse found');
-        }
-
         $challan->load('challan_items.item');
+        $challan->load('challan_items.warehouse');
 
         if ($challan->challan_items->isEmpty()) {
             throw new Exception('Challan has no items to reserve');
         }
 
         foreach ($challan->challan_items as $challanItem) {
+            $warehouse = $challanItem->warehouse;
             $stockLevel = StockLevel::where('item_id', $challanItem->item_id)
                 ->where('warehouse_id', $warehouse->id)
                 ->lockForUpdate()
@@ -647,6 +644,7 @@ class StockService
             'driver_bata' => $challan->driver_bata,
             'payment_mode' => $challan->payment_mode ?? PaymentOpts::AC,
             'company_id' => $challan->company_id,
+            'invoice_date' => $challan->challan_date
         ]);
 
         if ($challan->driver_bata > 0) {

@@ -63,7 +63,7 @@ class ListChallans extends ListRecords
                                 'item',
                                 'invoice',
                             ])
-                            ->whereBetween('created_at', [$start, $end])
+                            ->whereBetween('challan_date', [$start, $end])
                             ->get();
 
                         return ExportToExcelService::download(
@@ -91,7 +91,7 @@ class ListChallans extends ListRecords
                                 'item',
                                 'invoice',
                             ])
-                            ->whereBetween('created_at', [$start, $end])
+                            ->whereBetween('challan_date', [$start, $end])
                             ->get();
 
                         return ExportToExcelService::download(
@@ -130,7 +130,7 @@ class ListChallans extends ListRecords
                                 'item',
                                 'invoice',
                             ])
-                            ->whereBetween('created_at', [$start, $end])
+                            ->whereBetween('challan_date', [$start, $end])
                             ->get();
 
                         return ExportToExcelService::download(
@@ -173,7 +173,7 @@ class ListChallans extends ListRecords
                         $itemsQuery->where('party_id', $data['party_id']);
 
                         if ($start && $end) {
-                            $itemsQuery->whereBetween('created_at', [$start, $end]);
+                            $itemsQuery->whereBetween('challan_date', [$start, $end]);
                         }
 
                         $challans = $itemsQuery->get();

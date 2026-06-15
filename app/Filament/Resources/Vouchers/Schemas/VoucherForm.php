@@ -19,6 +19,8 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 
+use function Laravel\Prompts\title;
+
 class VoucherForm
 {
     public static function configure(Schema $schema): Schema
@@ -65,7 +67,7 @@ class VoucherForm
                             ->live()
                             ->native(false),
                         Select::make('company_id')
-                            ->relationship('company', 'name')
+                            ->relationship(name: 'company', titleAttribute: 'name')
                             ->default(fn() => Company::query()->value('id'))
                             ->searchable()
                             ->preload()
@@ -76,7 +78,7 @@ class VoucherForm
                 Section::make('Transaction')
                     ->schema([
                         Select::make('party_id')
-                            ->relationship('party', 'full_name')
+                            ->relationship(name: 'party', titleAttribute: 'full_name')
                             ->searchable()
                             ->preload()
                             ->live()
@@ -162,10 +164,16 @@ class VoucherForm
                         Select::make('from_account_id')
                             ->label('From Account')
                             ->relationship(
-                                'fromAccount',
-                                'title',
-                                modifyQueryUsing: fn($query, Get $get) =>
-                                $query->where('id', '!=', $get('to_account_id'))
+                                name: 'fromAccount',
+                                titleAttribute: 'title',
+                                modifyQueryUsing: function ($query, Get $get) {
+                                    $partyId = $get('party_id');
+                                    $baseFilter = $query->where('id', '!=', $get('to_account_id'));
+                                    if (!blank($partyId)) {
+                                        return $baseFilter->where('party_id', '=', $partyId);
+                                    }
+                                    return $baseFilter;
+                                }
                             )
                             ->searchable()
                             ->preload()
@@ -174,14 +182,20 @@ class VoucherForm
                                 $get('voucher_type'),
                                 [VoucherOpts::PAYMENT, VoucherOpts::RECEIPT]
                             ) && $get('payment_mode') !== PaymentOpts::CASH)
-                            ->different('to_account_id', 'From Account must be different from To Account'),
+                            ->different('to_account_id', 'From Account must be different from To Account')->disabled(fn(Get $get) => blank($get('party_id')))->dehydrated(),
                         Select::make('to_account_id')
                             ->label('To Account')
                             ->relationship(
-                                'toAccount',
-                                'title',
-                                modifyQueryUsing: fn($query, Get $get) =>
-                                $query->where('id', '!=', $get('from_account_id'))
+                                name: 'toAccount',
+                                titleAttribute: 'title',
+                                modifyQueryUsing: function ($query, Get $get) {
+                                    $partyId = $get('party_id');
+                                    $baseFilter = $query->where('id', '!=', $get('from_account_id'));
+                                    if (!blank($partyId)) {
+                                        return $baseFilter->whereNull('party_id')->orWhere('party_id', '!=', $partyId);
+                                    }
+                                    return $baseFilter;
+                                }
                             )
                             ->searchable()
                             ->preload()

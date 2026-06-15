@@ -7,7 +7,6 @@ use App\Models\StockLevel;
 use App\Models\StockMovement;
 use App\Models\Warehouse;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 
 class StockReportingService
@@ -15,7 +14,7 @@ class StockReportingService
     /**
      * Get stock level report for all items in a warehouse.
      */
-    public function getStockLevelReport(?Warehouse $warehouse = null): Collection
+    public function getStockLevelReport(?Warehouse $warehouse = null): SupportCollection
     {
         $query = StockLevel::with(['item', 'warehouse']);
 
@@ -45,7 +44,7 @@ class StockReportingService
         ?Carbon $toDate = null,
         ?Item $item = null,
         ?Warehouse $warehouse = null
-    ): Collection {
+    ): SupportCollection {
         $query = StockMovement::with(['item', 'warehouse']);
 
         if ($fromDate) {
@@ -73,7 +72,7 @@ class StockReportingService
                 'quantity' => $movement->quantity,
                 'unit_cost' => $movement->unit_cost,
                 'total_cost' => $movement->quantity * ($movement->unit_cost ?? 0),
-                'reference' => class_basename($movement->source_type)." #{$movement->source_id}",
+                'reference' => class_basename($movement->source_type) . " #{$movement->source_id}",
                 'remarks' => $movement->remarks,
             ];
         });

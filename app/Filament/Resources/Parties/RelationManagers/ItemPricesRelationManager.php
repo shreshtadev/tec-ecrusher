@@ -37,7 +37,6 @@ class ItemPricesRelationManager extends RelationManager
             ]);
     }
 
-    #[Override]
     public function form(Schema $schema): Schema
     {
         return $schema->components([

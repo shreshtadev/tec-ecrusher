@@ -14,7 +14,7 @@ class TripsheetColumnDef
             'vehicle.vehicle_number' => 'Vehicle',
             'item.material_name' => 'Item',
             'quantity_cft' => 'Quantity',
-            'created_at' => 'Created At',
+            'challan_date' => 'Challan Date',
         ];
     }
 

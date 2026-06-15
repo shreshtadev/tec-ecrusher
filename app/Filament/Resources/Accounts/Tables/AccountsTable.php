@@ -15,6 +15,8 @@ class AccountsTable
     {
         return $table
             ->columns([
+                TextColumn::make('party.full_name')
+                    ->label('Party Name'),
                 TextColumn::make('title')
                     ->searchable(),
                 TextColumn::make('account_number')

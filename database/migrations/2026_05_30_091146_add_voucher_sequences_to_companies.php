@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('companies', function (Blueprint $table) {
             $table->string('voucher_prefix', 20)->nullable()->default('VCH')->after('invoice_prefix');
             $table->string('voucher_number_format', 50)->nullable()->after('invoice_number_format')->nullable();
-            $table->unsignedInteger('voucher_sequence')->nullable()->after('invoice_sequence')->default(1);
+            $table->unsignedInteger('voucher_sequence')->nullable()->after('invoice_sequence')->default(0);
         });
     }
 

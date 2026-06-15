@@ -6,6 +6,8 @@ use App\Enums\NavigGroup;
 use App\Filament\Resources\Parties\Pages\CreateParty;
 use App\Filament\Resources\Parties\Pages\EditParty;
 use App\Filament\Resources\Parties\Pages\ListParties;
+use App\Filament\Resources\Parties\RelationManagers\AccountsRelationManager;
+use App\Filament\Resources\Parties\RelationManagers\DriversRelationManager;
 use App\Filament\Resources\Parties\RelationManagers\ItemPricesRelationManager;
 use App\Filament\Resources\Parties\RelationManagers\VehiclesRelationManager;
 use App\Filament\Resources\Parties\Schemas\PartyForm;
@@ -43,6 +45,8 @@ class PartyResource extends Resource
         return [
             ItemPricesRelationManager::class,
             VehiclesRelationManager::class,
+            DriversRelationManager::class,
+            AccountsRelationManager::class,
         ];
     }
 

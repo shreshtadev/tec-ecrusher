@@ -15,4 +15,9 @@ class Warehouse extends BModel
     {
         return $this->hasMany(ProductionEntry::class);
     }
+
+    public function challan_items()
+    {
+        return $this->hasMany(ChallanItem::class);
+    }
 }

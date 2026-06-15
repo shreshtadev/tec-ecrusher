@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::table('companies', function (Blueprint $table) {
             $table->unsignedInteger('invoice_sequence')
-                ->default(1)->after('challan_prefix');
+                ->default(0)->after('challan_prefix');
 
             $table->unsignedInteger('challan_sequence')
-                ->default(1)->after('invoice_sequence');
+                ->default(0)->after('invoice_sequence');
         });
     }
 

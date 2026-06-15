@@ -13,4 +13,9 @@ class Account extends LModel
     {
         return $this->hasMany(Voucher::class, 'to_account_id');
     }
+
+    public function party()
+    {
+        return $this->belongsTo(Party::class);
+    }
 }

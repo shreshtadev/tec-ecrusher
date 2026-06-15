@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Invoices\Schemas;
 use App\Enums\PaymentOpts;
 use App\Models\Company;
 use App\Models\Party;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
@@ -20,6 +21,12 @@ class InvoiceForm
                 TextInput::make('invoice_number')
                     ->hiddenOn('create')
                     ->readOnly('edit'),
+                DateTimePicker::make('invoice_date')
+                    ->required()
+                    ->placeholder("Please select a correct date.")
+                    ->seconds(false)
+                    ->default(now())
+                    ->native(false),
                 Select::make('company_id')
                     ->label('Companny')
                     ->relationship('company', 'name')

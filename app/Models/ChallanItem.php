@@ -6,14 +6,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ChallanItem extends LModel
 {
-    protected $fillable = [
-        'challan_id',
-        'item_id',
-        'quantity_cft',
-        'rate_at_sale',
-        'amount',
-    ];
-
     public function challan(): BelongsTo
     {
         return $this->belongsTo(Challan::class);
@@ -22,5 +14,10 @@ class ChallanItem extends LModel
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
     }
 }

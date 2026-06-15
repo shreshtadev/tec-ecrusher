@@ -15,6 +15,9 @@ class AccountForm
     {
         return $schema
             ->components([
+                Select::make('party_id')
+                    ->relationship('party', 'full_name')
+                    ->native(false),
                 TextInput::make('title')
                     ->required(),
                 TextInput::make('account_number')
