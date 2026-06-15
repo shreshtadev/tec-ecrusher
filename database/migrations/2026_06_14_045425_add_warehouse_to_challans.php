@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Party;
+use App\Models\Warehouse;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('challan_items', function (Blueprint $table) {
-            $table->foreignId('warehouse_id')->constrained();
+            $table->foreignIdFor(Warehouse::class);
         });
 
         Schema::table('challans', function (Blueprint $table) {
