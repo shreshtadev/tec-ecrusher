@@ -112,6 +112,8 @@ return new class extends Migration
             $table->date('challan_last_reset_at')->nullable();
             $table->date('invoice_last_reset_at')->nullable();
             $table->date('voucher_last_reset_at')->nullable();
+            $table->date('party_account_last_reset_at')->nullable();
+            $table->date('company_account_last_reset_at')->nullable();
         });
 
         Schema::create('drivers', function (Blueprint $table) {

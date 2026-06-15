@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Accounts\Tables;
 
+use App\Enums\AccountType;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -22,7 +23,7 @@ class AccountsTable
                 TextColumn::make('account_number')
                     ->searchable(),
                 TextColumn::make('account_type')
-                    ->searchable(),
+                    ->searchable()->badge()->formatStateUsing(fn(string $state): string => AccountType::displayValz(AccountType::from($state))),
                 TextColumn::make('balance')
                     ->sortable(),
                 IconColumn::make('is_active')

@@ -9,4 +9,9 @@ enum AccountType: string
     case EQUITY = 'equity';
     case INCOME = 'income';
     case EXPENSE = 'expense';
+
+    public static function displayValz(AccountType $vl): string
+    {
+        return ucfirst(str_replace('_', ' ', $vl->value));
+    }
 }

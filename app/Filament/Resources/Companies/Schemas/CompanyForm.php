@@ -32,14 +32,14 @@ class CompanyForm
                             ->maxLength(15)
                             ->regex('/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[A-Z0-9]{1}Z[A-Z0-9]{1}$/')
                             ->live()
-                            ->afterStateUpdated(fn ($state, $set) => $set('gstin', strtoupper($state))),
+                            ->afterStateUpdated(fn($state, $set) => $set('gstin', strtoupper($state))),
 
                         TextInput::make('pan')
                             ->label('PAN')
                             ->maxLength(10)
                             ->regex('/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/')
                             ->live()
-                            ->afterStateUpdated(fn ($state, $set) => $set('pan', strtoupper($state))),
+                            ->afterStateUpdated(fn($state, $set) => $set('pan', strtoupper($state))),
 
                         TextInput::make('cin')
                             ->label('CIN')
@@ -77,7 +77,7 @@ class CompanyForm
                             ->options(
                                 collect(IndianStates::options())
                                     ->mapWithKeys(
-                                        fn ($state) => [$state['name'] => $state['name']]
+                                        fn($state) => [$state['name'] => $state['name']]
                                     )
                                     ->toArray()
                             )
@@ -87,7 +87,7 @@ class CompanyForm
 
                                 $code = collect(IndianStates::options())
                                     ->search(
-                                        fn ($item) => $item['name'] === $state
+                                        fn($item) => $item['name'] === $state
                                     );
 
                                 $set('state_code', $code);
@@ -120,7 +120,7 @@ class CompanyForm
                             ->label('IFSC')
                             ->maxLength(11)
                             ->live()
-                            ->afterStateUpdated(fn ($state, $set) => $set('ifsc', strtoupper($state))),
+                            ->afterStateUpdated(fn($state, $set) => $set('ifsc', strtoupper($state))),
 
                         TextInput::make('branch')
                             ->maxLength(100),
@@ -132,18 +132,27 @@ class CompanyForm
                         TextInput::make('invoice_prefix')
                             ->required()
                             ->default('INV')
-                            ->maxLength(20),
+                            ->maxLength(5),
 
                         TextInput::make('challan_prefix')
                             ->label('Tripsheet Prefix')
                             ->required()
                             ->default('CHL')
-                            ->maxLength(20),
+                            ->maxLength(5),
                         TextInput::make('voucher_prefix')
                             ->label('Voucher Prefix')
                             ->required()
                             ->default('VCH')
-                            ->maxLength(20),
+                            ->maxLength(5),
+                        TextInput::make('company_account_prefix')
+                            ->label('Company Account Prefix')
+                            ->required()
+                            ->default('CAC')
+                            ->maxLength(5),
+                        TextInput::make('party_account_prefix')
+                            ->required()
+                            ->default('PAC')
+                            ->maxLength(5),
 
                         TextInput::make('invoice_number_format')
                             ->helperText('Example: {PREFIX}/{FY}/{NUMBER}')
@@ -172,6 +181,14 @@ class CompanyForm
                             ->minValue(0),
                         TextInput::make('voucher_sequence')
                             ->label('Current Voucher Number')
+                            ->numeric()
+                            ->minValue(0),
+                        TextInput::make('party_account_sequence')
+                            ->label('Current Party Account Number')
+                            ->numeric()
+                            ->minValue(0),
+                        TextInput::make('company_account_sequence')
+                            ->label('Current Company Account Number')
                             ->numeric()
                             ->minValue(0),
                     ])

@@ -15,11 +15,18 @@ class AccountForm
     {
         return $schema
             ->components([
+                Select::make('company_id')
+                    ->label('Company')
+                    ->relationship('company', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->required()
+                    ->default(fn(Select $component): string => array_key_first($component->getOptions()))
+                    ->native(false),
                 Select::make('party_id')
                     ->relationship('party', 'full_name')
                     ->native(false),
-                TextInput::make('title')
-                    ->required(),
                 TextInput::make('account_number')
                     ->default(null),
                 Select::make('account_type')
