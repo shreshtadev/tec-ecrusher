@@ -15,6 +15,8 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Tables\Enums\PaginationMode;
+use Filament\Tables\Table;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -25,6 +27,18 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
+    public function boot(): void
+    {
+        // This configures all tables within this specific panel
+        Table::configureUsing(function (Table $table): void {
+            $table->defaultPaginationPageOption(25)
+                ->paginationPageOptions([10, 25, 50, 100]);
+
+            // Optional: $table->simplePagination();
+            Optional:
+            $table->paginationMode(PaginationMode::Cursor);
+        });
+    }
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -37,7 +51,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->brandName(config('app.name'))
-            ->brandLogo(fn () => view('filament.brand'))
+            ->brandLogo(fn() => view('filament.brand'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
@@ -67,6 +81,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])->renderHook(PanelsRenderHook::FOOTER, fn () => view('filament.footer'));
+            ])->renderHook(PanelsRenderHook::FOOTER, fn() => view('filament.footer'));
     }
 }

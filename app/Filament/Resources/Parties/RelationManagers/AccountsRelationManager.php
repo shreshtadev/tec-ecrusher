@@ -27,8 +27,15 @@ class AccountsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                TextInput::make('title')
-                    ->required(),
+                Select::make('company_id')
+                    ->label('Company')
+                    ->relationship('company', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->required()
+                    ->default(fn(Select $component): string => array_key_first($component->getOptions()))
+                    ->native(false),
                 TextInput::make('account_number')
                     ->default(null),
                 TextInput::make('account_type')
@@ -40,14 +47,14 @@ class AccountsRelationManager extends RelationManager
                     ->default(null),
                 Select::make('account_mode')
                     ->options(['cash' => 'Cash', 'bank' => 'Bank', 'ledger' => 'Ledger'])
-                    ->default('cash')
-                    ->required(),
+                    ->default('ledger')
+                    ->required()->native(false),
                 TextInput::make('balance')
                     ->required()
                     ->numeric()
                     ->default(0.0),
                 Toggle::make('is_active')
-                    ->required(),
+                    ->required()->default(true),
             ]);
     }
 

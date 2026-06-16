@@ -5,10 +5,12 @@ namespace App\Filament\Resources\Vouchers\Schemas;
 use App\Enums\IndianStates;
 use App\Enums\PaymentOpts;
 use App\Enums\VoucherOpts;
+use App\Models\Account;
 use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\Party;
 use App\Models\Voucher;
+use Closure;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -166,18 +168,22 @@ class VoucherForm
                             ->relationship(
                                 name: 'fromAccount',
                                 titleAttribute: 'title',
-                                modifyQueryUsing: function ($query, Get $get) {
-                                    $partyId = $get('party_id');
-                                    $baseFilter = $query->where('id', '!=', $get('to_account_id'));
-                                    if (!blank($partyId)) {
-                                        return $baseFilter->where('party_id', '=', $partyId);
-                                    }
-                                    return $baseFilter;
-                                }
+                                modifyQueryUsing: fn($query, Get $get) => $query->where('id', '!=', $get('to_account_id'))
                             )
                             ->searchable()
                             ->preload()
                             ->live()
+                            ->getOptionLabelFromRecordUsing(
+                                fn($record) => $record->party->full_name ?? 'No Party'
+                            )->rule(function () {
+                                return function (string $attribute, $value, Closure $fail) {
+                                    $account = Account::with('party')->find($value);
+
+                                    if (! $account?->party) {
+                                        $fail('The selected account is not linked to a party.');
+                                    }
+                                };
+                            })
                             ->required(fn(Get $get): bool => in_array(
                                 $get('voucher_type'),
                                 [VoucherOpts::PAYMENT, VoucherOpts::RECEIPT]
@@ -194,6 +200,18 @@ class VoucherForm
                             ->searchable()
                             ->preload()
                             ->live()
+                            ->getOptionLabelFromRecordUsing(
+                                fn($record) => $record->party?->full_name ?? 'No Party'
+                            )
+                            ->rule(function () {
+                                return function (string $attribute, $value, Closure $fail) {
+                                    $account = Account::with('party')->find($value);
+
+                                    if (! $account?->party) {
+                                        $fail('The selected account is not linked to a party.');
+                                    }
+                                };
+                            })
                             ->required(fn(Get $get): bool => in_array(
                                 $get('voucher_type'),
                                 [VoucherOpts::PAYMENT, VoucherOpts::RECEIPT]
