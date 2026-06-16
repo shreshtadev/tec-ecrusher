@@ -520,13 +520,6 @@
                         </td>
                     </tr>
 
-                    <tr>
-                        <td>Driver Bata</td>
-                        <td class="text-right">
-                            ₹{{ number_format($record->driver_bata, 2) }}
-                        </td>
-                    </tr>
-
                     <tr class="grand-total">
                         <td>Grand Total</td>
                         <td class="text-right">

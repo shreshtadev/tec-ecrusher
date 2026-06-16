@@ -26,6 +26,8 @@ class ProductionEntryResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::Operation;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Schema $schema): Schema
     {
         return ProductionEntryForm::configure($schema);

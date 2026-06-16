@@ -30,4 +30,9 @@ class Company extends LModel
     {
         return $this->hasMany(Account::class);
     }
+
+    public function stockIssues(): HasMany
+    {
+        return $this->hasMany(StockIssue::class);
+    }
 }

@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class StockIssueItem extends Model
+class StockIssueItem extends BModel
 {
     public function item()
     {

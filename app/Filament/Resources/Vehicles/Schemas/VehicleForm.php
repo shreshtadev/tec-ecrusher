@@ -17,7 +17,7 @@ class VehicleForm
                 Select::make('party_id')
                     ->relationship('party', 'full_name'),
                 TextInput::make('vehicle_number')
-                    ->required(),
+                    ->required()->formatStateUsing(fn($state) => str($state)->replace(' ', '')),
                 TextInput::make('capacity_cft')
                     ->label('Capacity')
                     ->numeric(),
@@ -26,7 +26,7 @@ class VehicleForm
                     ->default('CFT')
                     ->options(
                         collect(UnitOpts::unitOptions())
-                            ->mapWithKeys(fn ($unit, $key) => [
+                            ->mapWithKeys(fn($unit, $key) => [
                                 $key => "
                 <div style='display:flex; flex-direction:column;'>
                     <span style='font-weight:600;'>
@@ -46,7 +46,7 @@ class VehicleForm
                     ->allowHtml()
                     ->options(
                         collect(VehicleOpts::vehicleTypeOptions())
-                            ->mapWithKeys(fn ($type, $key) => [
+                            ->mapWithKeys(fn($type, $key) => [
                                 $key => "
                     <div style='display:flex; flex-direction:column;'>
                         <span style='font-weight:600;'>

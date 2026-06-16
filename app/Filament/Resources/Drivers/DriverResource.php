@@ -24,6 +24,8 @@ class DriverResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::MasterData;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $recordTitleAttribute = 'full_name';
 
     public static function form(Schema $schema): Schema

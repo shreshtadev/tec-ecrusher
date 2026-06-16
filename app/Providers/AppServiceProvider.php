@@ -5,10 +5,12 @@ namespace App\Providers;
 use App\Models\InvoiceAllocation;
 use App\Models\InvoiceItem;
 use App\Models\ProductionEntry;
+use App\Models\StockIssue;
 use App\Models\Voucher;
 use App\Observers\InvoiceAllocationObserver;
 use App\Observers\InvoiceItemObserver;
 use App\Observers\ProductionEntryObserver;
+use App\Observers\StockIssueObserver;
 use App\Observers\VoucherObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -36,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
         InvoiceItem::observe(InvoiceItemObserver::class);
         Voucher::observe(VoucherObserver::class);
         InvoiceAllocation::observe(InvoiceAllocationObserver::class);
+        StockIssue::observe(StockIssueObserver::class);
     }
 
     /**

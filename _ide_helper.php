@@ -29179,6 +29179,13 @@ namespace App\Filament\Resources\Items\Pages {
             }
     }
 
+namespace App\Filament\Resources\Items\RelationManagers {
+    /**
+     */
+    class ProductionEntriesRelationManager extends \Filament\Resources\RelationManagers\RelationManager {
+            }
+    }
+
 namespace App\Filament\Resources\Parties\Pages {
     /**
      */
@@ -29225,6 +29232,28 @@ namespace App\Filament\Resources\ProductionEntries\Pages {
     /**
      */
     class ListProductionEntries extends \Filament\Resources\Pages\ListRecords {
+            }
+    }
+
+namespace App\Filament\Resources\StockIssues\Pages {
+    /**
+     */
+    class CreateStockIssue extends \Filament\Resources\Pages\CreateRecord {
+            }
+    /**
+     */
+    class EditStockIssue extends \Filament\Resources\Pages\EditRecord {
+            }
+    /**
+     */
+    class ListStockIssues extends \Filament\Resources\Pages\ListRecords {
+            }
+    }
+
+namespace App\Filament\Resources\StockIssues\RelationManagers {
+    /**
+     */
+    class StockIssueItemsRelationManager extends \Filament\Resources\RelationManagers\RelationManager {
             }
     }
 

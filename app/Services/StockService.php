@@ -640,7 +640,7 @@ class StockService
     {
         $invoice = Invoice::create([
             'party_id' => $challan->party_id,
-            'total_amount' => $challan->challan_items->sum('amount') + $challan->driver_bata,
+            'total_amount' => $challan->challan_items->sum('amount'),
             'driver_bata' => $challan->driver_bata,
             'payment_mode' => $challan->payment_mode ?? PaymentOpts::AC,
             'company_id' => $challan->company_id,

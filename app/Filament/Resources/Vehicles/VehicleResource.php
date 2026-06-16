@@ -24,6 +24,8 @@ class VehicleResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::MasterData;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $recordTitleAttribute = 'vehicle_number';
 
     public static function form(Schema $schema): Schema
