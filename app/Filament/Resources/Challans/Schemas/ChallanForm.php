@@ -13,7 +13,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Fruitcake\LaravelDebugbar\Facades\Debugbar;
 use Illuminate\Support\HtmlString;
 
 class ChallanForm
@@ -54,19 +53,15 @@ class ChallanForm
                     ->disabled(fn(Get $get) => blank($get('company_id')))
                     ->dehydrated()
                     ->afterStateUpdated(function ($state, Get $get, Set $set) {
-                        Debugbar::info("PartyId: {$state}");
                         $itemId = $get('item_id');
-                        Debugbar::info("ItemID: {$itemId}");
                         $item = Item::find($itemId);
                         $price = PartyItemPrice::query()
                             ->where('party_id', $state)
                             ->where('item_id', $itemId)
                             ->value('price_per_unit');
-                        Debugbar::info("PriceByParty: {$price}");
                         if ($item) {
                             if (!$price) {
                                 $price ??= $item->price_per_unit;
-                                Debugbar::info("PriceNotFound: {$price}");
                             }
                             $set('rate_at_sale', $price);
                             $set('quantity_cft', 0);
@@ -139,20 +134,17 @@ class ChallanForm
                             ->dehydrated()
                             ->native(false)
                             ->afterStateUpdated(function ($state, Get $get, Set $set) {
-                                Debugbar::info("ITEMID: {$state}");
+
                                 $item = Item::find($state);
                                 $partyId = $get('../../party_id');
-                                Debugbar::info("PartyFound: {$partyId}");
                                 $price = PartyItemPrice::query()
                                     ->where('party_id', $partyId)
                                     ->where('item_id', $state)
                                     ->value('price_per_unit');
-                                Debugbar::info("PriceByPartyHere: {$price}");
 
                                 if ($item) {
                                     if (!$price) {
                                         $price ??= $item->price_per_unit;
-                                        Debugbar::info("PriceNoPartyHere: {$price}");
                                     }
                                     $set('rate_at_sale', $price);
                                     $set('quantity_cft', 0);

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Parties\RelationManagers;
 
+use App\Enums\AccountType;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -38,7 +39,13 @@ class AccountsRelationManager extends RelationManager
                     ->native(false),
                 TextInput::make('account_number')
                     ->default(null),
-                TextInput::make('account_type')
+                Select::make('account_type')
+                    ->options(collect(AccountType::cases())
+                        ->mapWithKeys(fn($case) => [
+                            $case->value => ucfirst($case->value),
+                        ])
+                        ->toArray())
+                    ->native(false)
                     ->required()
                     ->default('asset'),
                 TextInput::make('bank_name')

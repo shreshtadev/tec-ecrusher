@@ -11,7 +11,6 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Fruitcake\LaravelDebugbar\Facades\Debugbar;
 
 class StockIssueItemRelationForm
 {
@@ -28,11 +27,11 @@ class StockIssueItemRelationForm
         return $schema->components([
             Select::make("item_id")->relationship('item', 'material_name')->required()->live()->native(false)->afterStateUpdated(function ($state, Get $get, Set $set, RelationManager $livewire) {
                 $warehouseId = $livewire->getOwnerRecord()->warehouse_id;
-                Debugbar::debug("Warehouse: {$warehouseId}");
+                logger()->debug("Warehouse: {$warehouseId}");
                 $itemId = $get('item_id');
-                Debugbar::debug("Item: {$itemId}");
+                logger()->debug("Item: {$itemId}");
                 $availableQuantity = StockLevel::where(['warehouse_id' => $warehouseId, 'item_id' => $itemId])->first()->value('available_qty');
-                Debugbar::debug("Available Quantity: {$availableQuantity}");
+                logger()->debug("Available Quantity: {$availableQuantity}");
                 $set('available_quantity', $availableQuantity);
             }),
             Hidden::make("available_quantity")

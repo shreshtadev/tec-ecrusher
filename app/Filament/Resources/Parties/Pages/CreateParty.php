@@ -6,7 +6,6 @@ use App\Filament\Resources\Parties\PartyResource;
 use App\Models\Account;
 use Exception;
 use Filament\Resources\Pages\CreateRecord;
-use Fruitcake\LaravelDebugbar\Facades\Debugbar;
 
 class CreateParty extends CreateRecord
 {
@@ -20,9 +19,9 @@ class CreateParty extends CreateRecord
                 'account_mode' => 'bank',
                 'is_active' => true,
             ]);
-            Debugbar::info("Default account created. {$defaultAccount->title}");
+            logger()->info("Default account created. {$defaultAccount->title}");
         } catch (Exception $e) {
-            Debugbar::error("Error creating default account.");
+            logger()->error("Error creating default account.");
             report($e);
         }
     }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Parties\RelationManagers;
 
+use App\Filament\Resources\Drivers\Schemas\DriverRelationForm;
 use App\Filament\Resources\Parties\PartyResource;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\TextInput;
@@ -33,11 +34,6 @@ class DriversRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return $schema->components([
-            TextInput::make('full_name')
-                ->required(),
-            TextInput::make('phone_number')
-                ->tel()->required(),
-        ]);
+        return DriverRelationForm::configure($schema);
     }
 }

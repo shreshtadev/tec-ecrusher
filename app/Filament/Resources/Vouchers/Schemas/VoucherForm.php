@@ -75,6 +75,12 @@ class VoucherForm
                             ->preload()
                             ->live()
                             ->required(),
+                        TextInput::make("ref_no")
+                            ->live()
+                            ->dehydrated(false)->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                $paymentMode = $get("payment_mode");
+                                $set('remarks', "Payment via " . $paymentMode . " with reference number" . $state);
+                            }),
                     ])->columns(2),
 
                 Section::make('Transaction')
@@ -159,7 +165,7 @@ class VoucherForm
                             ->required(),
 
                         Select::make('payment_mode')
-                            ->options(PaymentOpts::options())->default(PaymentOpts::AC)->native(false),
+                            ->options(PaymentOpts::options())->default(PaymentOpts::AC)->native(false)->live(),
                     ])->columns(2),
                 Section::make('Additional Information')
                     ->schema([
@@ -218,7 +224,7 @@ class VoucherForm
                             ) && $get('payment_mode') !== PaymentOpts::CASH)
                             ->different('from_account_id', 'To Account must be different from From Account'),
                     ]),
-                Textarea::make('remarks')->columnSpanFull(),
+                Textarea::make('remarks')->columnSpanFull()->live(),
             ]);
     }
 }
