@@ -24,7 +24,6 @@ class ItemsTable
                     ->searchable(),
                 TextColumn::make('price_per_unit')
                     ->money('INR')->alignment('left'),
-                TextColumn::make('unit'),
                 TextColumn::make('available_qty')
                     ->label('Available Quantity')
                     ->getStateUsing(function ($record) {
@@ -33,6 +32,7 @@ class ItemsTable
                         // Null check to prevent errors if no stock record exists
                         return $stockLevel ? $stockLevel->available_qty : 0;
                     }),
+                TextColumn::make('unit'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
