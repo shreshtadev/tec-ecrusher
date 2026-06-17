@@ -27,6 +27,7 @@ class InvoiceItemsRelationManager extends RelationManager
             ->recordTitleAttribute('id')
             ->columns([
                 TextColumn::make('id')->label('Sl No.'),
+                TextColumn::make('item.material_name'),
                 TextColumn::make('quantity')->label('Quantity'),
                 TextColumn::make('rate_at_sale')->label('Rate at Sale'),
                 TextColumn::make('amount')->label('Amount'),

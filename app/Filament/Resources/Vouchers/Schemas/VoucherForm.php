@@ -79,7 +79,7 @@ class VoucherForm
                             ->live()
                             ->dehydrated(false)->afterStateUpdated(function ($state, Get $get, Set $set) {
                                 $paymentMode = $get("payment_mode");
-                                $set('remarks', "Payment via " . $paymentMode . " with reference number" . $state);
+                                $set('remarks', "Payment via " . $paymentMode . " with reference number " . $state);
                             }),
                     ])->columns(2),
 
@@ -165,7 +165,10 @@ class VoucherForm
                             ->required(),
 
                         Select::make('payment_mode')
-                            ->options(PaymentOpts::options())->default(PaymentOpts::AC)->native(false)->live(),
+                            ->options(PaymentOpts::options())->default(PaymentOpts::AC)->native(false)->live()->afterStateUpdated(function ($state, Get $get, Set $set) {
+                                $refNo = $get('ref_no');
+                                $set('remarks', "Payment via " . $state . " with reference number " . $refNo);
+                            }),
                     ])->columns(2),
                 Section::make('Additional Information')
                     ->schema([
