@@ -269,7 +269,7 @@
                         </td>
 
                         <td>
-                            {{ $record->created_at->format('d-m-Y') }}
+                            {{ $record->invoice_date->format('d-m-Y') }}
                         </td>
                     </tr>
 
@@ -380,7 +380,7 @@
                             </td>
 
                             <td>
-                                {{ $challan->created_at->format('d-m-Y') }}
+                                {{ $challan->invoice_date->format('d-m-Y') }}
                             </td>
 
                             <td>
@@ -439,7 +439,7 @@
                         </td>
 
                         <td>
-                            {{ $record->created_at->format('d-m-Y') }}
+                            {{ $record->invoice_date->format('d-m-Y') }}
                         </td>
 
                         <td>

@@ -25,7 +25,7 @@
                 text-align: left;
             ">
                 <strong>Date:</strong>
-                {{ $record->created_at->format('d-m-Y') }}
+                {{ $record->challan_date->format('d-m-Y') }}
             </div>
 
             <div
@@ -36,7 +36,7 @@
                 text-align: left;
             ">
                 <strong>Time:</strong>
-                {{ $record->created_at->format('H:i') }}
+                {{ $record->challan_date->format('H:i') }}
             </div>
 
         </td>
