@@ -269,7 +269,7 @@
                         </td>
 
                         <td>
-                            {{ $record->invoice_date->format('d-m-Y') }}
+                            {{ date('d-m-Y', strtotime($record->invoice_date)) }}
                         </td>
                     </tr>
 
@@ -329,7 +329,7 @@
             <tr>
                 <th width="4%">#</th>
                 <th width="10%">Challan No</th>
-                <th width="8%">Date</th>
+                <th width="8%">Challan Date</th>
                 <th width="22%">Material</th>
                 <th width="10%">Vehicle</th>
                 <th width="12%">Driver</th>
@@ -380,7 +380,7 @@
                             </td>
 
                             <td>
-                                {{ $challan->invoice_date->format('d-m-Y') }}
+                                {{ date('d-m-Y', strtotime($challan->challan_date)) }}
                             </td>
 
                             <td>
@@ -392,7 +392,7 @@
                             </td>
 
                             <td>
-                                {{ $challan->driver->driver_name ?? '-' }}
+                                {{ $challan->driver->full_name ?? '-' }}
                             </td>
 
                             <td class="text-right">
@@ -439,7 +439,7 @@
                         </td>
 
                         <td>
-                            {{ $record->invoice_date->format('d-m-Y') }}
+                            {{ date('d-m-Y', strtotime($record->invoice_date)) }}
                         </td>
 
                         <td>

@@ -25,7 +25,7 @@
                 text-align: left;
             ">
                 <strong>Date:</strong>
-                {{ $record->challan_date->format('d-m-Y') }}
+                {{ date('d-m-Y', strtotime($record->challan_date)) }}
             </div>
 
             <div
@@ -36,7 +36,7 @@
                 text-align: left;
             ">
                 <strong>Time:</strong>
-                {{ $record->challan_date->format('H:i') }}
+                {{ date('H:i', strtotime($record->challan_date)) }}
             </div>
 
         </td>
@@ -57,7 +57,7 @@
     @if ($record->driver)
         <tr>
             <td style="padding: 2px 0;"><strong>Driver:</strong></td>
-            <td style="padding: 2px 0;">{{ $record->driver->name ?? 'N/A' }}</td>
+            <td style="padding: 2px 0;">{{ $record->driver->full_name ?? 'N/A' }}</td>
         </tr>
     @endif
     <tr>
@@ -108,20 +108,5 @@
     @endif
 @endif
 
-<!-- Signature Section -->
-<div style="margin-top: 30px; width: 100%;">
-    <table style="width: 100%; border-collapse: collapse;">
-        <tr>
-            <td
-                style="width: 50%; padding-top: 20px; border-top: 1px solid #000; text-align: center; font-size: 0.9rem;">
-                Driver Sign.
-            </td>
-            <td
-                style="width: 50%; padding-top: 20px; border-top: 1px solid #000; text-align: center; font-size: 0.9rem;">
-                Officer Sign.
-            </td>
-        </tr>
-    </table>
-</div>
 
 <div style="height: 10mm;"></div>
