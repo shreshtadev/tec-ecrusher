@@ -3,12 +3,15 @@
 namespace App\Filament\Pages;
 
 use App\Enums\NavigGroup;
-use App\Services\StockReportingService;
 use App\Models\Item;
 use App\Models\Warehouse;
-use Carbon\Carbon;
+use App\Services\ExportToExcelService;
+use App\Services\StockReportingService;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use Carbon\Carbon;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
@@ -23,6 +26,7 @@ class StockReport extends Page implements HasSchemas
     use HasPageShield, InteractsWithSchemas;
 
     protected string $view = 'filament.pages.stock-report';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
 
     protected static UnitEnum|string|null $navigationGroup = NavigGroup::Reports;
@@ -38,6 +42,92 @@ class StockReport extends Page implements HasSchemas
         ]);
 
         $this->loadReport();
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ActionGroup::make([
+                Action::make('download_stock_levels')
+                    ->label('Stock Levels (All Items)')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function () {
+                        $service = app(StockReportingService::class);
+
+                        $warehouse = null;
+                        if (! empty($this->data['warehouse_id'])) {
+                            $warehouseId = $this->extractId($this->data['warehouse_id']);
+                            $warehouse = $warehouseId ? Warehouse::find($warehouseId) : null;
+                        }
+
+                        $stockLevels = $service->getStockLevelReport($warehouse);
+
+                        $warehouseLabel = $warehouse ? '-'.str($warehouse->name)->slug() : '';
+                        $fileName = 'stock-levels'.$warehouseLabel.'-'.now()->format('Y-m-d').'.xlsx';
+
+                        return ExportToExcelService::download(
+                            $stockLevels,
+                            [
+                                'item_name' => 'Item',
+                                'item_unit' => 'Unit',
+                                'warehouse' => 'Warehouse',
+                                'available_qty' => 'Available Qty',
+                                'reserved_qty' => 'Reserved Qty',
+                                'total_qty' => 'Total Qty',
+                                'price_per_unit' => 'Price / Unit',
+                                'stock_value' => 'Stock Value',
+                            ],
+                            'Stock Levels',
+                            $fileName,
+                        );
+                    }),
+
+                Action::make('download_stock_movements')
+                    ->label('Stock Movements')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function () {
+                        $service = app(StockReportingService::class);
+
+                        [$from, $to] = $this->getDateRange();
+
+                        $item = null;
+                        if (! empty($this->data['item_id'])) {
+                            $itemId = $this->extractId($this->data['item_id']);
+                            $item = $itemId ? Item::find($itemId) : null;
+                        }
+
+                        $warehouse = null;
+                        if (! empty($this->data['warehouse_id'])) {
+                            $warehouseId = $this->extractId($this->data['warehouse_id']);
+                            $warehouse = $warehouseId ? Warehouse::find($warehouseId) : null;
+                        }
+
+                        $movements = $service->getMovementReport($from, $to, $item, $warehouse);
+
+                        $fileName = 'stock-movements-'.$from->format('Y-m-d').'-to-'.$to->format('Y-m-d').'.xlsx';
+
+                        return ExportToExcelService::download(
+                            $movements,
+                            [
+                                'date' => 'Date',
+                                'item' => 'Item',
+                                'warehouse' => 'Warehouse',
+                                'movement_type' => 'Type',
+                                'quantity' => 'Quantity',
+                                'unit_cost' => 'Unit Cost',
+                                'total_cost' => 'Total Cost',
+                                'reference' => 'Reference',
+                                'remarks' => 'Remarks',
+                            ],
+                            'Stock Movements',
+                            $fileName,
+                        );
+                    }),
+            ])
+                ->label('Download Report')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->button(),
+        ];
     }
 
     public function form(Schema $schema): Schema
@@ -163,6 +253,7 @@ class StockReport extends Page implements HasSchemas
                     return is_numeric($value->{$k}) ? (int) $value->{$k} : null;
                 }
             }
+
             return null;
         }
 
@@ -172,6 +263,7 @@ class StockReport extends Page implements HasSchemas
                     return is_numeric($value[$k]) ? (int) $value[$k] : null;
                 }
             }
+
             return null;
         }
 

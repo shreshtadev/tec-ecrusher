@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Widgets\DailyStats;
+use App\Filament\Widgets\DayBook;
 use App\Filament\Widgets\MaterialSalesChart;
 use App\Filament\Widgets\MonthlyComparison;
 use App\Filament\Widgets\WorkflowStatusWidget;
@@ -31,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
     {
         // This configures all tables within this specific panel
         Table::configureUsing(function (Table $table): void {
-            $table->defaultPaginationPageOption(25)
+            $table->defaultPaginationPageOption(10)
                 ->paginationPageOptions([10, 25, 50, 100]);
 
             // Optional: $table->simplePagination();
@@ -39,6 +40,7 @@ class AdminPanelProvider extends PanelProvider
             $table->paginationMode(PaginationMode::Cursor);
         });
     }
+
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -59,6 +61,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                DayBook::class,
                 WorkflowStatusWidget::class,
                 DailyStats::class,
                 MonthlyComparison::class,

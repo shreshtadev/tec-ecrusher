@@ -11,24 +11,31 @@ class DocumentNumberGenerator
         Company $company,
         DocOpts $type,
     ): string {
-        // 1. Lock the record
         $company = Company::query()
             ->lockForUpdate()
             ->findOrFail($company->id);
 
-        $prefixColumn = "{$type->value}_prefix";
+        $prefixColumn   = "{$type->value}_prefix";
         $sequenceColumn = "{$type->value}_sequence";
-        $dateColumn = "{$type->value}_last_reset_at";
+        $dateColumn     = "{$type->value}_last_reset_at";
 
-        $today = now()->format('Y-m-d');
-        $lastDate = $company->{$dateColumn};
+        $today = now()->toDateString();
 
-        // 2. Logic: Reset if the date has changed
-        $nextSequence = ($lastDate === $today) ? ($company->{$sequenceColumn} + 1) : 1;
+        if (array_key_exists($dateColumn, $company->getAttributes())) {
+            // Reset daily
+            $lastDate = $company->{$dateColumn};
 
-        // 3. Update the company record
+            $nextSequence = ($lastDate === $today)
+                ? $company->{$sequenceColumn} + 1
+                : 1;
+
+            $company->{$dateColumn} = $today;
+        } else {
+            // No reset column, just keep incrementing
+            $nextSequence = $company->{$sequenceColumn} + 1;
+        }
+
         $company->{$sequenceColumn} = $nextSequence;
-        $company->{$dateColumn} = $today;
         $company->save();
 
         return sprintf(

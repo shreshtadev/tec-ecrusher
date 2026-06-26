@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Enums\DocOpts;
-use App\Events\ChallanCreated;
 use App\Services\DocumentNumberGenerator;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Challan extends SModel
@@ -38,11 +38,6 @@ class Challan extends SModel
         return $this->belongsTo(Driver::class);
     }
 
-    public function item()
-    {
-        return $this->belongsTo(Item::class);
-    }
-
     // Link to the resulting Invoice
     public function invoice()
     {
@@ -63,5 +58,20 @@ class Challan extends SModel
     public function challan_items()
     {
         return $this->hasMany(ChallanItem::class);
+    }
+
+    /**
+     * Get all items associated with this challan through challan_items.
+     */
+    public function items(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Item::class,
+            ChallanItem::class,
+            'challan_id',  // Foreign key on challan_items table
+            'id',          // Foreign key on items table
+            'id',          // Local key on challans table
+            'item_id'      // Local key on challan_items table
+        );
     }
 }

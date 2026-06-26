@@ -19,9 +19,6 @@ class UsersTable
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),
-                TextColumn::make('roles.name')
-                    ->label('Roles')
-                    ->separator(', ')->badge(),
                 TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable(),
@@ -33,8 +30,6 @@ class UsersTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('two_factor_confirmed_at')
-                    ->dateTime()->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

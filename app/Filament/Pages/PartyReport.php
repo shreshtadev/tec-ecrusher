@@ -3,13 +3,17 @@
 namespace App\Filament\Pages;
 
 use App\Enums\NavigGroup;
+use App\Enums\PaymentOpts;
 use App\Models\Challan;
 use App\Models\ChallanItem;
 use App\Models\Invoice;
 use App\Models\Party;
+use App\Services\ExportToExcelService;
 use BackedEnum;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
@@ -17,6 +21,7 @@ use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class PartyReport extends Page implements HasSchemas
@@ -36,7 +41,7 @@ class PartyReport extends Page implements HasSchemas
     public function mount(): void
     {
         $this->form->fill([
-            'period' => 'today',
+            'period' => 'month',
         ]);
 
         $this->loadReport();
@@ -50,8 +55,10 @@ class PartyReport extends Page implements HasSchemas
 
                 Select::make('party_id')
                     ->label('Party')
+                    ->placeholder('All Parties')
                     ->options(
                         Party::query()
+                            ->has('challans')
                             ->orderBy('full_name')
                             ->pluck('full_name', 'id')
                     )
@@ -65,14 +72,33 @@ class PartyReport extends Page implements HasSchemas
                         'month' => 'This Month',
                         'custom' => 'Custom Range',
                     ])
-                    ->default('today')
+                    ->default('month')
                     ->live(),
 
-                DatePicker::make('from_date'),
+                DatePicker::make('from_date')
+                    ->visible(fn () => ($this->data['period'] ?? '') === 'custom'),
 
-                DatePicker::make('to_date'),
+                DatePicker::make('to_date')
+                    ->visible(fn () => ($this->data['period'] ?? '') === 'custom'),
+
+                Select::make('payment_status')
+                    ->label('Payment Status')
+                    ->placeholder('Any Status')
+                    ->options([
+                        'unpaid' => 'Unpaid',
+                        'partial' => 'Partial',
+                        'paid' => 'Paid',
+                    ])
+                    ->live(),
+
+                Select::make('payment_mode')
+                    ->label('Payment Mode')
+                    ->placeholder('Any Mode')
+                    ->options(PaymentOpts::options())
+                    ->live(),
+
             ])
-            ->columns(4);
+            ->columns(3);
     }
 
     public function updatedData(): void
@@ -80,9 +106,196 @@ class PartyReport extends Page implements HasSchemas
         $this->loadReport();
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            ActionGroup::make([
+
+                Action::make('download_party_summary')
+                    ->label('Party Summary')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function () {
+                        [$from, $to] = $this->getDateRange();
+
+                        $parties = Party::query()
+                            ->has('challans')
+                            ->orderBy('full_name')
+                            ->get();
+
+                        $rows = $parties->map(function (Party $party) use ($from, $to) {
+                            $invoiceQuery = Invoice::query()
+                                ->where('party_id', $party->id)
+                                ->whereBetween('invoice_date', [$from, $to]);
+
+                            $this->applyInvoiceFilters($invoiceQuery);
+
+                            $challanItemQuery = ChallanItem::query()
+                                ->join('challans', 'challans.id', '=', 'challan_items.challan_id')
+                                ->join('invoices', 'invoices.id', '=', 'challans.invoice_id')
+                                ->where('invoices.party_id', $party->id)
+                                ->whereBetween('invoices.invoice_date', [$from, $to]);
+
+                            $invoiceCount = (clone $invoiceQuery)->count();
+                            $totalAmount = (clone $invoiceQuery)->sum('total_amount');
+                            $outstanding = (clone $invoiceQuery)->sum('outstanding_amount');
+                            $totalQty = (clone $challanItemQuery)->sum('challan_items.quantity_cft');
+                            $largestInvoice = (clone $invoiceQuery)->max('total_amount');
+
+                            return [
+                                'party' => $party->full_name,
+                                'city' => $party->city,
+                                'party_type' => $party->party_type,
+                                'invoice_count' => $invoiceCount,
+                                'total_qty_cft' => round((float) $totalQty, 2),
+                                'total_amount' => round((float) $totalAmount, 2),
+                                'outstanding' => round((float) $outstanding, 2),
+                                'largest_invoice' => round((float) $largestInvoice, 2),
+                            ];
+                        })->filter(fn ($row) => $row['invoice_count'] > 0)->values();
+
+                        $fileName = 'party-summary-'.$from->format('Y-m-d').'-to-'.$to->format('Y-m-d').'.xlsx';
+
+                        return ExportToExcelService::download(
+                            $rows,
+                            [
+                                'party' => 'Party',
+                                'city' => 'City',
+                                'party_type' => 'Type',
+                                'invoice_count' => 'Invoices',
+                                'total_qty_cft' => 'Total Qty (CFT)',
+                                'total_amount' => 'Total Amount (₹)',
+                                'outstanding' => 'Outstanding (₹)',
+                                'largest_invoice' => 'Largest Invoice (₹)',
+                            ],
+                            'Party Summary',
+                            $fileName,
+                        );
+                    }),
+
+                Action::make('download_invoices')
+                    ->label('Invoices Detail')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function () {
+                        [$from, $to] = $this->getDateRange();
+
+                        $invoiceQuery = Invoice::query()
+                            ->with('party')
+                            ->whereBetween('invoice_date', [$from, $to])
+                            ->orderByDesc('invoice_date')
+                            ->orderByDesc('id');
+
+                        if (! blank($this->data['party_id'] ?? null)) {
+                            $invoiceQuery->where('party_id', $this->data['party_id']);
+                        }
+
+                        $this->applyInvoiceFilters($invoiceQuery);
+
+                        $rows = $invoiceQuery->get()->map(fn (Invoice $inv) => [
+                            'invoice_date' => date('d-m-Y', strtotime($inv->invoice_date)),
+                            'invoice_number' => $inv->invoice_number,
+                            'party' => $inv->party?->full_name,
+                            'payment_mode' => $inv->payment_mode,
+                            'payment_status' => $inv->payment_status,
+                            'total_amount' => $inv->total_amount,
+                            'discount_amount' => $inv->discount_amount,
+                            'grand_total' => $inv->grand_total,
+                            'outstanding_amount' => $inv->outstanding_amount,
+                            'driver_bata' => $inv->driver_bata,
+                        ]);
+
+                        $partyLabel = ! blank($this->data['party_id'] ?? null)
+                            ? '-'.str(Party::find($this->data['party_id'])?->full_name ?? '')->slug()
+                            : '';
+
+                        $fileName = 'invoices'.$partyLabel.'-'.$from->format('Y-m-d').'-to-'.$to->format('Y-m-d').'.xlsx';
+
+                        return ExportToExcelService::download(
+                            $rows,
+                            [
+                                'invoice_date' => 'Invoice Date',
+                                'invoice_number' => 'Invoice No',
+                                'party' => 'Party',
+                                'payment_mode' => 'Payment Mode',
+                                'payment_status' => 'Payment Status',
+                                'total_amount' => 'Total Amount (₹)',
+                                'discount_amount' => 'Discount (₹)',
+                                'grand_total' => 'Grand Total (₹)',
+                                'outstanding_amount' => 'Outstanding (₹)',
+                                'driver_bata' => 'Driver Bata (₹)',
+                            ],
+                            'Invoices',
+                            $fileName,
+                        );
+                    }),
+
+                Action::make('download_challans')
+                    ->label('Challans Detail')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function () {
+                        [$from, $to] = $this->getDateRange();
+
+                        $challanQuery = Challan::query()
+                            ->with(['party', 'vehicle', 'driver', 'items', 'invoice'])
+                            ->whereBetween('challan_date', [$from, $to])
+                            ->orderByDesc('challan_date')
+                            ->orderByDesc('id');
+
+                        if (! blank($this->data['party_id'] ?? null)) {
+                            $challanQuery->where('party_id', $this->data['party_id']);
+                        }
+
+                        if (! blank($this->data['payment_mode'] ?? null)) {
+                            $challanQuery->where('payment_mode', $this->data['payment_mode']);
+                        }
+
+                        $rows = $challanQuery->get()->map(fn (Challan $c) => [
+                            'challan_date' => date('Y-m-d H:i', strtotime($c->challan_date)),
+                            'challan_number' => $c->challan_number,
+                            'party' => $c->party?->full_name,
+                            'vehicle' => $c->vehicle?->vehicle_number ?? '-',
+                            'driver' => $c->driver?->full_name ?? '-',
+                            'item' => $c->items?->pluck('material_name')?->join(', ') ?? '-',
+                            'payment_mode' => $c->payment_mode,
+                            'status' => $c->status,
+                            'driver_bata' => $c->driver_bata,
+                            'invoice_number' => $c->invoice?->invoice_number ?? '-',
+                        ]);
+
+                        $partyLabel = ! blank($this->data['party_id'] ?? null)
+                            ? '-'.str(Party::find($this->data['party_id'])?->full_name ?? '')->slug()
+                            : '';
+
+                        $fileName = 'challans'.$partyLabel.'-'.$from->format('Y-m-d').'-to-'.$to->format('Y-m-d').'.xlsx';
+
+                        return ExportToExcelService::download(
+                            $rows,
+                            [
+                                'challan_date' => 'Challan Date',
+                                'challan_number' => 'Challan No',
+                                'party' => 'Party',
+                                'vehicle' => 'Vehicle',
+                                'driver' => 'Driver',
+                                'item' => 'Item',
+                                'payment_mode' => 'Payment Mode',
+                                'status' => 'Status',
+                                'driver_bata' => 'Driver Bata (₹)',
+                                'invoice_number' => 'Invoice No',
+                            ],
+                            'Challans',
+                            $fileName,
+                        );
+                    }),
+
+            ])
+                ->label('Download Report')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->button(),
+        ];
+    }
+
     protected function getDateRange(): array
     {
-        $period = $this->data['period'] ?? 'today';
+        $period = $this->data['period'] ?? 'month';
 
         return match ($period) {
 
@@ -102,37 +315,67 @@ class PartyReport extends Page implements HasSchemas
             ],
 
             'custom' => [
-                Carbon::parse($this->data['from_date']),
-                Carbon::parse($this->data['to_date'])->endOfDay(),
+                Carbon::parse($this->data['from_date'] ?? now()->startOfMonth()),
+                Carbon::parse($this->data['to_date'] ?? now()->endOfMonth())->endOfDay(),
             ],
         };
     }
 
-    public function loadReport(): void
+    /**
+     * Apply invoice-level filters (payment_status, payment_mode) to a query builder.
+     */
+    protected function applyInvoiceFilters(Builder $query): void
     {
-        if (empty($this->data['party_id'])) {
-            return;
+        if (! blank($this->data['payment_status'] ?? null)) {
+            $query->where('payment_status', $this->data['payment_status']);
         }
 
+        if (! blank($this->data['payment_mode'] ?? null)) {
+            $query->where('payment_mode', $this->data['payment_mode']);
+        }
+    }
+
+    public function loadReport(): void
+    {
         [$from, $to] = $this->getDateRange();
 
-        $baseQuery = Invoice::query()
-            ->where('party_id', $this->data['party_id'])
-            ->whereBetween('challan_date', [$from, $to]);
+        $partyId = $this->data['party_id'] ?? null;
 
-        $itemWiseSales = ChallanItem::query()
+        $invoiceQuery = Invoice::query()
+            ->whereBetween('invoice_date', [$from, $to]);
+
+        if (! blank($partyId)) {
+            $invoiceQuery->where('party_id', $partyId);
+        }
+
+        $this->applyInvoiceFilters($invoiceQuery);
+
+        $challanItemQuery = ChallanItem::query()
             ->join('challans', 'challans.id', '=', 'challan_items.challan_id')
-            ->join('items', 'items.id', '=', 'challan_items.item_id')
             ->join('invoices', 'invoices.id', '=', 'challans.invoice_id')
+            ->whereBetween('invoices.invoice_date', [$from, $to]);
+
+        if (! blank($partyId)) {
+            $challanItemQuery->where('invoices.party_id', $partyId);
+        }
+
+        if (! blank($this->data['payment_status'] ?? null)) {
+            $challanItemQuery->where('invoices.payment_status', $this->data['payment_status']);
+        }
+
+        if (! blank($this->data['payment_mode'] ?? null)) {
+            $challanItemQuery->where('invoices.payment_mode', $this->data['payment_mode']);
+        }
+
+        $itemWiseSales = (clone $challanItemQuery)
+            ->join('items', 'items.id', '=', 'challan_items.item_id')
             ->selectRaw('
-        challan_items.item_id,
-        items.material_name,
-        items.price_per_unit,
-        SUM(challan_items.quantity_cft) as total_qty,
-        SUM(challan_items.amount) as total_amount
-    ')
-            ->where('invoices.party_id', $this->data['party_id'])
-            ->whereBetween('invoices.challan_date', [$from, $to])
+                challan_items.item_id,
+                items.material_name,
+                items.price_per_unit,
+                SUM(challan_items.quantity_cft) as total_qty,
+                SUM(challan_items.amount) as total_amount
+            ')
             ->groupBy(
                 'challan_items.item_id',
                 'items.material_name',
@@ -140,32 +383,22 @@ class PartyReport extends Page implements HasSchemas
             )
             ->get();
 
+        $invoices = (clone $invoiceQuery)
+            ->with('party')
+            ->orderByDesc('invoice_date')
+            ->orderByDesc('id')
+            ->get();
+
         $this->reportData = [
-
-            'invoice_count' => (clone $baseQuery)->count(),
-
-            'total_amount' => (clone $baseQuery)->sum('total_amount'),
-
-            'total_qty' => ChallanItem::query()
-                ->whereHas('challan.invoice', function ($query) use ($from, $to) {
-                    $query
-                        ->where('party_id', $this->data['party_id'])
-                        ->whereBetween('challan_date', [$from, $to]);
-                })
-                ->sum('quantity_cft'),
-
-            'invoices' => (clone $baseQuery)
-                ->select([
-                    'invoice_number',
-                    'challan_date',
-                    'total_amount',
-                    'party_id',
-                ])
-                ->latest()
-                ->get(),
-            'average_invoice_value' => (clone $baseQuery)->avg('total_amount'),
-
-            'largest_invoice' => (clone $baseQuery)->max('total_amount'),
+            'party_id' => $partyId,
+            'invoice_count' => (clone $invoiceQuery)->count(),
+            'total_amount' => (clone $invoiceQuery)->sum('total_amount'),
+            'grand_total' => (clone $invoiceQuery)->sum('grand_total'),
+            'outstanding_amount' => (clone $invoiceQuery)->sum('outstanding_amount'),
+            'total_qty' => (clone $challanItemQuery)->sum('challan_items.quantity_cft'),
+            'average_invoice_value' => (clone $invoiceQuery)->avg('total_amount'),
+            'largest_invoice' => (clone $invoiceQuery)->max('total_amount'),
+            'invoices' => $invoices,
             'item_sales' => $itemWiseSales,
         ];
     }

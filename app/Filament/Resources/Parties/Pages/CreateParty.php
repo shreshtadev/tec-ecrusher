@@ -15,9 +15,11 @@ class CreateParty extends CreateRecord
     {
         try {
             $defaultAccount = Account::create([
-                'title' => 'Default Account',
+                'account_type' => 'asset',
                 'account_mode' => 'bank',
                 'is_active' => true,
+                'party_id' => $this->record->id,
+                'company_id' => $this->record->company->id,
             ]);
             logger()->info("Default account created. {$defaultAccount->title}");
         } catch (Exception $e) {

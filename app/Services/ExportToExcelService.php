@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -13,9 +12,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ExportToExcelService
 {
     /**
-     * Export an Eloquent collection to Excel.
+     * Export a collection to Excel.
      *
-     * @param  Collection<int, Model>  $items
+     * @param  Collection<int, mixed>  $items  Eloquent models or plain arrays/objects
      * @param  array<string>|null  $fields  Optional fields to export
      */
     public static function download(
@@ -38,9 +37,9 @@ class ExportToExcelService
 
         $firstItem = $items->first();
 
-        $fields ??= array_keys(
-            $firstItem->getAttributes()
-        );
+        $fields ??= is_array($firstItem)
+            ? array_keys($firstItem)
+            : array_keys($firstItem->getAttributes());
 
         /*
 |--------------------------------------------------------------------------
