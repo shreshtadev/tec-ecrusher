@@ -15,6 +15,9 @@ class InvoiceItemForm
     {
         return $schema
             ->components([
+                Select::make('warehouse_id')
+                    ->label('Warehouse')
+                    ->relationship(name: 'warehouse', titleAttribute: 'name', modifyQueryUsing: fn($query) => $query->orderBy('name')),
                 Select::make('item_id')
                     ->label('Item')
                     ->relationship(

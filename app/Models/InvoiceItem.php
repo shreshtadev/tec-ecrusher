@@ -14,4 +14,9 @@ class InvoiceItem extends BModel
     {
         return $this->belongsTo(Item::class);
     }
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
 }

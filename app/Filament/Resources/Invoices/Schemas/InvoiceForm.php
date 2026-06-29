@@ -28,7 +28,7 @@ class InvoiceForm
                     ->default(now())
                     ->native(false),
                 Select::make('company_id')
-                    ->label('Companny')
+                    ->label('Company')
                     ->relationship('company', 'name')
                     ->searchable()
                     ->preload()
@@ -39,6 +39,7 @@ class InvoiceForm
                 Select::make('party_id')
                     ->label('Party')
                     ->required()
+                    ->searchable()
                     ->options(fn() => Party::pluck('full_name', 'id')->toArray())->native(false),
                 TextInput::make('total_amount')
                     ->prefix('₹')
@@ -56,15 +57,26 @@ class InvoiceForm
                     ->default(0)
                     ->maxValue(100)
                     ->numeric()
-                    ->dehydrated(false)
+                    ->dehydrated(false) // Safely kept!
+                    // FIX 1: Added missing page load computation
+                    ->afterStateHydrated(function (TextInput $component, Get $get) {
+                        $totalAmount = (float)($get('total_amount') ?? 0);
+                        $discountAmount = (float)($get('discount_amount') ?? 0);
+                        $discountPercentage = $totalAmount > 0 ? (($discountAmount / $totalAmount) * 100) : 0;
+
+                        $component->state(round($discountPercentage, 2));
+                    })
+                    // FIX 2: Added missing $state variable into the closure arguments list
                     ->afterStateUpdated(function ($state, Get $get, Set $set) {
-                        //
-                        $totalAmount = $get('total_amount') ?? 0;
-                        $discountAmount = $totalAmount * ($state / 100.0 ?? 0);
+                        $totalAmount = (float)($get('total_amount') ?? 0);
+
+                        $discountAmount = $totalAmount * ((float)($state ?? 0) / 100);
                         $grandTotal = $totalAmount - $discountAmount;
-                        $set('discount_amount', round($discountAmount));
+
+                        $set('discount_amount', round($discountAmount, 2));
                         $set('grand_total', $grandTotal);
                     }),
+
                 TextInput::make('discount_amount')
                     ->prefix('₹')
                     ->required()
@@ -72,11 +84,15 @@ class InvoiceForm
                     ->default(0)
                     ->numeric()
                     ->afterStateUpdated(function ($state, Get $get, Set $set) {
-                        $totalAmount = $get('total_amount') ?? 0;
-                        $discountPercentage = (($state / $totalAmount) * 100) ?? 0;
-                        $grandTotal = number_format($totalAmount - $state, 3);
+                        $totalAmount = (float)($get('total_amount') ?? 0);
+                        $discountAmount = (float)($state ?? 0);
+
+                        // Prevent Division by Zero error if total_amount is zero or empty
+                        $discountPercentage = $totalAmount > 0 ? (($discountAmount / $totalAmount) * 100) : 0;
+                        $grandTotal = $totalAmount - $discountAmount;
+
+                        $set("discount_percentage", round($discountPercentage, 2));
                         $set('grand_total', $grandTotal);
-                        $set("discount_percentage", round($discountPercentage));
                     }),
                 TextInput::make('grand_total')
                     ->prefix('₹')

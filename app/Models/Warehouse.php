@@ -20,4 +20,9 @@ class Warehouse extends BModel
     {
         return $this->hasMany(ChallanItem::class);
     }
+
+    public function invoiceItems()
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
 }
