@@ -44,6 +44,7 @@ class PartiesTable
                 SelectFilter::make('party_type')->options([
                     'Customer' => 'Customer',
                     'Supplier' => 'Supplier',
+                    'Employee' => 'Employee',
                     'Other' => 'Other',
                 ]),
             ])

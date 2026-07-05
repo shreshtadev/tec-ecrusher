@@ -21,6 +21,7 @@ class ExpenseForm
                 Select::make('party_id')
                     ->label('Party')
                     ->relationship('party', 'full_name')
+                    ->searchable()
                     ->native(false),
                 Select::make('category')
                     ->options(collect(ExpenseOpts::cases())
