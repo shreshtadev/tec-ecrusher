@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Driver extends BModel
+class Driver extends SModel
 {
     public function party(): BelongsTo
     {

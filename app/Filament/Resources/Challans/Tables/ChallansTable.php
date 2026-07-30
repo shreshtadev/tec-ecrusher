@@ -60,7 +60,10 @@ class ChallansTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('status'),
+                SelectFilter::make('status')->options([
+                    "Pending" => "Pending",
+                    "Invoiced" => "Invoiced"
+                ]),
                 TrashedFilter::make(),
             ])
             ->recordActions([

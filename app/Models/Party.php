@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Party extends BModel
+class Party extends SModel
 {
     public function vehicles(): HasMany
     {

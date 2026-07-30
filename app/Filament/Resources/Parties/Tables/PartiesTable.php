@@ -5,9 +5,12 @@ namespace App\Filament\Resources\Parties\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 
 class PartiesTable
 {
@@ -39,6 +42,10 @@ class PartiesTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deleted_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('party_type')->options([
@@ -47,6 +54,7 @@ class PartiesTable
                     'Employee' => 'Employee',
                     'Other' => 'Other',
                 ]),
+                TrashedFilter::make(),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -54,6 +62,8 @@ class PartiesTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ]);
     }
