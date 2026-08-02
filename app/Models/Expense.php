@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Expense extends SModel
 {
+    use SoftDeletes;
     protected $casts = [
         'expenditure_date' => 'date',
         'amount' => 'decimal:2',

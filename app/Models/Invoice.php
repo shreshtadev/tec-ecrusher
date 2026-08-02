@@ -6,9 +6,11 @@ use App\Enums\DocOpts;
 use App\Services\DocumentNumberGenerator;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Invoice extends SModel
 {
+    use SoftDeletes;
     protected static function booted(): void
     {
         static::creating(function (self $invoice) {

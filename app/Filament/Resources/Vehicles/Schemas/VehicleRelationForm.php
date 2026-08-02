@@ -13,6 +13,7 @@ class VehicleRelationForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
+            ->columns(2)
             ->components([
                 TextInput::make('vehicle_number')
                     ->required()->formatStateUsing(fn($state) => str($state)->replace(' ', '')),

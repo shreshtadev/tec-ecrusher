@@ -9,7 +9,6 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 
@@ -57,7 +56,7 @@ class ProductionEntriesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                TrashedFilter::make(),
+                //
             ])
             ->recordActions([
                 EditAction::make(),

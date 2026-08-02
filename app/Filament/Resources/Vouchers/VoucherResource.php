@@ -16,6 +16,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Override;
 use UnitEnum;
 
 class VoucherResource extends Resource
@@ -54,11 +55,20 @@ class VoucherResource extends Resource
         ];
     }
 
+    #[Override]
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    #[Override]
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->withoutGlobalScopes([
+            SoftDeletingScope::class,
+        ]);
     }
 }

@@ -20,8 +20,6 @@ class VehiclesRelationManager extends RelationManager
 {
     protected static string $relationship = 'vehicles';
 
-    protected static ?string $relatedResource = VehicleResource::class;
-
     public function form(Schema $schema): Schema
     {
         return VehicleRelationForm::configure($schema);
@@ -40,8 +38,7 @@ class VehiclesRelationManager extends RelationManager
                 CreateAction::make(),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(), // This triggers SoftDeletes as configured
+                EditAction::make()
             ]);
     }
 }

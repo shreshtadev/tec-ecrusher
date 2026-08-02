@@ -44,7 +44,7 @@ class ExpensesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()
             ])
             ->recordActions([
                 EditAction::make(),

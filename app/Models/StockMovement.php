@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class StockMovement extends SModel
 {
+    use SoftDeletes;
     protected $fillable = [
         'item_id',
         'warehouse_id',

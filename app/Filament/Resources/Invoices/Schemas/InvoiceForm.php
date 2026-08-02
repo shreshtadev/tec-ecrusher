@@ -26,6 +26,7 @@ class InvoiceForm
                     ->placeholder("Please select a correct date.")
                     ->seconds(false)
                     ->default(now())
+                    ->displayFormat('d-M-Y H:i A')
                     ->native(false),
                 Select::make('company_id')
                     ->label('Company')

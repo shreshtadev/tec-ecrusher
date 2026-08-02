@@ -29,7 +29,7 @@ class ChallanForm
                     ->hiddenOn('create')
                     ->readOnly()->default('Pending'),
 
-                DateTimePicker::make('challan_date')->required()->default(now())->seconds(false)->native(false),
+                DateTimePicker::make('challan_date')->required()->default(now())->seconds(false)->native(false)->displayFormat('d-M-Y H:i A'),
 
                 Select::make('payment_mode')
                     ->options(PaymentOpts::options())->default(PaymentOpts::AC)->native(false),

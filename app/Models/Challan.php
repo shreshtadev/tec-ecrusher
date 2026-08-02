@@ -7,9 +7,11 @@ use App\Services\DocumentNumberGenerator;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Challan extends SModel
 {
+    use SoftDeletes;
     protected static function booted(): void
     {
         static::creating(function (self $challan) {

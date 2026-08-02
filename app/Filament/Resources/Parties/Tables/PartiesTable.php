@@ -10,7 +10,9 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
+use Illuminate\Database\Eloquent\Builder;
 
 class PartiesTable
 {
@@ -54,7 +56,7 @@ class PartiesTable
                     'Employee' => 'Employee',
                     'Other' => 'Other',
                 ]),
-                TrashedFilter::make(),
+                TrashedFilter::make()
             ])
             ->recordActions([
                 EditAction::make(),

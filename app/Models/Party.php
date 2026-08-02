@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Party extends SModel
 {
+    use SoftDeletes;
     public function vehicles(): HasMany
     {
         return $this->hasMany(Vehicle::class);

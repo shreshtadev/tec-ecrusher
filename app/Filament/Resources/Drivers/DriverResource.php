@@ -15,6 +15,9 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Override;
 
 class DriverResource extends Resource
 {
@@ -52,5 +55,22 @@ class DriverResource extends Resource
             'create' => CreateDriver::route('/create'),
             'edit' => EditDriver::route('/{record}/edit'),
         ];
+    }
+
+    #[Override]
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+
+    #[Override]
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->withoutGlobalScopes([
+            SoftDeletingScope::class,
+        ]);
     }
 }

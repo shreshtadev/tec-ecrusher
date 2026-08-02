@@ -4,6 +4,7 @@ namespace App\Filament\Resources\StockMovements\Tables;
 
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
 class StockMovementsTable
@@ -27,7 +28,7 @@ class StockMovementsTable
                 TextColumn::make('movement_type')
                     ->label('Type')
                     ->badge()
-                    ->color(fn ($state) => match ($state) {
+                    ->color(fn($state) => match ($state) {
                         'IN' => 'success',
                         'OUT' => 'danger',
                         'ADJUSTMENT' => 'secondary',
@@ -42,7 +43,7 @@ class StockMovementsTable
                     ->numeric(),
                 TextColumn::make('remarks')
                     ->limit(50)
-                    ->tooltip(fn ($record) => $record->remarks),
+                    ->tooltip(fn($record) => $record->remarks),
             ])
             ->filters([
                 SelectFilter::make('movement_type')
@@ -51,6 +52,7 @@ class StockMovementsTable
                         'OUT' => 'Stock Out',
                         'ADJUSTMENT' => 'Adjustment',
                     ]),
+                TrashedFilter::make(),
             ])
             ->defaultSort('movement_date', 'desc')
             ->recordActions([]);

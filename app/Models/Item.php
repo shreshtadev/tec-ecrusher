@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Item extends BModel
+class Item extends SModel
 {
-
+    use SoftDeletes;
     public function stockLevels(): HasMany
     {
         return $this->hasMany(StockLevel::class);
