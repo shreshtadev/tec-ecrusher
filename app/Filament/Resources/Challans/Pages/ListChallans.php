@@ -17,27 +17,35 @@ class ListChallans extends ListRecords
     {
         return [
             CreateAction::make()
-                ->failureNotification(Notification::make()
-                    ->danger()
-                    ->title('Tripsheet/Stock Error')
-                    ->body('We could not save your submission. Please check inventory.'), )->before(function (Action $action) {
-                        $data = $action->getLivewire()->form->getState();
+                ->before(function (Action $action) {
+                    $data = $action->getLivewire()->form->getState();
 
-                        $itemId = $data['item_id'] ?? null;
-                        $quantity = $data['quantity_cft'] ?? null;
+                    $itemId = $data['item_id'] ?? null;
+                    $quantity = $data['quantity_cft'] ?? null;
 
-                        if ($itemId && $quantity) {
-                            $availableStock = StockLevel::where('item_id', $itemId)->pluck('available_qty')->first();
+                    if ($itemId && $quantity) {
+                        $availableStock = (float) StockLevel::query()
+                            ->where('item_id', $itemId)
+                            ->sum('available_qty');
 
-                            if ($quantity > $availableStock) {
-                                return false; // Prevent form submission
-                            }
+                        if ($quantity > $availableStock) {
+                            // Send the failure notification manually before halting
+                            Notification::make()
+                                ->danger()
+                                ->title('Tripsheet/Stock Error')
+                                ->body('We could not save your submission. Please check inventory.')
+                                ->send();
+
+                            // Halt the execution and keep the modal open
+                            $action->halt();
                         }
+                    }
 
-                        return true; // Allow form submission
-                    })->visible(
-                        fn () => StockLevel::where('available_qty', '>', 0)->exists()
-                    ),
+                    // Do not return false here. Leaving it blank allows execution to continue.
+                })
+                ->visible(
+                    fn() => StockLevel::where('available_qty', '>', 0)->exists()
+                ),
         ];
     }
 }

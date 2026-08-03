@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Challans\Schemas;
 use App\Enums\PaymentOpts;
 use App\Models\Item;
 use App\Models\PartyItemPrice;
+use App\Models\StockLevel;
 use App\Models\Vehicle;
 use Filament\Forms\Components\Repeater;
 use Filament\Schemas\Components\Utilities\Get;
@@ -22,6 +23,31 @@ use Filament\Schemas\Components\Grid;
 
 class ChallanForm
 {
+    private static function getStockAvailabilityMessage(Get $get): HtmlString
+    {
+        $itemId = $get('item_id');
+        $warehouseId = $get('warehouse_id');
+
+        if (blank($itemId)) {
+            return new HtmlString('<span style="color: #64748b;">Select an item to view stock availability.</span>');
+        }
+
+        $stockLevels = StockLevel::query()
+            ->where('item_id', $itemId)
+            ->with('warehouse')
+            ->get();
+
+        $selectedWarehouseQty = (float) $stockLevels
+            ->firstWhere('warehouse_id', $warehouseId)?->available_qty ?? 0;
+
+        $totalAcrossWarehouses = (float) $stockLevels->sum('available_qty');
+
+        return new HtmlString(
+            '<strong>Available:</strong> ' . number_format($selectedWarehouseQty, 2) . ' in selected warehouse<br>'
+                . '<strong>Total across warehouses:</strong> ' . number_format($totalAcrossWarehouses, 2)
+        );
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -188,6 +214,7 @@ class ChallanForm
                             ->required()
                             ->disabled(fn(Get $get) => blank($get('warehouse_id')))
                             ->dehydrated()
+                            ->helperText(fn(Get $get): HtmlString => self::getStockAvailabilityMessage($get))
                             ->native(false)
                             ->afterStateUpdated(function ($state, Get $get, Set $set) {
 
