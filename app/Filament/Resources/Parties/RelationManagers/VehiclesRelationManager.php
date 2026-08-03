@@ -2,15 +2,10 @@
 
 namespace App\Filament\Resources\Parties\RelationManagers;
 
-use App\Enums\UnitOpts;
-use App\Enums\VehicleOpts;
+use App\Filament\Resources\Parties\PartyResource;
 use App\Filament\Resources\Vehicles\Schemas\VehicleRelationForm;
-use App\Filament\Resources\Vehicles\VehicleResource;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -19,6 +14,8 @@ use Filament\Tables\Table;
 class VehiclesRelationManager extends RelationManager
 {
     protected static string $relationship = 'vehicles';
+    protected static ?string $relatedResource = PartyResource::class;
+    protected static ?string $title = 'Vehicles';
 
     public function form(Schema $schema): Schema
     {

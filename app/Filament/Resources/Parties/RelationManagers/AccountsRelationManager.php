@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Parties\RelationManagers;
 
 use App\Enums\AccountType;
+use App\Filament\Resources\Accounts\AccountResource;
+use App\Filament\Resources\Parties\PartyResource;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -23,6 +25,8 @@ use Filament\Tables\Table;
 class AccountsRelationManager extends RelationManager
 {
     protected static string $relationship = 'accounts';
+    protected static ?string $relatedResource = PartyResource::class;
+    protected static ?string $title = 'Accounts';
 
     public function form(Schema $schema): Schema
     {

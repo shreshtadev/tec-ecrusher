@@ -6,14 +6,19 @@ use App\Enums\PaymentOpts;
 use App\Models\Item;
 use App\Models\PartyItemPrice;
 use App\Models\Vehicle;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
+use Carbon\Carbon;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Grid;
 
 class ChallanForm
 {
@@ -29,7 +34,58 @@ class ChallanForm
                     ->hiddenOn('create')
                     ->readOnly()->default('Pending'),
 
-                DateTimePicker::make('challan_date')->required()->default(now())->seconds(false)->native(false)->displayFormat('d-M-Y H:i A'),
+                Group::make()
+                    ->statePath('challan_date')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                // 1. Date Dropdown
+                                DatePicker::make('challan_day')
+                                    ->label('Challan Date')
+                                    ->required()
+                                    ->native(false)
+                                    ->displayFormat('d-m-Y')
+                                    ->format('Y-m-d')
+                                    ->disabled(fn(string $operation) => $operation === 'edit'),
+
+                                // 2. Dynamic Time Dropdown (Generates 12 hours with exact minute increments)
+                                TimePicker::make('challan_time')
+                                    ->label('Time')
+                                    ->seconds(false)
+                                    ->displayFormat('h:i A')->disabled(fn(string $operation) => $operation === 'edit'),
+                            ])
+                    ])
+                    // Formats default selections for the Create form using the current time
+                    ->default(function () {
+                        $now = now();
+                        return [
+                            'challan_day' => $now->format('Y-m-d'),
+                            'challan_time' => $now->format('h:i A'),
+                        ];
+                    })
+                    // Combines the dropdown selections into a standard database timestamp string
+                    ->dehydrateStateUsing(function ($state) {
+                        $date = $state['challan_day'] ?? null;
+                        $time = $state['challan_time'] ?? null;
+
+                        if ($date && $time) {
+                            return Carbon::parse("{$date} {$time}")->format('Y-m-d H:i:s');
+                        }
+
+                        return null;
+                    })
+                    // Safely reads the database record and splits it into the fields during Edit mode
+                    ->afterStateHydrated(function ($component, $state) {
+                        if (is_string($state)) {
+                            $carbonDate = Carbon::parse($state);
+
+                            $component->state([
+                                'challan_day' => $carbonDate->format('Y-m-d'),
+                                'challan_time' => $carbonDate->format('h:i'),
+                                'challan_ampm' => $carbonDate->format('A'),
+                            ]);
+                        }
+                    }),
 
                 Select::make('payment_mode')
                     ->options(PaymentOpts::options())->default(PaymentOpts::AC)->native(false),

@@ -5,9 +5,14 @@ namespace App\Filament\Resources\Invoices\Schemas;
 use App\Enums\PaymentOpts;
 use App\Models\Company;
 use App\Models\Party;
+use Carbon\Carbon;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
@@ -21,13 +26,58 @@ class InvoiceForm
                 TextInput::make('invoice_number')
                     ->hiddenOn('create')
                     ->readOnly('edit'),
-                DateTimePicker::make('invoice_date')
-                    ->required()
-                    ->placeholder("Please select a correct date.")
-                    ->seconds(false)
-                    ->default(now())
-                    ->displayFormat('d-M-Y H:i A')
-                    ->native(false),
+                Group::make()
+                    ->statePath('invoice_date')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                // 1. Date Dropdown
+                                DatePicker::make('invoice_day')
+                                    ->label('Invoice Date')
+                                    ->required()
+                                    ->native(false)
+                                    ->displayFormat('d-m-Y') // Formats how the user sees the date in the input field
+                                    ->format('Y-m-d')
+                                    ->disabled(fn(string $operation) => $operation === 'edit'),
+
+                                // 2. Dynamic Time Dropdown (Generates 12 hours with exact minute increments)
+                                TimePicker::make('invoice_time')
+                                    ->label('Time')
+                                    ->seconds(false)
+                                    ->displayFormat('h:i A')->disabled(fn(string $operation) => $operation === 'edit'),
+                            ])
+                    ])
+                    // Formats default selections for the Create form using the current time
+                    ->default(function () {
+                        $now = now();
+                        return [
+                            'invoice_day' => $now->format('Y-m-d'),
+                            'invoice_time' => $now->format('h:i A'),
+                        ];
+                    })
+                    // Combines the dropdown selections into a standard database timestamp string
+                    ->dehydrateStateUsing(function ($state) {
+                        $date = $state['invoice_day'] ?? null;
+                        $time = $state['invoice_time'] ?? null;
+
+                        if ($date && $time) {
+                            return Carbon::parse("{$date} {$time}")->format('Y-m-d H:i:s');
+                        }
+
+                        return null;
+                    })
+                    // Safely reads the database record and splits it into the fields during Edit mode
+                    ->afterStateHydrated(function ($component, $state) {
+                        if (is_string($state)) {
+                            $carbonDate = Carbon::parse($state);
+
+                            $component->state([
+                                'invoice_day' => $carbonDate->format('Y-m-d'),
+                                'invoice_time' => $carbonDate->format('h:i'), // FIXED: Captures exact minutes (e.g., "06:30")
+                                'invoice_ampm' => $carbonDate->format('A'),
+                            ]);
+                        }
+                    }),
                 Select::make('company_id')
                     ->label('Company')
                     ->relationship('company', 'name')
