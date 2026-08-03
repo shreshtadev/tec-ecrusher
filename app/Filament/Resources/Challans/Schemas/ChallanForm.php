@@ -81,7 +81,7 @@ class ChallanForm
 
                             $component->state([
                                 'challan_day' => $carbonDate->format('Y-m-d'),
-                                'challan_time' => $carbonDate->format('h:i'),
+                                'challan_time' => $carbonDate->format('H:i'),
                                 'challan_ampm' => $carbonDate->format('A'),
                             ]);
                         }

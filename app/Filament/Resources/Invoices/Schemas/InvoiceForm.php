@@ -73,7 +73,7 @@ class InvoiceForm
 
                             $component->state([
                                 'invoice_day' => $carbonDate->format('Y-m-d'),
-                                'invoice_time' => $carbonDate->format('h:i'), // FIXED: Captures exact minutes (e.g., "06:30")
+                                'invoice_time' => $carbonDate->format('H:i'), // FIXED: Captures exact minutes (e.g., "06:30")
                                 'invoice_ampm' => $carbonDate->format('A'),
                             ]);
                         }
