@@ -248,12 +248,12 @@ class PartyReport extends Page implements HasSchemas
                         }
 
                         $rows = $challanQuery->get()->map(fn(Challan $c) => [
-                            'challan_date' => date('Y-m-d H:i', strtotime($c->challan_date)),
+                            'challan_date' => date('Y-M-d h:i A', strtotime($c->challan_date)),
                             'challan_number' => $c->challan_number,
                             'party' => $c->party?->full_name,
                             'vehicle' => $c->vehicle?->vehicle_number ?? '-',
                             'driver' => $c->driver?->full_name ?? '-',
-                            'item' => $c->items?->pluck('material_name')?->join(', ') ?? '-',
+                            'item' => $c->challan_items?->map(fn($challanItem) => ($challanItem->item?->material_name ?? '-') . ' (' . ($challanItem->quantity_cft ?? 0) . ' ' . ($challanItem->item?->unit ?? '-') . ')')?->join(', ') ?? '-',
                             'payment_mode' => $c->payment_mode,
                             'status' => $c->status,
                             'driver_bata' => $c->driver_bata,

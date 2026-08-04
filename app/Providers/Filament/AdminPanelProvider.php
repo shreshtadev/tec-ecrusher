@@ -50,7 +50,7 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->colors([
-                'primary' => Color::Rose,
+                'primary' => Color::Orange,
             ])
             ->brandName(config('app.name'))
             ->brandLogo(fn() => view('filament.brand'))
