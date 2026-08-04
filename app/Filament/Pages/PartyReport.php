@@ -227,8 +227,103 @@ class PartyReport extends Page implements HasSchemas
                         );
                     }),
 
+                Action::make('download_challan_items_grouped')
+                    ->label('Challan Details')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function () {
+                        [$from, $to] = $this->getDateRange();
+
+                        $challanItemQuery = ChallanItem::query()
+                            ->select([
+                                'challan_items.challan_id',
+                                'challan_items.quantity_cft',
+                                'challans.challan_number',
+                                'challans.challan_date',
+                                'challans.party_id',
+                                'challans.payment_mode',
+                                'challans.status',
+                                'challans.driver_bata',
+                                'invoices.invoice_number',
+                                'invoices.total_amount',
+                                'parties.full_name as party_name',
+                                'vehicles.vehicle_number',
+                                'drivers.full_name as driver_name',
+                                'items.material_name',
+                                'items.unit',
+                            ])
+                            ->join('challans', 'challans.id', '=', 'challan_items.challan_id')
+                            ->leftJoin('invoices', 'invoices.id', '=', 'challans.invoice_id')
+                            ->leftJoin('parties', 'parties.id', '=', 'challans.party_id')
+                            ->leftJoin('vehicles', 'vehicles.id', '=', 'challans.vehicle_id')
+                            ->leftJoin('drivers', 'drivers.id', '=', 'challans.driver_id')
+                            ->leftJoin('items', 'items.id', '=', 'challan_items.item_id')
+                            ->whereBetween('challans.challan_date', [$from, $to])
+                            ->orderByDesc('challans.challan_date')
+                            ->orderByDesc('challans.id')
+                            ->orderBy('challan_items.id');
+
+                        if (! blank($this->data['party_id'] ?? null)) {
+                            $challanItemQuery->where('challans.party_id', $this->data['party_id']);
+                        }
+
+                        if (! blank($this->data['payment_mode'] ?? null)) {
+                            $challanItemQuery->where('challans.payment_mode', $this->data['payment_mode']);
+                        }
+
+                        if (! blank($this->data['payment_status'] ?? null)) {
+                            $challanItemQuery->where('invoices.payment_status', $this->data['payment_status']);
+                        }
+
+                        $rows = $challanItemQuery
+                            ->get()
+                            ->map(function ($item) {
+                                return [
+                                    'challan_date' => $item->challan_date ? date('Y-M-d h:i A', strtotime($item->challan_date)) : '-',
+                                    'challan_number' => $item->challan_number ?? '-',
+                                    'party' => $item->party_name ?? '-',
+                                    'vehicle' => $item->vehicle_number ?? '-',
+                                    'driver' => $item->driver_name ?? '-',
+                                    'item' => $item->material_name ?? '-',
+                                    'quantity' => $item->quantity_cft ?? 0,
+                                    'unit' => $item->unit ?? '-',
+                                    'payment_mode' => $item->payment_mode ?? '-',
+                                    'status' => $item->status ?? '-',
+                                    'driver_bata' => $item->driver_bata ?? 0,
+                                    'invoice_number' => $item->invoice_number ?? '-',
+                                    'total_amount' => $item->total_amount ?? 0,
+                                ];
+                            })
+                            ->values();
+
+                        $partyLabel = ! blank($this->data['party_id'] ?? null)
+                            ? '-' . str(Party::find($this->data['party_id'])?->full_name ?? '')->slug()
+                            : '';
+
+                        $fileName = 'challan-items-grouped' . $partyLabel . '-' . $from->format('Y-m-d') . '-to-' . $to->format('Y-m-d') . '.xlsx';
+
+                        return ExportToExcelService::download(
+                            $rows,
+                            [
+                                'challan_date' => 'Challan Date',
+                                'challan_number' => 'Challan No',
+                                'party' => 'Party',
+                                'vehicle' => 'Vehicle',
+                                'driver' => 'Driver',
+                                'item' => 'Item',
+                                'quantity' => 'Quantity',
+                                'unit' => 'Unit',
+                                'payment_mode' => 'Payment Mode',
+                                'total_amount' => 'Total Amount (₹)',
+                                'status' => 'Status',
+                                'driver_bata' => 'Driver Bata (₹)',
+                            ],
+                            'All challan items by Challan',
+                            $fileName,
+                        );
+                    }),
+
                 Action::make('download_challans')
-                    ->label('Challans Detail')
+                    ->label('Agg. Challans Detail')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function () {
                         [$from, $to] = $this->getDateRange();
