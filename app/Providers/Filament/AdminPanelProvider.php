@@ -32,10 +32,10 @@ class AdminPanelProvider extends PanelProvider
     {
         // This configures all tables within this specific panel
         Table::configureUsing(function (Table $table): void {
+            $table->defaultSort('created_at', 'desc');
             $table->defaultPaginationPageOption(10)
                 ->paginationPageOptions([10, 25, 50, 100]);
 
-            // Optional: $table->simplePagination();
             Optional:
             $table->paginationMode(PaginationMode::Cursor);
         });
@@ -50,7 +50,7 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Rose,
             ])
             ->brandName(config('app.name'))
             ->brandLogo(fn() => view('filament.brand'))

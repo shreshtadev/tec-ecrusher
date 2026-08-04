@@ -76,10 +76,10 @@ class PartyReport extends Page implements HasSchemas
                     ->live(),
 
                 DatePicker::make('from_date')
-                    ->visible(fn () => ($this->data['period'] ?? '') === 'custom'),
+                    ->visible(fn() => ($this->data['period'] ?? '') === 'custom'),
 
                 DatePicker::make('to_date')
-                    ->visible(fn () => ($this->data['period'] ?? '') === 'custom'),
+                    ->visible(fn() => ($this->data['period'] ?? '') === 'custom'),
 
                 Select::make('payment_status')
                     ->label('Payment Status')
@@ -151,9 +151,9 @@ class PartyReport extends Page implements HasSchemas
                                 'outstanding' => round((float) $outstanding, 2),
                                 'largest_invoice' => round((float) $largestInvoice, 2),
                             ];
-                        })->filter(fn ($row) => $row['invoice_count'] > 0)->values();
+                        })->filter(fn($row) => $row['invoice_count'] > 0)->values();
 
-                        $fileName = 'party-summary-'.$from->format('Y-m-d').'-to-'.$to->format('Y-m-d').'.xlsx';
+                        $fileName = 'party-summary-' . $from->format('Y-m-d') . '-to-' . $to->format('Y-m-d') . '.xlsx';
 
                         return ExportToExcelService::download(
                             $rows,
@@ -190,7 +190,7 @@ class PartyReport extends Page implements HasSchemas
 
                         $this->applyInvoiceFilters($invoiceQuery);
 
-                        $rows = $invoiceQuery->get()->map(fn (Invoice $inv) => [
+                        $rows = $invoiceQuery->get()->map(fn(Invoice $inv) => [
                             'invoice_date' => date('d-m-Y', strtotime($inv->invoice_date)),
                             'invoice_number' => $inv->invoice_number,
                             'party' => $inv->party?->full_name,
@@ -204,10 +204,10 @@ class PartyReport extends Page implements HasSchemas
                         ]);
 
                         $partyLabel = ! blank($this->data['party_id'] ?? null)
-                            ? '-'.str(Party::find($this->data['party_id'])?->full_name ?? '')->slug()
+                            ? '-' . str(Party::find($this->data['party_id'])?->full_name ?? '')->slug()
                             : '';
 
-                        $fileName = 'invoices'.$partyLabel.'-'.$from->format('Y-m-d').'-to-'.$to->format('Y-m-d').'.xlsx';
+                        $fileName = 'invoices' . $partyLabel . '-' . $from->format('Y-m-d') . '-to-' . $to->format('Y-m-d') . '.xlsx';
 
                         return ExportToExcelService::download(
                             $rows,
@@ -219,7 +219,6 @@ class PartyReport extends Page implements HasSchemas
                                 'payment_status' => 'Payment Status',
                                 'total_amount' => 'Total Amount (₹)',
                                 'discount_amount' => 'Discount (₹)',
-                                'grand_total' => 'Grand Total (₹)',
                                 'outstanding_amount' => 'Outstanding (₹)',
                                 'driver_bata' => 'Driver Bata (₹)',
                             ],
@@ -248,7 +247,7 @@ class PartyReport extends Page implements HasSchemas
                             $challanQuery->where('payment_mode', $this->data['payment_mode']);
                         }
 
-                        $rows = $challanQuery->get()->map(fn (Challan $c) => [
+                        $rows = $challanQuery->get()->map(fn(Challan $c) => [
                             'challan_date' => date('Y-m-d H:i', strtotime($c->challan_date)),
                             'challan_number' => $c->challan_number,
                             'party' => $c->party?->full_name,
@@ -259,13 +258,14 @@ class PartyReport extends Page implements HasSchemas
                             'status' => $c->status,
                             'driver_bata' => $c->driver_bata,
                             'invoice_number' => $c->invoice?->invoice_number ?? '-',
+                            'total_amount' => $c->invoice?->total_amount ?? 0,
                         ]);
 
                         $partyLabel = ! blank($this->data['party_id'] ?? null)
-                            ? '-'.str(Party::find($this->data['party_id'])?->full_name ?? '')->slug()
+                            ? '-' . str(Party::find($this->data['party_id'])?->full_name ?? '')->slug()
                             : '';
 
-                        $fileName = 'challans'.$partyLabel.'-'.$from->format('Y-m-d').'-to-'.$to->format('Y-m-d').'.xlsx';
+                        $fileName = 'challans' . $partyLabel . '-' . $from->format('Y-m-d') . '-to-' . $to->format('Y-m-d') . '.xlsx';
 
                         return ExportToExcelService::download(
                             $rows,
@@ -277,9 +277,9 @@ class PartyReport extends Page implements HasSchemas
                                 'driver' => 'Driver',
                                 'item' => 'Item',
                                 'payment_mode' => 'Payment Mode',
+                                'total_amount' => 'Total Amount (₹)',
                                 'status' => 'Status',
                                 'driver_bata' => 'Driver Bata (₹)',
-                                'invoice_number' => 'Invoice No',
                             ],
                             'Challans',
                             $fileName,
